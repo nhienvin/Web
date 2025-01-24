@@ -5,7 +5,7 @@
 * License: https://creativecommons.org/licenses/by/3.0/
 */
 body {
-  font-family: "PT Mono", monospace;
+  font-family: "Playwrite VN", serif;
   line-height: 1.6;
   background: #e6e6fa;
   overflow-x: hidden;
@@ -66,7 +66,7 @@ a.text-primary {
     color: #0389ff !important; }
 
 h1, .h1, h2, .h2, h3, .h3, h4, .h4 {
-  font-family: "PT Mono", sans-serif;
+  font-family: "Playwrite VN", serif;
   color: #dddde6; }
 
 .btn {
@@ -632,7 +632,7 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4 {
     font-size: 40px; }
   .untree_co-section .subheading {
     font-size: 18px;
-    font-family: "PT Mono", monospace; }
+    font-family: "Playwrite VN", serif }
 .hero-image{
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("../images/LangGom/LangGom_28.jpg");
   background-position: center;
@@ -1164,7 +1164,7 @@ figure.dotted-bg {
 #about-section {
   margin-top: 7rem; }
   #about-section .container {
-    background: #0389ff;
+    background: linear-gradient(to bottom, #ffff66 0%, #ffff00 100%);
     padding-top: 50px;
     padding-bottom: 50px;
     padding-left: 50px;

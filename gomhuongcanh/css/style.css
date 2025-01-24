@@ -1683,6 +1683,7 @@ figure.dotted-bg {
   background: #36a1ff;
   color: #ffffff; }
 
+/*Class tự viết chữ*/
   .typewriter {
   overflow: hidden; /* Ensures the content is not revealed until the animation */
   border-right: .1em solid white; /* The typwriter cursor */

@@ -221,30 +221,30 @@
 	}
 	owlPlugin();
 
-	var counter = function() {
+	// var counter = function() {
 		
-		$('.count-numbers').waypoint( function( direction ) {
+	// 	$('.count-numbers').waypoint( function( direction ) {
 
-			if( direction === 'down' && !$(this.element).hasClass('ut-animated') ) {
+	// 		if( direction === 'down' && !$(this.element).hasClass('ut-animated') ) {
 
-				var comma_separator_number_step = $.animateNumber.numberStepFactories.separator(',')
-				$('.counter > .number').each(function(){
-					var $this = $(this),
-					num = $this.data('number');
-					$this.animateNumber(
-					{
-						number: num,
-						numberStep: comma_separator_number_step
-					}, 7000
-					);
-				});
+	// 			var comma_separator_number_step = $.animateNumber.numberStepFactories.separator(',')
+	// 			$('.counter > .number').each(function(){
+	// 				var $this = $(this),
+	// 				num = $this.data('number');
+	// 				$this.animateNumber(
+	// 				{
+	// 					number: num,
+	// 					numberStep: comma_separator_number_step
+	// 				}, 7000
+	// 				);
+	// 			});
 				
-			}
+	// 		}
 
-		} , { offset: '95%' } );
+	// 	} , { offset: '95%' } );
 
-	}
-	counter();
+	// }
+	// counter();
 
 	// jarallax
 	var jarallaxPlugin = function() {

@@ -1,7 +1,6 @@
 body{
     font-family: "Tilt Neon", serif; 
     background-color: rgba(73, 137, 118, 0.5);
-    hei
 }
 .tilt-neon-font {
     font-family: "Tilt Neon", serif;
@@ -11,4 +10,12 @@ body{
     font-variation-settings:
         "XROT" 0,
         "YROT" 0;
+}
+/* Style the links inside the sidenav */
+#mySidenav{
+ position: absolute;  /* Position them relative to the browser window */
+ left: -80px; /* Position them outside of the screen */
+ transition: 0.5s; /* Add transition on hover */
+ padding: 15px;
+ width: 100px; /* Set a specific width */
 }

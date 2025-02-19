@@ -1,0 +1,35 @@
+@font-face {
+    font-family: 'SAIGON1985';
+    src: url(../font/SAIGON1985.ttf);
+   }
+body, html{
+    background: url(../imgs/VINTAGE_GRUNGE_BACKGROUND.jpg) no-repeat center fixed;
+    background-size: cover;
+    font-family: 'SAIGON1985';
+    color: whitesmoke;
+    width: 80%;
+  margin: auto;
+}
+h1, h2, h3, h4, h5, h6{
+    color: goldenrod;
+}
+.font-SAIGON1985{
+    font-family: 'SAIGON1985';
+}
+.container {
+    container: layout / inline-size;
+    padding: 16px;
+ }
+ @container layout (width < 600px) {
+    .container article {
+       flex-direction: column;
+    }
+ 
+    .container article h2 {
+       flex: 1;
+    }
+ 
+    .container article p {
+       flex: 2;
+    }
+ }

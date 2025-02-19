@@ -1,6 +1,8 @@
-body{
+body, html {
     font-family: "Tilt Neon", serif; 
     background-color: rgba(73, 137, 118, 0.5);
+    height: 100%;
+    margin: 0;
 }
 .tilt-neon-font {
     font-family: "Tilt Neon", serif;
@@ -12,10 +14,78 @@ body{
         "YROT" 0;
 }
 /* Style the links inside the sidenav */
-#mySidenav{
+#mySidenav a{
  position: absolute;  /* Position them relative to the browser window */
- left: -80px; /* Position them outside of the screen */
+ left: -120px; /* Position them outside of the screen */
  transition: 0.5s; /* Add transition on hover */
  padding: 15px;
- width: 100px; /* Set a specific width */
+ width: 120px; /* Set a specific width */
+ text-decoration: none;  /* Remove underline */
+ font-size: 20px;
+ color: floralwhite;
+ border-radius: 0 5px 5px 0; /* Rounded corners on the top right and bottom right side */
 }
+#mySidenav a:hover {
+    left: 0; /* On mouse-over, make the elements appear as they should */
+}
+/* The about link: 20px from the top with a green background */
+#about{
+    top:20px;
+    background-color: lightcoral;
+}
+#projects{
+    top:80px;
+    background-color: forestgreen;
+}
+#contact{
+    top:140px;
+    background-color: Indigo ;
+}
+#login{
+    top:200px;
+    background-color: LightBlue;
+}
+/*Hero image*/
+.hero-image{
+    display: flex;
+    flex-direction: column;
+      /* Use "linear-gradient" to add a darken background effect to the image (photographer.jpg). This will make the text easier to read */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("../imgs/DSC_0427.JPG");
+
+    height: 100vh;
+    align-self: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    align-items: center;
+    justify-content: center;
+}
+.hero-text {
+  text-align: center;
+  color: floralwhite;
+  font-size: 20px;
+}
+/*Animate button*/
+.hero-text button {
+    border: none;
+    border-radius: 5px;
+    outline: 0;
+    display: inline-block;
+    padding: 15px 25px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 20px;
+    transition: all 0.5s;
+}
+.hero-text button span{
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+    
+}
+.hero-text button:hover {
+  background-color: LightBlue;
+  color: floralwhite;
+}
+

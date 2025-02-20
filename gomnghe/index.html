@@ -5,10 +5,52 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="./src/css/styles.css">
         <script type="text/javascript" src="./src/js/script.js"></script>
-        <title>Gốm Nghê</title>
+        <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Corinthia:wght@400;700&family=Roboto:ital,wght@0,100..900;1,100..900&family=VT323&display=swap" rel="stylesheet"> -->
+        <title>Gốm Ngô Nghê</title>
     </head>
     <body>
-        <h1>Xin chào!</h1>
-        <p>Chúng tôi là Gốm Nghê</p>
+        <!-- header -->
+         <div class="header">
+            <!-- <img src="" alt="Gốm Ngô Nghê"> -->
+             <h1>Gốm Nghô Nghê</h1>
+         </div>
+         <!-- End header -->
+        <!-- Tab -->
+        <button class="tablink" onclick="openPage('Home', this, 'red')">Nhà</button>
+        <button class="tablink" onclick="openPage('News', this, 'green')" id="defaultOpen">Có gì mới?</button>
+        <button class="tablink" onclick="openPage('Childs', this, 'blue')">Những đứa con</button>
+        <button class="tablink" onclick="openPage('Blog', this, 'blue')">Tản mạn</button>
+        <button class="tablink" onclick="openPage('About', this, 'orange')">Về chúng tôi</button>
+        <button class="tablink" onclick="openPage('Contact', this, 'orange')">Liên Hệ</button>
+        <div id="Home" class="tabcontent">
+            <h3>Nhà</h3>
+            <p>Home is where the heart is..</p>
+        </div>
+        
+        <div id="News" class="tabcontent">
+            <h3>Có gì mới?</h3>
+            <p>Some news this fine day!</p>
+        </div>
+        <div id="Childs" class="tabcontent">
+            <h3>Những đứa con</h3>
+            <p>Some news this fine day!</p>
+        </div>
+        <div id="Blog" class="tabcontent">
+            <h3>Tản mạn</h3>
+            <p>Some news this fine day!</p>
+        </div>
+        <div id="About" class="tabcontent">
+        <h3>Về chúng tôi</h3>
+        <p>Who we are and what we do.</p>
+        </div>
+        <div id="Contact" class="tabcontent">
+        <h3>Contact</h3>
+        <p>Get in touch, or swing by for a cup of coffee.</p>
+        </div>
+        
+        
+        <!-- End Tab -->
     </body>
 </html>

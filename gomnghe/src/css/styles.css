@@ -16,20 +16,35 @@ h1, h2, h3, h4, h5, h6{
 .font-SAIGON1985{
     font-family: 'SAIGON1985';
 }
-.container {
-    container: layout / inline-size;
-    padding: 16px;
+
+.font-roboto {
+   font-family: "Roboto", serif;
+   font-optical-sizing: auto;
+   font-weight: 400;
+   font-style: normal;
+   font-variation-settings: "wdth" 100;
  }
- @container layout (width < 600px) {
-    .container article {
-       flex-direction: column;
-    }
- 
-    .container article h2 {
-       flex: 1;
-    }
- 
-    .container article p {
-       flex: 2;
-    }
+ .corinthia-regular {
+   font-family: "Corinthia", serif;
+   font-weight: 400;
+   font-style: normal;
  }
+ 
+ .corinthia-bold {
+   font-family: "Corinthia", serif;
+   font-weight: 700;
+   font-style: normal;
+ }
+ .vt323-regular {
+   font-family: "VT323", serif;
+   font-weight: 400;
+   font-style: normal;
+ }
+.text-center{
+   text-align: center;
+}  
+/* Responsive header */
+.header{
+   overflow: hidden;
+   text-align: center;
+}

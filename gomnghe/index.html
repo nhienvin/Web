@@ -18,38 +18,41 @@
          </div>
          <!-- End header -->
         <!-- Tab -->
-        <div class="tabs">
-            <input class="input" name="tabs" type="radio" id="Home" checked="checked"/>
-            <label class="label" for="Home">Nhà</label>
-            <div class="panel">
-                <h1>Arlina Design</h1>
-                <p>Arlina Design (specifically, the sweet orange) is the fruit of the citrus species Citrus × sinensis in the family Rutaceae</p>
-                <p>The fruit of the Citrus × sinensis is considered a sweet orange, whereas the fruit of the Citrus × aurantium is considered a bitter orange. The sweet orange reproduces asexually (apomixis through nucellar embryony); varieties of sweet orange arise through mutations.</p>
-            </div>
+        <button class="tablink" onclick="openPage('Home', this)" id="defaultOpen">Nhà Ngô Nghê</button>
+        <button class="tablink" onclick="openPage('News', this)" >Bản tin Ngô Nghê</button>
+        <button class="tablink" onclick="openPage('Childs', this)" >Con của Ngô Nghê</button>
+        <button class="tablink" onclick="openPage('Service', this)" >Trải nghiệm Ngô Nghê</button>
+        <button class="tablink" onclick="openPage('Contact', this)">Liên hệ Ngô Nghê</button>
+        <button class="tablink" onclick="openPage('About', this)">Về Ngô Nghê</button>
 
-            <input class="input" name="tabs" type="radio" id="Childs"/>
-            <label class="label" for="Childs">Những đứa con</label>
-            <div class="panel">
-                <h1>Những đứa con</h1>
-            </div>
+        <div id="Home" class="tabcontent">
+        <h3>Home</h3>
+        <p>Home is where the heart is..</p>
+        </div>
 
-            <input class="input" name="tabs" type="radio" id="Blog"/>
-            <label class="label" for="Blog">Tản mạn</label>
-            <div class="panel">
-                <h1>Tản mạn</h1>
-            </div>
+        <div id="News" class="tabcontent">
+        <h3>News</h3>
+        <p>Some news this fine day!</p>
+        </div>
 
-            <input class="input" name="tabs" type="radio" id="About"/>
-            <label class="label" for="About">Liên Hệ</label>
-            <div class="panel">
-                <h1>Liên Hệ</h1>
-            </div>
+        <div id="Childs" class="tabcontent">
+            <h3>News</h3>
+            <p>Some news this fine day!</p>
+        </div>
 
-            <input class="input" name="tabs" type="radio" id="Contact"/>
-            <label class="label" for="Contact">Về chúng tôi</label>
-            <div class="panel">
-                <h1>Về chúng tôi</h1>
-            </div>
+        <div id="Service" class="tabcontent">
+            <h3>News</h3>
+            <p>Some news this fine day!</p>
+        </div>
+
+        <div id="Contact" class="tabcontent">
+        <h3>Contact</h3>
+        <p>Get in touch, or swing by for a cup of coffee.</p>
+        </div>
+
+        <div id="About" class="tabcontent">
+        <h3>About</h3>
+        <p>Who we are and what we do.</p>
         </div>
         
         <!-- End Tab -->

@@ -38,7 +38,8 @@ export function AuthProvider({ children }) {
       localStorage.setItem('token', res.data.token);
       api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
       setUser(res.data.data.user);
-      return { success: true };
+      // return { success: true };
+      return res.data;
     } catch (err) {
       throw err;
     }

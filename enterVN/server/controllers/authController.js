@@ -55,7 +55,9 @@ exports.login = async (req, res, next) => {
       return next(new AppError('User không tồn tại', 401));
     }
     // 3. Kiểm tra password (sử dụng phương thức mới)ư
-    const isCorrect = await user.correctPassword(password, user.password);
+    // const isCorrect = await user.correctPassword(password, user.password);
+    const isCorrect = await user.correctPassword(password);
+    console.log("isCorrect: " + isCorrect);
     if (!isCorrect) {
       return next(new AppError('Mật khẩu không đúng', 401));
     }

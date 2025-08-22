@@ -18,7 +18,7 @@ const createAdmin = async () => {
   const admin = await User.create({
     username: 'admin',
     email: 'admin@gmail.com',
-    password: await bcrypt.hash('abc@123', 12), 
+    password: 'abc@123', 
     role: 'admin'
   });
   await admin.save({ validateBeforeSave: false }); // Bỏ qua validate
@@ -34,6 +34,6 @@ const testHash = async () => {
   console.log('New hash:', hash);
   console.log('Compare result:', await bcrypt.compare('abc@123', hash));
 };
-testHash();
+// testHash();
 
- //createAdmin();
+createAdmin();

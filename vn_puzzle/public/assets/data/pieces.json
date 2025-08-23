@@ -1,0 +1,34 @@
+[
+  {
+    "id": "ha-noi",
+    "name": "Hà Nội",
+    "svg": "/assets/svg-63/ha-noi.svg",
+    "start": {
+      "x": 220,
+      "y": 520,
+      "angle": 20
+    },
+    "target": {
+      "x": 530,
+      "y": 330,
+      "angle": 0
+    },
+    "scale": 0.7
+  },
+  {
+    "id": "hai-phong",
+    "name": "Hải Phòng",
+    "svg": "/assets/svg-63/hai-phong.svg",
+    "start": {
+      "x": 1040,
+      "y": 540,
+      "angle": -10
+    },
+    "target": {
+      "x": 730,
+      "y": 370,
+      "angle": 0
+    },
+    "scale": 0.7
+  }
+]

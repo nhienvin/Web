@@ -1,0 +1,439 @@
+[
+  {
+    "name": "Thành phố Hà Nội",
+    "type": "city",
+    "id": "thanh-pho-ha-noi",
+    "admin_center_hint": "Hà Nội",
+    "components_from_63": [
+      "Hà Nội"
+    ],
+    "svg": "/svg-34/thanh-pho-ha-noi.svg",
+    "sticker": "/stickers/thanh-pho-ha-noi.png",
+    "audio": "/audio/thanh-pho-ha-noi.mp3"
+  },
+  {
+    "name": "Thành phố Huế",
+    "type": "city",
+    "id": "thanh-pho-hue",
+    "admin_center_hint": "Huế",
+    "components_from_63": [
+      "Thừa Thiên Huế"
+    ],
+    "svg": "/svg-34/thanh-pho-hue.svg",
+    "sticker": "/stickers/thanh-pho-hue.png",
+    "audio": "/audio/thanh-pho-hue.mp3"
+  },
+  {
+    "name": "Tỉnh Lai Châu",
+    "type": "province",
+    "id": "tinh-lai-chau",
+    "admin_center_hint": "Lai Châu",
+    "components_from_63": [
+      "Lai Châu"
+    ],
+    "svg": "/svg-34/tinh-lai-chau.svg",
+    "sticker": "/stickers/tinh-lai-chau.png",
+    "audio": "/audio/tinh-lai-chau.mp3"
+  },
+  {
+    "name": "Tỉnh Điện Biên",
+    "type": "province",
+    "id": "tinh-ien-bien",
+    "admin_center_hint": "Điện Biên Phủ",
+    "components_from_63": [
+      "Điện Biên"
+    ],
+    "svg": "/svg-34/tinh-ien-bien.svg",
+    "sticker": "/stickers/tinh-ien-bien.png",
+    "audio": "/audio/tinh-ien-bien.mp3"
+  },
+  {
+    "name": "Tỉnh Sơn La",
+    "type": "province",
+    "id": "tinh-son-la",
+    "admin_center_hint": "Sơn La",
+    "components_from_63": [
+      "Sơn La"
+    ],
+    "svg": "/svg-34/tinh-son-la.svg",
+    "sticker": "/stickers/tinh-son-la.png",
+    "audio": "/audio/tinh-son-la.mp3"
+  },
+  {
+    "name": "Tỉnh Lạng Sơn",
+    "type": "province",
+    "id": "tinh-lang-son",
+    "admin_center_hint": "Lạng Sơn",
+    "components_from_63": [
+      "Lạng Sơn"
+    ],
+    "svg": "/svg-34/tinh-lang-son.svg",
+    "sticker": "/stickers/tinh-lang-son.png",
+    "audio": "/audio/tinh-lang-son.mp3"
+  },
+  {
+    "name": "Tỉnh Quảng Ninh",
+    "type": "province",
+    "id": "tinh-quang-ninh",
+    "admin_center_hint": "Hạ Long",
+    "components_from_63": [
+      "Quảng Ninh"
+    ],
+    "svg": "/svg-34/tinh-quang-ninh.svg",
+    "sticker": "/stickers/tinh-quang-ninh.png",
+    "audio": "/audio/tinh-quang-ninh.mp3"
+  },
+  {
+    "name": "Tỉnh Thanh Hóa",
+    "type": "province",
+    "id": "tinh-thanh-hoa",
+    "admin_center_hint": "Thanh Hóa",
+    "components_from_63": [
+      "Thanh Hóa"
+    ],
+    "svg": "/svg-34/tinh-thanh-hoa.svg",
+    "sticker": "/stickers/tinh-thanh-hoa.png",
+    "audio": "/audio/tinh-thanh-hoa.mp3"
+  },
+  {
+    "name": "Tỉnh Nghệ An",
+    "type": "province",
+    "id": "tinh-nghe-an",
+    "admin_center_hint": "Vinh",
+    "components_from_63": [
+      "Nghệ An"
+    ],
+    "svg": "/svg-34/tinh-nghe-an.svg",
+    "sticker": "/stickers/tinh-nghe-an.png",
+    "audio": "/audio/tinh-nghe-an.mp3"
+  },
+  {
+    "name": "Tỉnh Hà Tĩnh",
+    "type": "province",
+    "id": "tinh-ha-tinh",
+    "admin_center_hint": "Hà Tĩnh",
+    "components_from_63": [
+      "Hà Tĩnh"
+    ],
+    "svg": "/svg-34/tinh-ha-tinh.svg",
+    "sticker": "/stickers/tinh-ha-tinh.png",
+    "audio": "/audio/tinh-ha-tinh.mp3"
+  },
+  {
+    "name": "Tỉnh Cao Bằng",
+    "type": "province",
+    "id": "tinh-cao-bang",
+    "admin_center_hint": "Cao Bằng",
+    "components_from_63": [
+      "Cao Bằng"
+    ],
+    "svg": "/svg-34/tinh-cao-bang.svg",
+    "sticker": "/stickers/tinh-cao-bang.png",
+    "audio": "/audio/tinh-cao-bang.mp3"
+  },
+  {
+    "name": "Tỉnh Tuyên Quang",
+    "type": "province",
+    "id": "tinh-tuyen-quang",
+    "admin_center_hint": "TP Tuyên Quang",
+    "components_from_63": [
+      "Tuyên Quang",
+      "Hà Giang"
+    ],
+    "svg": "/svg-34/tinh-tuyen-quang.svg",
+    "sticker": "/stickers/tinh-tuyen-quang.png",
+    "audio": "/audio/tinh-tuyen-quang.mp3"
+  },
+  {
+    "name": "Tỉnh Lào Cai",
+    "type": "province",
+    "id": "tinh-lao-cai",
+    "admin_center_hint": "Lào Cai",
+    "components_from_63": [
+      "Lào Cai",
+      "Yên Bái"
+    ],
+    "svg": "/svg-34/tinh-lao-cai.svg",
+    "sticker": "/stickers/tinh-lao-cai.png",
+    "audio": "/audio/tinh-lao-cai.mp3"
+  },
+  {
+    "name": "Tỉnh Thái Nguyên",
+    "type": "province",
+    "id": "tinh-thai-nguyen",
+    "admin_center_hint": "TP Thái Nguyên",
+    "components_from_63": [
+      "Bắc Kạn",
+      "Thái Nguyên"
+    ],
+    "svg": "/svg-34/tinh-thai-nguyen.svg",
+    "sticker": "/stickers/tinh-thai-nguyen.png",
+    "audio": "/audio/tinh-thai-nguyen.mp3"
+  },
+  {
+    "name": "Tỉnh Phú Thọ",
+    "type": "province",
+    "id": "tinh-phu-tho",
+    "admin_center_hint": "Việt Trì",
+    "components_from_63": [
+      "Vĩnh Phúc",
+      "Phú Thọ",
+      "Hòa Bình"
+    ],
+    "svg": "/svg-34/tinh-phu-tho.svg",
+    "sticker": "/stickers/tinh-phu-tho.png",
+    "audio": "/audio/tinh-phu-tho.mp3"
+  },
+  {
+    "name": "Tỉnh Bắc Ninh",
+    "type": "province",
+    "id": "tinh-bac-ninh",
+    "admin_center_hint": "Bắc Ninh",
+    "components_from_63": [
+      "Bắc Ninh",
+      "Bắc Giang"
+    ],
+    "svg": "/svg-34/tinh-bac-ninh.svg",
+    "sticker": "/stickers/tinh-bac-ninh.png",
+    "audio": "/audio/tinh-bac-ninh.mp3"
+  },
+  {
+    "name": "Tỉnh Hưng Yên",
+    "type": "province",
+    "id": "tinh-hung-yen",
+    "admin_center_hint": "Hưng Yên",
+    "components_from_63": [
+      "Hưng Yên",
+      "Thái Bình"
+    ],
+    "svg": "/svg-34/tinh-hung-yen.svg",
+    "sticker": "/stickers/tinh-hung-yen.png",
+    "audio": "/audio/tinh-hung-yen.mp3"
+  },
+  {
+    "name": "Thành phố Hải Phòng",
+    "type": "city",
+    "id": "thanh-pho-hai-phong",
+    "admin_center_hint": "Hải Phòng",
+    "components_from_63": [
+      "Hải Dương",
+      "Hải Phòng"
+    ],
+    "svg": "/svg-34/thanh-pho-hai-phong.svg",
+    "sticker": "/stickers/thanh-pho-hai-phong.png",
+    "audio": "/audio/thanh-pho-hai-phong.mp3"
+  },
+  {
+    "name": "Tỉnh Ninh Bình",
+    "type": "province",
+    "id": "tinh-ninh-binh",
+    "admin_center_hint": "Ninh Bình",
+    "components_from_63": [
+      "Hà Nam",
+      "Ninh Bình",
+      "Nam Định"
+    ],
+    "svg": "/svg-34/tinh-ninh-binh.svg",
+    "sticker": "/stickers/tinh-ninh-binh.png",
+    "audio": "/audio/tinh-ninh-binh.mp3"
+  },
+  {
+    "name": "Tỉnh Quảng Trị",
+    "type": "province",
+    "id": "tinh-quang-tri",
+    "admin_center_hint": "Đông Hà/Đồng Hới",
+    "components_from_63": [
+      "Quảng Bình",
+      "Quảng Trị"
+    ],
+    "svg": "/svg-34/tinh-quang-tri.svg",
+    "sticker": "/stickers/tinh-quang-tri.png",
+    "audio": "/audio/tinh-quang-tri.mp3"
+  },
+  {
+    "name": "Thành phố Đà Nẵng",
+    "type": "city",
+    "id": "thanh-pho-a-nang",
+    "admin_center_hint": "Đà Nẵng",
+    "components_from_63": [
+      "Quảng Nam",
+      "Đà Nẵng"
+    ],
+    "svg": "/svg-34/thanh-pho-a-nang.svg",
+    "sticker": "/stickers/thanh-pho-a-nang.png",
+    "audio": "/audio/thanh-pho-a-nang.mp3"
+  },
+  {
+    "name": "Tỉnh Quảng Ngãi",
+    "type": "province",
+    "id": "tinh-quang-ngai",
+    "admin_center_hint": "Quảng Ngãi",
+    "components_from_63": [
+      "Kon Tum",
+      "Quảng Ngãi"
+    ],
+    "svg": "/svg-34/tinh-quang-ngai.svg",
+    "sticker": "/stickers/tinh-quang-ngai.png",
+    "audio": "/audio/tinh-quang-ngai.mp3"
+  },
+  {
+    "name": "Tỉnh Gia Lai",
+    "type": "province",
+    "id": "tinh-gia-lai",
+    "admin_center_hint": "Pleiku",
+    "components_from_63": [
+      "Gia Lai",
+      "Bình Định"
+    ],
+    "svg": "/svg-34/tinh-gia-lai.svg",
+    "sticker": "/stickers/tinh-gia-lai.png",
+    "audio": "/audio/tinh-gia-lai.mp3"
+  },
+  {
+    "name": "Tỉnh Khánh Hòa",
+    "type": "province",
+    "id": "tinh-khanh-hoa",
+    "admin_center_hint": "Nha Trang",
+    "components_from_63": [
+      "Ninh Thuận",
+      "Khánh Hòa"
+    ],
+    "svg": "/svg-34/tinh-khanh-hoa.svg",
+    "sticker": "/stickers/tinh-khanh-hoa.png",
+    "audio": "/audio/tinh-khanh-hoa.mp3"
+  },
+  {
+    "name": "Tỉnh Lâm Đồng",
+    "type": "province",
+    "id": "tinh-lam-ong",
+    "admin_center_hint": "Đà Lạt",
+    "components_from_63": [
+      "Lâm Đồng",
+      "Đắk Nông",
+      "Bình Thuận"
+    ],
+    "svg": "/svg-34/tinh-lam-ong.svg",
+    "sticker": "/stickers/tinh-lam-ong.png",
+    "audio": "/audio/tinh-lam-ong.mp3"
+  },
+  {
+    "name": "Tỉnh Đắk Lắk",
+    "type": "province",
+    "id": "tinh-ak-lak",
+    "admin_center_hint": "Buôn Ma Thuột",
+    "components_from_63": [
+      "Đắk Lắk",
+      "Phú Yên"
+    ],
+    "svg": "/svg-34/tinh-ak-lak.svg",
+    "sticker": "/stickers/tinh-ak-lak.png",
+    "audio": "/audio/tinh-ak-lak.mp3"
+  },
+  {
+    "name": "Thành phố Hồ Chí Minh",
+    "type": "city",
+    "id": "thanh-pho-ho-chi-minh",
+    "admin_center_hint": "TP.HCM",
+    "components_from_63": [
+      "Bà Rịa - Vũng Tàu",
+      "Bình Dương",
+      "Thành phố Hồ Chí Minh"
+    ],
+    "svg": "/svg-34/thanh-pho-ho-chi-minh.svg",
+    "sticker": "/stickers/thanh-pho-ho-chi-minh.png",
+    "audio": "/audio/thanh-pho-ho-chi-minh.mp3"
+  },
+  {
+    "name": "Tỉnh Đồng Nai",
+    "type": "province",
+    "id": "tinh-ong-nai",
+    "admin_center_hint": "Biên Hòa",
+    "components_from_63": [
+      "Đồng Nai",
+      "Bình Phước"
+    ],
+    "svg": "/svg-34/tinh-ong-nai.svg",
+    "sticker": "/stickers/tinh-ong-nai.png",
+    "audio": "/audio/tinh-ong-nai.mp3"
+  },
+  {
+    "name": "Tỉnh Tây Ninh",
+    "type": "province",
+    "id": "tinh-tay-ninh",
+    "admin_center_hint": "Tây Ninh/Tân An",
+    "components_from_63": [
+      "Tây Ninh",
+      "Long An"
+    ],
+    "svg": "/svg-34/tinh-tay-ninh.svg",
+    "sticker": "/stickers/tinh-tay-ninh.png",
+    "audio": "/audio/tinh-tay-ninh.mp3"
+  },
+  {
+    "name": "Thành phố Cần Thơ",
+    "type": "city",
+    "id": "thanh-pho-can-tho",
+    "admin_center_hint": "Cần Thơ",
+    "components_from_63": [
+      "Cần Thơ",
+      "Sóc Trăng",
+      "Hậu Giang"
+    ],
+    "svg": "/svg-34/thanh-pho-can-tho.svg",
+    "sticker": "/stickers/thanh-pho-can-tho.png",
+    "audio": "/audio/thanh-pho-can-tho.mp3"
+  },
+  {
+    "name": "Tỉnh Vĩnh Long",
+    "type": "province",
+    "id": "tinh-vinh-long",
+    "admin_center_hint": "Vĩnh Long",
+    "components_from_63": [
+      "Bến Tre",
+      "Vĩnh Long",
+      "Trà Vinh"
+    ],
+    "svg": "/svg-34/tinh-vinh-long.svg",
+    "sticker": "/stickers/tinh-vinh-long.png",
+    "audio": "/audio/tinh-vinh-long.mp3"
+  },
+  {
+    "name": "Tỉnh Đồng Tháp",
+    "type": "province",
+    "id": "tinh-ong-thap",
+    "admin_center_hint": "Cao Lãnh/Mỹ Tho",
+    "components_from_63": [
+      "Tiền Giang",
+      "Đồng Tháp"
+    ],
+    "svg": "/svg-34/tinh-ong-thap.svg",
+    "sticker": "/stickers/tinh-ong-thap.png",
+    "audio": "/audio/tinh-ong-thap.mp3"
+  },
+  {
+    "name": "Tỉnh Cà Mau",
+    "type": "province",
+    "id": "tinh-ca-mau",
+    "admin_center_hint": "Cà Mau",
+    "components_from_63": [
+      "Bạc Liêu",
+      "Cà Mau"
+    ],
+    "svg": "/svg-34/tinh-ca-mau.svg",
+    "sticker": "/stickers/tinh-ca-mau.png",
+    "audio": "/audio/tinh-ca-mau.mp3"
+  },
+  {
+    "name": "Tỉnh An Giang",
+    "type": "province",
+    "id": "tinh-an-giang",
+    "admin_center_hint": "Long Xuyên/Rạch Giá",
+    "components_from_63": [
+      "An Giang",
+      "Kiên Giang"
+    ],
+    "svg": "/svg-34/tinh-an-giang.svg",
+    "sticker": "/stickers/tinh-an-giang.png",
+    "audio": "/audio/tinh-an-giang.mp3"
+  }
+]

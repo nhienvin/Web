@@ -1,34 +1,546 @@
 [
   {
-    "id": "ha-noi",
-    "name": "Hà Nội",
-    "svg": "/assets/svg-63/ha-noi.svg",
+    "id": "thanh-pho-hue",
+    "name": "Thanh Pho Hue",
+    "svg": "/public/assets/svg-34/thanh-pho-hue.svg",
     "start": {
-      "x": 220,
-      "y": 520,
-      "angle": 20
-    },
-    "target": {
-      "x": 530,
-      "y": 330,
+      "x": 116.36,
+      "y": 580.0,
       "angle": 0
     },
-    "scale": 0.7
+    "target": {
+      "x": 116.36,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
   },
   {
-    "id": "hai-phong",
-    "name": "Hải Phòng",
-    "svg": "/assets/svg-63/hai-phong.svg",
+    "id": "tinh-lao-cai",
+    "name": "Tinh Lao Cai",
+    "svg": "/public/assets/svg-34/tinh-lao-cai.svg",
     "start": {
-      "x": 1040,
-      "y": 540,
-      "angle": -10
-    },
-    "target": {
-      "x": 730,
-      "y": 370,
+      "x": 221.09,
+      "y": 580.0,
       "angle": 0
     },
-    "scale": 0.7
+    "target": {
+      "x": 221.09,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-nghe-an",
+    "name": "Tinh Nghe An",
+    "svg": "/public/assets/svg-34/tinh-nghe-an.svg",
+    "start": {
+      "x": 325.82,
+      "y": 580.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 325.82,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-ha-tinh",
+    "name": "Tinh Ha Tinh",
+    "svg": "/public/assets/svg-34/tinh-ha-tinh.svg",
+    "start": {
+      "x": 430.55,
+      "y": 580.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 430.55,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-phu-tho",
+    "name": "Tinh Phu Tho",
+    "svg": "/public/assets/svg-34/tinh-phu-tho.svg",
+    "start": {
+      "x": 535.27,
+      "y": 580.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 535.27,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-son-la",
+    "name": "Tinh Son La",
+    "svg": "/public/assets/svg-34/tinh-son-la.svg",
+    "start": {
+      "x": 640.0,
+      "y": 580.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 640.0,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-khanh-hoa",
+    "name": "Tinh Khanh Hoa",
+    "svg": "/public/assets/svg-34/tinh-khanh-hoa.svg",
+    "start": {
+      "x": 744.73,
+      "y": 580.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 744.73,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-cao-bang",
+    "name": "Tinh Cao Bang",
+    "svg": "/public/assets/svg-34/tinh-cao-bang.svg",
+    "start": {
+      "x": 849.45,
+      "y": 580.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 849.45,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-lai-chau",
+    "name": "Tinh Lai Chau",
+    "svg": "/public/assets/svg-34/tinh-lai-chau.svg",
+    "start": {
+      "x": 954.18,
+      "y": 580.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 954.18,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-gia-lai",
+    "name": "Tinh Gia Lai",
+    "svg": "/public/assets/svg-34/tinh-gia-lai.svg",
+    "start": {
+      "x": 1058.91,
+      "y": 580.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 1058.91,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-quang-ninh",
+    "name": "Tinh Quang Ninh",
+    "svg": "/public/assets/svg-34/tinh-quang-ninh.svg",
+    "start": {
+      "x": 1163.64,
+      "y": 580.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 1163.64,
+      "y": 107.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-ien-bien",
+    "name": "Tinh Ien Bien",
+    "svg": "/public/assets/svg-34/tinh-ien-bien.svg",
+    "start": {
+      "x": 116.36,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 116.36,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-quang-ngai",
+    "name": "Tinh Quang Ngai",
+    "svg": "/public/assets/svg-34/tinh-quang-ngai.svg",
+    "start": {
+      "x": 221.09,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 221.09,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-ca-mau",
+    "name": "Tinh Ca Mau",
+    "svg": "/public/assets/svg-34/tinh-ca-mau.svg",
+    "start": {
+      "x": 325.82,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 325.82,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-bac-ninh",
+    "name": "Tinh Bac Ninh",
+    "svg": "/public/assets/svg-34/tinh-bac-ninh.svg",
+    "start": {
+      "x": 430.55,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 430.55,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-tay-ninh",
+    "name": "Tinh Tay Ninh",
+    "svg": "/public/assets/svg-34/tinh-tay-ninh.svg",
+    "start": {
+      "x": 535.27,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 535.27,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-ak-lak",
+    "name": "Tinh Ak Lak",
+    "svg": "/public/assets/svg-34/tinh-ak-lak.svg",
+    "start": {
+      "x": 640.0,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 640.0,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-ong-nai",
+    "name": "Tinh Ong Nai",
+    "svg": "/public/assets/svg-34/tinh-ong-nai.svg",
+    "start": {
+      "x": 744.73,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 744.73,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "thanh-pho-a-nang",
+    "name": "Thanh Pho A Nang",
+    "svg": "/public/assets/svg-34/thanh-pho-a-nang.svg",
+    "start": {
+      "x": 849.45,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 849.45,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-tuyen-quang",
+    "name": "Tinh Tuyen Quang",
+    "svg": "/public/assets/svg-34/tinh-tuyen-quang.svg",
+    "start": {
+      "x": 954.18,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 954.18,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-hung-yen",
+    "name": "Tinh Hung Yen",
+    "svg": "/public/assets/svg-34/tinh-hung-yen.svg",
+    "start": {
+      "x": 1058.91,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 1058.91,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-lang-son",
+    "name": "Tinh Lang Son",
+    "svg": "/public/assets/svg-34/tinh-lang-son.svg",
+    "start": {
+      "x": 1163.64,
+      "y": 620.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 1163.64,
+      "y": 193.75,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "thanh-pho-ha-noi",
+    "name": "Thanh Pho Ha Noi",
+    "svg": "/public/assets/svg-34/thanh-pho-ha-noi.svg",
+    "start": {
+      "x": 116.36,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 116.36,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-thanh-hoa",
+    "name": "Tinh Thanh Hoa",
+    "svg": "/public/assets/svg-34/tinh-thanh-hoa.svg",
+    "start": {
+      "x": 221.09,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 221.09,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-quang-tri",
+    "name": "Tinh Quang Tri",
+    "svg": "/public/assets/svg-34/tinh-quang-tri.svg",
+    "start": {
+      "x": 325.82,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 325.82,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-ninh-binh",
+    "name": "Tinh Ninh Binh",
+    "svg": "/public/assets/svg-34/tinh-ninh-binh.svg",
+    "start": {
+      "x": 430.55,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 430.55,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "thanh-pho-hai-phong",
+    "name": "Thanh Pho Hai Phong",
+    "svg": "/public/assets/svg-34/thanh-pho-hai-phong.svg",
+    "start": {
+      "x": 535.27,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 535.27,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-ong-thap",
+    "name": "Tinh Ong Thap",
+    "svg": "/public/assets/svg-34/tinh-ong-thap.svg",
+    "start": {
+      "x": 640.0,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 640.0,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "thanh-pho-ho-chi-minh",
+    "name": "Thanh Pho Ho Chi Minh",
+    "svg": "/public/assets/svg-34/thanh-pho-ho-chi-minh.svg",
+    "start": {
+      "x": 744.73,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 744.73,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-thai-nguyen",
+    "name": "Tinh Thai Nguyen",
+    "svg": "/public/assets/svg-34/tinh-thai-nguyen.svg",
+    "start": {
+      "x": 849.45,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 849.45,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-vinh-long",
+    "name": "Tinh Vinh Long",
+    "svg": "/public/assets/svg-34/tinh-vinh-long.svg",
+    "start": {
+      "x": 954.18,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 954.18,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-lam-ong",
+    "name": "Tinh Lam Ong",
+    "svg": "/public/assets/svg-34/tinh-lam-ong.svg",
+    "start": {
+      "x": 1058.91,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 1058.91,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "thanh-pho-can-tho",
+    "name": "Thanh Pho Can Tho",
+    "svg": "/public/assets/svg-34/thanh-pho-can-tho.svg",
+    "start": {
+      "x": 1163.64,
+      "y": 660.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 1163.64,
+      "y": 280.25,
+      "angle": 0
+    },
+    "scale": 0.078
+  },
+  {
+    "id": "tinh-an-giang",
+    "name": "Tinh An Giang",
+    "svg": "/public/assets/svg-34/tinh-an-giang.svg",
+    "start": {
+      "x": 116.36,
+      "y": 700.0,
+      "angle": 0
+    },
+    "target": {
+      "x": 116.36,
+      "y": 366.75,
+      "angle": 0
+    },
+    "scale": 0.078
   }
 ]

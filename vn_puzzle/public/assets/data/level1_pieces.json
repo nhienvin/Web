@@ -1,0 +1,821 @@
+[
+  {
+    "id": "angiang",
+    "text": "AnGiang",
+    "start": {
+      "x": 1056.0,
+      "y": 29.33
+    },
+    "target": {
+      "x": 356.92,
+      "y": 597.89
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "baria-vungtau",
+    "text": "BàRịa-VũngTàu",
+    "start": {
+      "x": 1056.0,
+      "y": 40.0
+    },
+    "target": {
+      "x": 609.57,
+      "y": 598.35
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "bacgiang",
+    "text": "BắcGiang",
+    "start": {
+      "x": 1056.0,
+      "y": 50.67
+    },
+    "target": {
+      "x": 499.09,
+      "y": 114.35
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "backan",
+    "text": "BắcKạn",
+    "start": {
+      "x": 1056.0,
+      "y": 61.33
+    },
+    "target": {
+      "x": 447.84,
+      "y": 74.1
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "bacninh",
+    "text": "BắcNinh",
+    "start": {
+      "x": 1056.0,
+      "y": 72.0
+    },
+    "target": {
+      "x": 459.37,
+      "y": 125.86
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "baclieu",
+    "text": "BạcLiêu",
+    "start": {
+      "x": 1056.0,
+      "y": 82.67
+    },
+    "target": {
+      "x": 405.41,
+      "y": 653.67
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "bentre",
+    "text": "BếnTre",
+    "start": {
+      "x": 1056.0,
+      "y": 93.33
+    },
+    "target": {
+      "x": 510.47,
+      "y": 620.67
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "binhduong",
+    "text": "BìnhDương",
+    "start": {
+      "x": 1056.0,
+      "y": 104.0
+    },
+    "target": {
+      "x": 523.62,
+      "y": 570.61
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "binhphuoc",
+    "text": "BìnhPhước",
+    "start": {
+      "x": 1056.0,
+      "y": 114.67
+    },
+    "target": {
+      "x": 535.14,
+      "y": 542.96
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "binhthuan",
+    "text": "BìnhThuận",
+    "start": {
+      "x": 1056.0,
+      "y": 125.33
+    },
+    "target": {
+      "x": 664.51,
+      "y": 575.99
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "binh-inh",
+    "text": "BìnhĐịnh",
+    "start": {
+      "x": 1056.0,
+      "y": 136.0
+    },
+    "target": {
+      "x": 780.06,
+      "y": 439.62
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "caobang",
+    "text": "CaoBằng",
+    "start": {
+      "x": 1056.0,
+      "y": 146.67
+    },
+    "target": {
+      "x": 455.03,
+      "y": 53.29
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "camau",
+    "text": "CàMau",
+    "start": {
+      "x": 1056.0,
+      "y": 157.33
+    },
+    "target": {
+      "x": 359.24,
+      "y": 665.56
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "cantho",
+    "text": "CầnThơ",
+    "start": {
+      "x": 1056.0,
+      "y": 168.0
+    },
+    "target": {
+      "x": 389.77,
+      "y": 618.09
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "gialai",
+    "text": "GiaLai",
+    "start": {
+      "x": 1056.0,
+      "y": 178.67
+    },
+    "target": {
+      "x": 648.91,
+      "y": 453.47
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "hagiang",
+    "text": "HàGiang",
+    "start": {
+      "x": 1056.0,
+      "y": 189.33
+    },
+    "target": {
+      "x": 312.92,
+      "y": 51.45
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "hanam",
+    "text": "HàNam",
+    "start": {
+      "x": 1056.0,
+      "y": 200.0
+    },
+    "target": {
+      "x": 455.66,
+      "y": 151.99
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "hanoi",
+    "text": "HàNội",
+    "start": {
+      "x": 1056.0,
+      "y": 210.67
+    },
+    "target": {
+      "x": 401.06,
+      "y": 132.22
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "hatinh",
+    "text": "HàTĩnh",
+    "start": {
+      "x": 1056.0,
+      "y": 221.33
+    },
+    "target": {
+      "x": 395.94,
+      "y": 250.23
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "haiduong",
+    "text": "HảiDương",
+    "start": {
+      "x": 1056.0,
+      "y": 232.0
+    },
+    "target": {
+      "x": 485.56,
+      "y": 132.84
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "haiphong",
+    "text": "HảiPhòng",
+    "start": {
+      "x": 1056.0,
+      "y": 242.67
+    },
+    "target": {
+      "x": 525.11,
+      "y": 139.65
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "haugiang",
+    "text": "HậuGiang",
+    "start": {
+      "x": 1056.0,
+      "y": 253.33
+    },
+    "target": {
+      "x": 407.08,
+      "y": 633.31
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "hoabinh",
+    "text": "HoàBình",
+    "start": {
+      "x": 1056.0,
+      "y": 264.0
+    },
+    "target": {
+      "x": 358.5,
+      "y": 144.17
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "hochiminh",
+    "text": "HồChíMinh",
+    "start": {
+      "x": 1056.0,
+      "y": 274.67
+    },
+    "target": {
+      "x": 509.98,
+      "y": 589.63
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "hungyen",
+    "text": "HưngYên",
+    "start": {
+      "x": 1056.0,
+      "y": 285.33
+    },
+    "target": {
+      "x": 452.36,
+      "y": 139.81
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "khanhhoa",
+    "text": "KhánhHòa",
+    "start": {
+      "x": 1056.0,
+      "y": 296.0
+    },
+    "target": {
+      "x": 761.42,
+      "y": 518.92
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "kiengiang",
+    "text": "KiênGiang",
+    "start": {
+      "x": 1056.0,
+      "y": 306.67
+    },
+    "target": {
+      "x": 365.96,
+      "y": 624.89
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "kontum",
+    "text": "KonTum",
+    "start": {
+      "x": 1056.0,
+      "y": 317.33
+    },
+    "target": {
+      "x": 648.72,
+      "y": 414.52
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "laichau",
+    "text": "LaiChâu",
+    "start": {
+      "x": 1056.0,
+      "y": 328.0
+    },
+    "target": {
+      "x": 173.66,
+      "y": 75.22
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "laocai",
+    "text": "LàoCai",
+    "start": {
+      "x": 1056.0,
+      "y": 338.67
+    },
+    "target": {
+      "x": 246.12,
+      "y": 70.29
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "lam-ong",
+    "text": "LâmĐồng",
+    "start": {
+      "x": 1056.0,
+      "y": 349.33
+    },
+    "target": {
+      "x": 668.68,
+      "y": 544.45
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "langson",
+    "text": "LạngSơn",
+    "start": {
+      "x": 1056.0,
+      "y": 360.0
+    },
+    "target": {
+      "x": 492.65,
+      "y": 91.09
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "longan",
+    "text": "LongAn",
+    "start": {
+      "x": 1056.0,
+      "y": 370.67
+    },
+    "target": {
+      "x": 454.45,
+      "y": 591.64
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "nam-inh",
+    "text": "NamĐịnh",
+    "start": {
+      "x": 1056.0,
+      "y": 381.33
+    },
+    "target": {
+      "x": 505.04,
+      "y": 165.63
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "nghean",
+    "text": "NghệAn",
+    "start": {
+      "x": 1056.0,
+      "y": 392.0
+    },
+    "target": {
+      "x": 303.29,
+      "y": 208.36
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "ninhbinh",
+    "text": "NinhBình",
+    "start": {
+      "x": 1056.0,
+      "y": 402.67
+    },
+    "target": {
+      "x": 443.49,
+      "y": 167.15
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "ninhthuan",
+    "text": "NinhThuận",
+    "start": {
+      "x": 1056.0,
+      "y": 413.33
+    },
+    "target": {
+      "x": 769.63,
+      "y": 545.81
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "phutho",
+    "text": "PhúThọ",
+    "start": {
+      "x": 1056.0,
+      "y": 424.0
+    },
+    "target": {
+      "x": 331.1,
+      "y": 116.84
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "phuyen",
+    "text": "PhúYên",
+    "start": {
+      "x": 1056.0,
+      "y": 434.67
+    },
+    "target": {
+      "x": 779.08,
+      "y": 480.28
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "quangbinh",
+    "text": "QuảngBình",
+    "start": {
+      "x": 1056.0,
+      "y": 445.33
+    },
+    "target": {
+      "x": 478.85,
+      "y": 287.56
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "quangnam",
+    "text": "QuảngNam",
+    "start": {
+      "x": 1056.0,
+      "y": 456.0
+    },
+    "target": {
+      "x": 635.41,
+      "y": 376.88
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "quangngai",
+    "text": "QuảngNgãi",
+    "start": {
+      "x": 1056.0,
+      "y": 466.67
+    },
+    "target": {
+      "x": 732.09,
+      "y": 400.69
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "quangninh",
+    "text": "QuảngNinh",
+    "start": {
+      "x": 1056.0,
+      "y": 477.33
+    },
+    "target": {
+      "x": 579.35,
+      "y": 120.42
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "quangtri",
+    "text": "QuảngTrị",
+    "start": {
+      "x": 1056.0,
+      "y": 488.0
+    },
+    "target": {
+      "x": 564.24,
+      "y": 322.08
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "soctrang",
+    "text": "SócTrăng",
+    "start": {
+      "x": 1056.0,
+      "y": 498.67
+    },
+    "target": {
+      "x": 418.8,
+      "y": 641.89
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "sonla",
+    "text": "SơnLa",
+    "start": {
+      "x": 1056.0,
+      "y": 509.33
+    },
+    "target": {
+      "x": 290.38,
+      "y": 117.53
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "tayninh",
+    "text": "TâyNinh",
+    "start": {
+      "x": 1056.0,
+      "y": 520.0
+    },
+    "target": {
+      "x": 464.14,
+      "y": 562.22
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "thanhhoa",
+    "text": "ThanhHóa",
+    "start": {
+      "x": 1056.0,
+      "y": 530.67
+    },
+    "target": {
+      "x": 354.97,
+      "y": 176.82
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "thaibinh",
+    "text": "TháiBình",
+    "start": {
+      "x": 1056.0,
+      "y": 541.33
+    },
+    "target": {
+      "x": 492.65,
+      "y": 154.16
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "thainguyen",
+    "text": "TháiNguyên",
+    "start": {
+      "x": 1056.0,
+      "y": 552.0
+    },
+    "target": {
+      "x": 450.34,
+      "y": 100.37
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "thuathienhue",
+    "text": "ThừaThiênHuế",
+    "start": {
+      "x": 1056.0,
+      "y": 562.67
+    },
+    "target": {
+      "x": 602.81,
+      "y": 338.42
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "tiengiang",
+    "text": "TiềnGiang",
+    "start": {
+      "x": 1056.0,
+      "y": 573.33
+    },
+    "target": {
+      "x": 463.61,
+      "y": 606.12
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "travinh",
+    "text": "TràVinh",
+    "start": {
+      "x": 1056.0,
+      "y": 584.0
+    },
+    "target": {
+      "x": 479.7,
+      "y": 632.23
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "tuyenquang",
+    "text": "TuyênQuang",
+    "start": {
+      "x": 1056.0,
+      "y": 594.67
+    },
+    "target": {
+      "x": 350.73,
+      "y": 81.91
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "vinhlong",
+    "text": "VĩnhLong",
+    "start": {
+      "x": 1056.0,
+      "y": 605.33
+    },
+    "target": {
+      "x": 464.14,
+      "y": 618.74
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "vinhphuc",
+    "text": "VĩnhPhúc",
+    "start": {
+      "x": 1056.0,
+      "y": 616.0
+    },
+    "target": {
+      "x": 403.38,
+      "y": 114.79
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "yenbai",
+    "text": "YênBái",
+    "start": {
+      "x": 1056.0,
+      "y": 626.67
+    },
+    "target": {
+      "x": 303.7,
+      "y": 94.88
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "anang",
+    "text": "ĐàNẵng",
+    "start": {
+      "x": 1056.0,
+      "y": 637.33
+    },
+    "target": {
+      "x": 668.71,
+      "y": 351.94
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "aklak",
+    "text": "ĐắkLắk",
+    "start": {
+      "x": 1056.0,
+      "y": 648.0
+    },
+    "target": {
+      "x": 694.5,
+      "y": 498.73
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "aknong",
+    "text": "ĐắkNông",
+    "start": {
+      "x": 1056.0,
+      "y": 658.67
+    },
+    "target": {
+      "x": 641.69,
+      "y": 521.43
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "ienbien",
+    "text": "ĐiệnBiên",
+    "start": {
+      "x": 1056.0,
+      "y": 669.33
+    },
+    "target": {
+      "x": 144.69,
+      "y": 98.89
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "ongnai",
+    "text": "ĐồngNai",
+    "start": {
+      "x": 1056.0,
+      "y": 680.0
+    },
+    "target": {
+      "x": 580.4,
+      "y": 575.12
+    },
+    "fontSize": 20
+  },
+  {
+    "id": "ongthap",
+    "text": "ĐồngTháp",
+    "start": {
+      "x": 1056.0,
+      "y": 690.67
+    },
+    "target": {
+      "x": 416.95,
+      "y": 598.76
+    },
+    "fontSize": 20
+  }
+]

@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root { color-scheme: light dark; }
+html, body, #root { height: 100%; }
+body { @apply bg-slate-50 text-slate-900; }
+
+/* --- animations --- */
+@keyframes pop-in {
+    0% { transform: scale(.8); opacity: .2 }
+    60% { transform: scale(1.08); opacity: 1 }
+    100% { transform: scale(1); opacity: 1 }
+  }
+  @keyframes shake-x {
+    10% { transform: translateX(-6px) }
+    20% { transform: translateX(6px) }
+    30% { transform: translateX(-5px) }
+    40% { transform: translateX(5px) }
+    50% { transform: translateX(-3px) }
+    60% { transform: translateX(3px) }
+    70% { transform: translateX(-2px) }
+    80% { transform: translateX(2px) }
+    100% { transform: translateX(0) }
+  }
+  .anim-pop { animation: pop-in .35s cubic-bezier(.2,.7,.3,1) both }
+  .anim-shake { animation: shake-x .45s ease both }
+  
+  /* tick badge */
+  .tick-badge {
+    @apply bg-emerald-600 text-white text-[10px] rounded-full px-1.5 py-[2px] shadow;
+    transform-origin: center;
+  }
+  
+/* giữ không gian thanh cuộn ổn định để tránh layout shift */
+.scroll-stable { scrollbar-gutter: stable both-edges; }
+.aim { position:absolute; border:2px dashed rgba(16,185,129,.6); border-radius:9999px; pointer-events:none }
+
+  

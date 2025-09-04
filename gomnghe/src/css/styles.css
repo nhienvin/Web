@@ -8,7 +8,7 @@
 }
 
 body, html{
-    background: url(../imgs/VINTAGE_GRUNGE_BACKGROUND.jpg) no-repeat center fixed;
+    background: url(../imgs/VINTAGE_GRUNGE_BACKGROUND.avif) no-repeat center fixed;
     background-size: cover;
     font-family: 'SAIGON1985';
     color: whitesmoke;
@@ -18,19 +18,17 @@ body, html{
 }
 h1, h2, h3, h4, h5, h6{
     color: goldenrod;
-    font-size: 36px;
+}
+p{
+  font-family: "Corinthia", serif;
+   font-weight: 400;
+   font-size: 36px;
+   color: #690B22;
 }
 .font-SAIGON1985{
     font-family: 'SAIGON1985';
 }
 
-.font-roboto {
-   font-family: "Roboto", serif;
-   font-optical-sizing: auto;
-   font-weight: 400;
-   font-style: normal;
-   font-variation-settings: "wdth" 100;
- }
  .corinthia-regular {
    font-family: "Corinthia", serif;
    font-weight: 400;
@@ -59,7 +57,6 @@ h1, h2, h3, h4, h5, h6{
 /*Tab*/
 /* Style tab links */
 .tablink {
-  font-family: 'SAIGON1985';
   color: #F1DEC6;
   background: none;
   border:  3px solid goldenrod;
@@ -67,8 +64,8 @@ h1, h2, h3, h4, h5, h6{
   float: left;
   outline: none;
   cursor: pointer;
-  padding: 14px 16px;
-  font-size: 17px;
+  padding: 8px 8px;
+  font-size: 18px;
 }
 
 .tablink:hover {
@@ -78,7 +75,7 @@ h1, h2, h3, h4, h5, h6{
 /* Style the tab content (and add height:100% for full page content) */
 .tabcontent {
   display: none;
-  padding: 100px 20px;
+  padding: 50px 20px;
   height: 100%;
 }
 @media only screen and (max-width: 600px) {
@@ -98,4 +95,162 @@ h1, h2, h3, h4, h5, h6{
   .tablink{
     width: 16%;
   }
+}
+
+/*Typewriter Effect*/
+.typewriter h2{
+  overflow: hidden;/* Ensures the content is not revealed until the animation */
+  border-right: .15em solid darkorange; /* The typwriter cursor */
+  white-space: nowrap; /* Keeps the content on a single line */
+  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+  letter-spacing: .15em; /* Adjust as needed */
+  animation: 
+      typing 5s steps(40, end),
+      blink-caret .75s step-end infinite;
+
+}
+/* The typing effect */
+@keyframes typing {
+from { width: 0 }
+to { width: 100% }
+}
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+from, to { border-color: transparent }
+50% { border-color: darkorange; }
+}
+/* Animation Button */
+button {
+  font-family: 'SAIGON1985';
+  color: #F1DEC6;
+  border:  3px solid goldenrod;
+  background: none;
+  border-radius: 5px;
+  outline: 0;
+  display: inline-block;
+  padding: 15px 25px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 20px;
+  transition: all 0.5s;
+}
+button:hover{
+  background-color: #A02334;
+}
+button span{
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+
+}
+button span:after{
+  content:'\00bb';
+  position: absolute;
+  opacity: 0;
+  top:0;
+  right: -20px;
+  transition: 0.5s;
+}
+button:hover span {
+padding-right: 25px;
+}
+button:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+/* CSS link button */
+a{
+  font-family: 'SAIGON1985';
+  color: #F1DEC6;
+  border:  3px solid goldenrod;
+  background: none;
+  border-radius: 5px;
+  outline: 0;
+  display: inline-block;
+  padding: 5px 15px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 20px;
+  transition: all 0.5s;
+  text-decoration: none;
+}
+a:hover, a:active{
+  background-color: #A02334;
+}
+
+/*responsive*/
+.responsive{
+  width: 100%;
+  height: auto;
+}
+.row::after{
+  content:'';
+  clear: both;
+  display: table;
+}
+[class*="col-"]
+{
+  float: left;
+  padding: 15px;
+}
+/* For mobile phones: */
+[class*="col-"] {
+width: 100%;
+}
+@media only screen and (min-width: 600px) {
+/* For tablets: */
+.col-s-1 {width: 8.33%;}
+.col-s-2 {width: 16.66%;}
+.col-s-3 {width: 25%;}
+.col-s-4 {width: 33.33%;}
+.col-s-5 {width: 41.66%;}
+.col-s-6 {width: 50%;}
+.col-s-7 {width: 58.33%;}
+.col-s-8 {width: 66.66%;}
+.col-s-9 {width: 75%;}
+.col-s-10 {width: 83.33%;}
+.col-s-11 {width: 91.66%;}
+.col-s-12 {width: 100%;}
+}
+@media only screen and (min-width: 768px) {
+/* For desktop: */
+.col-1 {width: 8.33%;}
+.col-2 {width: 16.66%;}
+.col-3 {width: 25%;}
+.col-4 {width: 33.33%;}
+.col-5 {width: 41.66%;}
+.col-6 {width: 50%;}
+.col-7 {width: 58.33%;}
+.col-8 {width: 66.66%;}
+.col-9 {width: 75%;}
+.col-10 {width: 83.33%;}
+.col-11 {width: 91.66%;}
+.col-12 {width: 100%;}
+}
+img{
+  width: 100%;
+  height: auto;
+}
+
+/* Blogs */
+.card{
+  padding: 20px;
+  margin-top: 20px;
+  border:  3px solid goldenrod;
+}
+/* Childs */
+#Childs{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+#Childs img{
+  width: 450px;
+  height: 300px;
+  border: 10px solid goldenrod;
+  -webkit-filter: sepia(100%);
+  filter: sepia(100%);
+  transition-duration: 1s;
 }

@@ -1,0 +1,157 @@
+/* Đặt font cho toàn trang */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Cormorant Garamond', serif;
+    background-color: #f9f6f1; /* Tông màu nền nhạt gợi vintage */
+    color: #333;
+  }
+  
+  /* Hero Section */
+  .hero-section {
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    background: url('mac-ad-hero.jpg') no-repeat center center/cover; 
+    /* Thay bằng hình ảnh người phụ nữ đang ăn chocolate, có thể chỉnh màu đen-trắng hoặc sepia */
+  }
+  
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3); /* Hiệu ứng mờ tối nhẹ để chữ nổi bật */
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: #fff;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 80%;
+    margin: 0 auto;
+  }
+  
+  .hero-content h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .hero-content p {
+    font-size: 1.3rem;
+  }
+  
+  /* Intro Section */
+  .intro-section {
+    padding: 2rem 0;
+  }
+  
+  .intro-section .container {
+    width: 80%;
+    margin: 0 auto;
+    max-width: 900px;
+  }
+  
+  .intro-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Products Section */
+  .products-section {
+    padding: 2rem 0;
+  }
+  
+  .products-section .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .product-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    flex: 1 1 calc(33.333% - 2rem);
+    min-width: 250px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .product-card img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+  }
+  
+  .product-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .product-card p {
+    font-size: 1rem;
+  }
+  
+  /* Contact Section */
+  .contact-section {
+    padding: 2rem 0;
+    background-color: #efe8de;
+  }
+  
+  .contact-section .container {
+    width: 80%;
+    margin: 0 auto;
+    max-width: 900px;
+  }
+  
+  .contact-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .contact-section form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 400px;
+  }
+  
+  .contact-section label {
+    font-weight: bold;
+  }
+  
+  .contact-section input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    font-family: inherit;
+  }
+  
+  .contact-section button {
+    padding: 0.7rem 1rem;
+    background-color: #654321; /* tông nâu đậm */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 1rem 0;
+    background-color: #ccc;
+    font-size: 0.9rem;
+    color: #333;
+  }
+  

@@ -31,7 +31,9 @@ body { @apply bg-slate-50 text-slate-900; }
   }
   
 /* giữ không gian thanh cuộn ổn định để tránh layout shift */
-.scroll-stable { scrollbar-gutter: stable both-edges; }
+/* .scroll-stable { scrollbar-gutter: stable both-edges; }
 .aim { position:absolute; border:2px dashed rgba(16,185,129,.6); border-radius:9999px; pointer-events:none }
+@keyframes pop-in { 0%{transform:scale(.8);opacity:.2} 60%{transform:scale(1.05);opacity:1} 100%{transform:scale(1);opacity:1} }
+.anim-pop { animation: pop-in .35s cubic-bezier(.2,.7,.3,1) both } */
 
   

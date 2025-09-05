@@ -21,7 +21,7 @@ export function useSfx() {
   const aWrong = useMemo(()=>{
     const el = new Audio('/sfx/wrong.mp3'); el.preload = 'auto'; return el;
   },[]);
-
+  const aWin = useMemo(()=>{ const el = new Audio('/sfx/win.mp3'); el.preload='auto'; return el; },[]);
   function playCorrect(){
     if (aCorrect.src) { aCorrect.currentTime = 0; aCorrect.play().catch(()=>makeOsc(880)); }
     else makeOsc(880);
@@ -30,5 +30,9 @@ export function useSfx() {
     if (aWrong.src) { aWrong.currentTime = 0; aWrong.play().catch(()=>makeOsc(220)); }
     else makeOsc(220);
   }
-  return { playCorrect, playWrong };
+  function playWin(){
+    if (aWin.src) { aWin.currentTime=0; aWin.play().catch(()=>{ makeOsc(880,0.2); setTimeout(()=>makeOsc(1320,0.2),120); }); }
+    else { makeOsc(880,0.2); setTimeout(()=>makeOsc(1320,0.2),120); }
+  }
+  return { playCorrect, playWrong, playWin };
 }

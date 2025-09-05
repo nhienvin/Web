@@ -20,156 +20,18 @@
         143.2
       ],
       "bbox_px": [
-        101.5,
-        92.4,
-        138.6,
-        101.4
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "2",
         "5",
         "71"
       ],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "2",
-      "name_vi": "Lào Cai",
-      "name_en": "Lào Cai Province",
-      "region_code": "TBB",
-      "region_name": "Tây Bắc Bộ",
-      "lat": 22.059777,
-      "lon": 104.34923,
-      "svg_path_file": "map/svg/2.svg",
-      "anchor_px": [
-        275.0,
-        157.9
-      ],
-      "bbox_px": [
-        202.1,
-        89.6,
-        130.7,
-        136.4
-      ],
-      "neighbors": [
-        "1",
-        "5",
-        "68",
-        "7"
-      ],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "4",
-      "name_vi": "Cao Bằng",
-      "name_en": "Cao Bằng Province",
-      "region_code": "DBB",
-      "region_name": "Đông Bắc Bộ",
-      "lat": 22.744492,
-      "lon": 106.085516,
-      "svg_path_file": "map/svg/4.svg",
-      "anchor_px": [
-        429.0,
-        99.2
-      ],
-      "bbox_px": [
-        346.7,
-        64.8,
-        130.7,
-        68.7
-      ],
-      "neighbors": [
-        "69",
-        "7",
-        "9"
-      ],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "5",
-      "name_vi": "Sơn La",
-      "name_en": "Sơn La Province",
-      "region_code": "TBB",
-      "region_name": "Tây Bắc Bộ",
-      "lat": 21.193021,
-      "lon": 104.070558,
-      "svg_path_file": "map/svg/5.svg",
-      "anchor_px": [
-        252.8,
-        228.2
-      ],
-      "bbox_px": [
-        175.7,
-        162.9,
-        150.9,
-        130.2
-      ],
-      "neighbors": [
-        "1",
-        "2",
-        "21",
-        "68",
-        "71"
-      ],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "7",
-      "name_vi": "Tuyên Quang",
-      "name_en": "Tuyên Quang Province",
-      "region_code": "DBB",
-      "region_name": "Đông Bắc Bộ",
-      "lat": 22.488597,
-      "lon": 105.101107,
-      "svg_path_file": "map/svg/7.svg",
-      "anchor_px": [
-        324.8,
-        125.6
-      ],
-      "bbox_px": [
-        269.1,
-        40.0,
-        105.2,
-        170.6
-      ],
-      "neighbors": [
-        "2",
-        "4",
-        "68",
-        "69"
-      ],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "9",
-      "name_vi": "Lạng Sơn",
-      "name_en": "Lạng Sơn Province",
-      "region_code": "DBB",
-      "region_name": "Đông Bắc Bộ",
-      "lat": 21.838554,
-      "lon": 106.620648,
-      "svg_path_file": "map/svg/9.svg",
-      "anchor_px": [
-        456.7,
-        175.2
-      ],
-      "bbox_px": [
-        415.6,
-        124.1,
-        105.6,
-        101.9
-      ],
-      "neighbors": [
-        "13",
-        "4",
-        "56",
-        "69"
-      ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -187,16 +49,18 @@
         249.3
       ],
       "bbox_px": [
-        444.2,
-        195.8,
-        147.2,
-        106.9
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "56",
         "9",
         "HP"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -214,10 +78,10 @@
         338.8
       ],
       "bbox_px": [
-        369.6,
-        281.4,
-        117.4,
-        114.6
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "21",
@@ -225,6 +89,38 @@
         "68",
         "HN"
       ],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 18,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "2",
+      "name_vi": "Lào Cai",
+      "name_en": "Lào Cai Province",
+      "region_code": "TBB",
+      "region_name": "Tây Bắc Bộ",
+      "lat": 22.059777,
+      "lon": 104.34923,
+      "svg_path_file": "map/svg/2.svg",
+      "anchor_px": [
+        275.0,
+        157.9
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [
+        "1",
+        "5",
+        "68",
+        "7"
+      ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -242,10 +138,10 @@
         350.2
       ],
       "bbox_px": [
-        272.6,
-        284.4,
-        157.5,
-        131.2
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "18",
@@ -253,6 +149,8 @@
         "5",
         "68"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -270,15 +168,17 @@
         407.8
       ],
       "bbox_px": [
-        230.9,
-        343.7,
-        198.9,
-        127.8
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "21",
         "23"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -296,15 +196,17 @@
         490.3
       ],
       "bbox_px": [
-        333.1,
-        452.6,
-        137.3,
-        75.2
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "22",
         "25"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -322,15 +224,17 @@
         588.3
       ],
       "bbox_px": [
-        375.1,
-        508.4,
-        173.4,
-        159.4
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "23",
         "26"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -348,15 +252,17 @@
         646.0
       ],
       "bbox_px": [
-        493.8,
-        597.5,
-        120.3,
-        96.9
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "25",
         "DN"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -374,15 +280,17 @@
         792.4
       ],
       "bbox_px": [
-        518.8,
-        711.5,
-        177.1,
-        161.5
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "30",
         "DN"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -400,15 +308,17 @@
         879.1
       ],
       "bbox_px": [
-        528.4,
-        805.8,
-        177.6,
-        146.3
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "29",
         "33"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -426,16 +336,18 @@
         957.9
       ],
       "bbox_px": [
-        531.2,
-        892.3,
-        181.6,
-        131.0
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "30",
         "34",
         "35"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -449,19 +361,21 @@
       "lon": 111.599409,
       "svg_path_file": "map/svg/34.svg",
       "anchor_px": [
-        918.2,
-        1308.8
+        666.7,
+        1118.3
       ],
       "bbox_px": [
-        620.0,
-        963.0,
-        93.2,
-        179.0
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "33",
         "35"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -479,10 +393,10 @@
         1113.8
       ],
       "bbox_px": [
-        508.1,
-        967.8,
-        182.7,
-        291.3
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "33",
@@ -490,6 +404,8 @@
         "39",
         "SG"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -507,16 +423,18 @@
         1114.4
       ],
       "bbox_px": [
-        366.1,
-        1055.5,
-        103.7,
-        117.7
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "39",
         "45",
         "SG"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -534,16 +452,47 @@
         1084.7
       ],
       "bbox_px": [
-        442.0,
-        1011.6,
-        97.0,
-        146.0
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "35",
         "37",
         "SG"
       ],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 18,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "4",
+      "name_vi": "Cao Bằng",
+      "name_en": "Cao Bằng Province",
+      "region_code": "DBB",
+      "region_name": "Đông Bắc Bộ",
+      "lat": 22.744492,
+      "lon": 106.085516,
+      "svg_path_file": "map/svg/4.svg",
+      "anchor_px": [
+        429.0,
+        99.2
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [
+        "69",
+        "7",
+        "9"
+      ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -561,16 +510,18 @@
         1208.4
       ],
       "bbox_px": [
-        162.4,
-        1125.1,
-        210.0,
-        166.3
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "45",
         "59",
         "CT"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -588,10 +539,10 @@
         1159.7
       ],
       "bbox_px": [
-        339.9,
-        1124.2,
-        150.4,
-        71.0
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "37",
@@ -600,6 +551,8 @@
         "CT",
         "SG"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -617,15 +570,48 @@
         1231.0
       ],
       "bbox_px": [
-        381.2,
-        1177.8,
-        109.1,
-        106.4
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "45",
         "CT"
       ],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 18,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "5",
+      "name_vi": "Sơn La",
+      "name_en": "Sơn La Province",
+      "region_code": "TBB",
+      "region_name": "Tây Bắc Bộ",
+      "lat": 21.193021,
+      "lon": 104.070558,
+      "svg_path_file": "map/svg/5.svg",
+      "anchor_px": [
+        252.8,
+        228.2
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [
+        "1",
+        "2",
+        "21",
+        "68",
+        "71"
+      ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -643,10 +629,10 @@
         228.5
       ],
       "bbox_px": [
-        397.8,
-        199.1,
-        95.9,
-        58.7
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "13",
@@ -656,6 +642,8 @@
         "HN",
         "HP"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -673,15 +661,17 @@
         1303.7
       ],
       "bbox_px": [
-        198.2,
-        1237.2,
-        214.1,
-        122.8
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "44",
         "CT"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -699,10 +689,10 @@
         295.9
       ],
       "bbox_px": [
-        399.0,
-        254.4,
-        101.8,
-        82.6
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "18",
@@ -710,6 +700,8 @@
         "HN",
         "HP"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -727,10 +719,10 @@
         253.9
       ],
       "bbox_px": [
-        309.0,
-        190.7,
-        86.8,
-        126.1
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "18",
@@ -741,6 +733,8 @@
         "7",
         "HN"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -758,10 +752,10 @@
         162.5
       ],
       "bbox_px": [
-        360.4,
-        98.9,
-        67.9,
-        127.0
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "4",
@@ -771,6 +765,38 @@
         "9",
         "HN"
       ],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 18,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "7",
+      "name_vi": "Tuyên Quang",
+      "name_en": "Tuyên Quang Province",
+      "region_code": "DBB",
+      "region_name": "Đông Bắc Bộ",
+      "lat": 22.488597,
+      "lon": 105.101107,
+      "svg_path_file": "map/svg/7.svg",
+      "anchor_px": [
+        324.8,
+        125.6
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [
+        "2",
+        "4",
+        "68",
+        "69"
+      ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -788,15 +814,47 @@
         190.7
       ],
       "bbox_px": [
-        86.8,
-        116.3,
-        121.1,
-        148.3
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "1",
         "5"
       ],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 18,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "9",
+      "name_vi": "Lạng Sơn",
+      "name_en": "Lạng Sơn Province",
+      "region_code": "DBB",
+      "region_name": "Đông Bắc Bộ",
+      "lat": 21.838554,
+      "lon": 106.620648,
+      "svg_path_file": "map/svg/9.svg",
+      "anchor_px": [
+        456.7,
+        175.2
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [
+        "13",
+        "4",
+        "56",
+        "69"
+      ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -814,10 +872,10 @@
         1247.7
       ],
       "bbox_px": [
-        343.3,
-        1179.1,
-        102.2,
-        136.9
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "44",
@@ -825,6 +883,8 @@
         "49",
         "59"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -842,15 +902,17 @@
         724.8
       ],
       "bbox_px": [
-        508.5,
-        665.0,
-        150.8,
-        119.5
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "26",
         "29"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -868,10 +930,10 @@
         257.3
       ],
       "bbox_px": [
-        348.5,
-        220.6,
-        60.8,
-        73.2
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "18",
@@ -880,6 +942,8 @@
         "68",
         "69"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -897,16 +961,18 @@
         278.4
       ],
       "bbox_px": [
-        418.0,
-        233.9,
-        152.1,
-        117.3
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "13",
         "56",
         "66"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     },
@@ -924,10 +990,10 @@
         1224.8
       ],
       "bbox_px": [
-        405.8,
-        1079.4,
-        204.2,
-        266.6
+        0.0,
+        0.0,
+        0.0,
+        0.0
       ],
       "neighbors": [
         "35",
@@ -935,40 +1001,42 @@
         "39",
         "45"
       ],
+      "facts": [],
+      "media": [],
       "snap_tolerance_px": 18,
       "difficulty_1to5": 3
     }
   ],
   "indexById": {
     "1": 0,
-    "2": 1,
-    "4": 2,
-    "5": 3,
-    "7": 4,
-    "9": 5,
-    "13": 6,
-    "18": 7,
-    "21": 8,
-    "22": 9,
-    "23": 10,
-    "25": 11,
-    "26": 12,
-    "29": 13,
-    "30": 14,
-    "33": 15,
-    "34": 16,
-    "35": 17,
-    "37": 18,
-    "39": 19,
-    "44": 20,
-    "45": 21,
-    "49": 22,
-    "56": 23,
-    "59": 24,
-    "66": 25,
-    "68": 26,
-    "69": 27,
-    "71": 28,
+    "13": 1,
+    "18": 2,
+    "2": 3,
+    "21": 4,
+    "22": 5,
+    "23": 6,
+    "25": 7,
+    "26": 8,
+    "29": 9,
+    "30": 10,
+    "33": 11,
+    "34": 12,
+    "35": 13,
+    "37": 14,
+    "39": 15,
+    "4": 16,
+    "44": 17,
+    "45": 18,
+    "49": 19,
+    "5": 20,
+    "56": 21,
+    "59": 22,
+    "66": 23,
+    "68": 24,
+    "69": 25,
+    "7": 26,
+    "71": 27,
+    "9": 28,
     "CT": 29,
     "DN": 30,
     "HN": 31,

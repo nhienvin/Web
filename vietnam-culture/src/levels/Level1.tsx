@@ -19,7 +19,6 @@ function colorForId(id: string) {
 }
 function mulberry32(a:number){return function(){let t=(a+=0x6D2B79F5);t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),61);return((t^(t>>>14))>>>0)/4294967296;}}
 function shuffleSeeded<T>(arr:T[], seed:number){const rnd=mulberry32(seed);for(let i=arr.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
-function seedFromURLorLS(key='seed:l1'){const qs=new URLSearchParams(window.location.search||'');const q=qs.get('seed');if(q&&/^\d+$/.test(q))return Number(q)>>>0;const s=localStorage.getItem(key);if(s)return Number(s)>>>0;const r=(crypto.getRandomValues(new Uint32Array(1))[0])>>>0;localStorage.setItem(key,String(r));return r;}
 function useStageScale(stageW:number, stageH:number, pad=24){
   const [scale,setScale]=useState(1);
   useEffect(()=>{
@@ -31,55 +30,47 @@ function useStageScale(stageW:number, stageH:number, pad=24){
   },[stageW,stageH,pad]);
   return scale;
 }
-// ——— lấy path từ SVG rời nếu atlas thiếu ———
-const svgCache = new Map<string, string>();
-function normalizeUrl(p: string){ return p?.startsWith('/') ? p : ('/'+p); }
-async function fetchProvincePathD(url: string): Promise<string>{
+/* ================= Fallback: đọc SVG tỉnh rời =================== */
+type SvgMeta = { d: string; vb: {minX:number; minY:number; width:number; height:number} | null };
+const svgCache = new Map<string, SvgMeta>();
+const warnOnce = new Set<string>();
+
+function normalizeUrl(path: string){ return path?.startsWith('/') ? path : ('/'+path); }
+
+function parseViewBox(txt: string){
+  const m = txt.match(/viewBox\s*=\s*["']\s*([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s*["']/i);
+  if (!m) return null;
+  return { minX: +m[1], minY: +m[2], width: +m[3], height: +m[4] };
+}
+
+async function fetchProvinceSvgMeta(url: string): Promise<SvgMeta>{
   const key = normalizeUrl(url);
   if (svgCache.has(key)) return svgCache.get(key)!;
   const res = await fetch(key);
-  if (!res.ok) return "";
+  if (!res.ok) return { d:"", vb:null };
   const txt = await res.text();
+
+  const vb = parseViewBox(txt); // có thể null
   const d = [...txt.matchAll(/<path[^>]*\sd=(?:"([^"]+)"|'([^']+)')/gi)]
-            .map(m => m[1] || m[2] || "").join(" ");
-  svgCache.set(key, d);
-  return d;
+              .map(m => m[1] || m[2] || "").join(" ");
+
+  const meta = { d, vb };
+  svgCache.set(key, meta);
+  return meta;
 }
 
-// ——— đo bbox center của d để “bắt” path gần anchor ———
-let measureSvg: SVGSVGElement | null = null;
-function ensureMeasureSvg(){ if (!measureSvg){ measureSvg = document.createElementNS('http://www.w3.org/2000/svg','svg'); measureSvg.setAttribute('viewBox','0 0 10 10'); measureSvg.style.position='absolute'; measureSvg.style.left='-99999px'; measureSvg.style.top='-99999px'; document.body.appendChild(measureSvg); } }
-function centerOfPathD(d: string){ ensureMeasureSvg(); const path = document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('d', d); measureSvg!.appendChild(path); const b = path.getBBox(); measureSvg!.removeChild(path); return { cx: b.x + b.width/2, cy: b.y + b.height/2 }; }
-
-// ——— chọn d đúng theo id hoặc gần anchor ———
-const mapCache = new Map<string, string>(); // province_id -> d
-function resolvePathForProvince(p: Province, atlasPaths: Record<string,string>, extra: Record<string,string>): string {
-  // 1) ưu tiên file rời nếu đã có
-  if (extra[p.id]) return extra[p.id];
-  // 2) thử nhiều khoá id trong atlas
-  const kCandidates = [p.id, `p-${p.id}`, `VN-${p.id}`];
-  for (const k of kCandidates){ if (atlasPaths[k]) return atlasPaths[k]; }
-  // 3) fallback: tìm path có tâm gần anchor nhất
-  const key = p.id;
-  if (mapCache.has(key)) return mapCache.get(key)!;
-  let bestD = "", bestDist = Infinity;
-  const ax = p.anchor_px[0], ay = p.anchor_px[1];
-  for (const d of Object.values(atlasPaths)){
-    try {
-      const {cx, cy} = centerOfPathD(d);
-      const dd = (cx-ax)*(cx-ax) + (cy-ay)*(cy-ay);
-      if (dd < bestDist){ bestDist = dd; bestD = d; }
-    } catch {}
-  }
-  if (bestD) mapCache.set(key, bestD);
-  return bestD;
+function isBoardAligned(vb: SvgMeta["vb"], vw:number, vh:number){
+  if (!vb) return false;
+  const eps = 1e-3;
+  return Math.abs(vb.minX) < eps && Math.abs(vb.minY) < eps &&
+         Math.abs(vb.width - vw) < eps && Math.abs(vb.height - vh) < eps;
 }
-
 /* =============================================================== */
 
 const LB_KEY = 'lb:pack1:level1';
 
 export default function Level1({ bundle }: { bundle: Bundle }) {
+  // Nếu có atlas vẫn dùng; nếu KHÔNG có atlas sẽ fallback SVG rời (đã xử lý bên dưới)
   const atlasPaths = useAtlasPaths("/assets/atlas.svg");
 
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
@@ -93,45 +84,46 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
 
   const boardRef = useRef<HTMLDivElement>(null);
   const [vx, vy, vw, vh] = bundle.viewBox;
-
-  // random tên tỉnh
-  const [seed] = useState(seedFromURLorLS());
+  const [hasWon, setHasWon] = useState(false);
+  // Random tên tỉnh
+  const [seed, setSeed] = useState(() => (crypto.getRandomValues(new Uint32Array(1))[0]) >>> 0);
   const provinces = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
 
-  // Stage fit màn hình (không có scroll dọc)
+  // Stage fit màn hình
   const panelW = 340, gap = 16;
   const stageW = vw + gap + panelW;
   const stageH = vh;
   const stageScale = useStageScale(stageW, stageH, 24);
 
-  // Preload fallback path cho tỉnh thiếu atlas (không block UI)
-  const [extraPaths, setExtraPaths] = useState<Record<string,string>>({});
+  // Preload meta SVG rời cho tỉnh thiếu atlas
+  const [extraMeta, setExtraMeta] = useState<Record<string, SvgMeta>>({});
   useEffect(()=>{
     (async ()=>{
-      const upd: Record<string,string> = {};
+      const upd: Record<string, SvgMeta> = {};
       for (const p of bundle.provinces){
-        if (atlasPaths[p.id] || atlasPaths['p-'+p.id] || atlasPaths['VN-'+p.id]) continue;
+        if (atlasPaths[p.id]) continue;       // atlas có thì thôi
         if (!p.svg_path_file) continue;
-        const d = await fetchProvincePathD(p.svg_path_file);
-        if (d) upd[p.id] = d;
+        const meta = await fetchProvinceSvgMeta(p.svg_path_file);
+        if (meta.d) upd[p.id] = meta;
       }
-      if (Object.keys(upd).length) setExtraPaths(s=>({ ...s, ...upd }));
+      if (Object.keys(upd).length) setExtraMeta(s=>({ ...s, ...upd }));
     })();
   }, [bundle.provinces, atlasPaths]);
 
-
-  useEffect(()=>{
-    if (Object.keys(placed).length === provinces.length){
+  useEffect(() => {
+    const complete = Object.keys(placed).length === bundle.provinces.length;
+    if (!hasWon && complete) {
+      setHasWon(true);
       setShowWin(true);
       playWin();
     }
-  }, [placed, provinces.length, playWin]);
+  }, [placed, bundle.provinces.length, hasWon, playWin]);
 
-  // >>>> QUAN TRỌNG: chuyển clientXY -> toạ độ gốc (viewBox) của board bằng scale thực <<<<
+  // Snap: quy đổi clientXY -> toạ độ gốc (viewBox) bằng scale thực
   function onTryDrop(pid: string, clientX:number, clientY:number) {
     const rect = boardRef.current!.getBoundingClientRect();
-    const sx = rect.width  / vw;       // scale X thực
-    const sy = rect.height / vh;       // scale Y thực
+    const sx = rect.width  / vw;
+    const sy = rect.height / vh;
     const x = (clientX - rect.left) / sx;
     const y = (clientY - rect.top)  / sy;
 
@@ -151,11 +143,25 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
       setFeedback('bad'); setTimeout(()=>setFeedback(null), 700);
       playWrong();
     }
+    return ok;
   }
 
+  // Lấy path để fill (atlas ưu tiên; nếu không có thì chỉ fill khi SVG rời board-aligned)
+  function pathForFill(p: Province): string {
+    const dAtlas = atlasPaths[p.id];
+    if (dAtlas) return dAtlas;
+    const meta = extraMeta[p.id];
+    if (!meta) return "";
 
-  // lấy path để fill (ưu tiên atlas, thiếu thì extraPaths)
-  const getPathD = (p: Province) => atlasPaths[p.id] || extraPaths[p.id] || "";
+    if (isBoardAligned(meta.vb, vw, vh)) return meta.d;
+
+    // Không board-aligned => không thể đặt đúng vị trí trong overlay
+    if (!warnOnce.has(p.id)) {
+      console.warn(`[Level1] SVG của tỉnh ${p.id} không cùng viewBox với board. Bỏ fill tỉnh này. Gợi ý: xuất file với viewBox="0 0 ${vw} ${vh}" (tọa độ tuyệt đối).`);
+      warnOnce.add(p.id);
+    }
+    return "";
+  }
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
@@ -171,13 +177,23 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
           borderRadius: 8,
           padding: '6px 10px',
           boxShadow: '0 2px 8px rgba(0,0,0,.35)',
-          pointerEvents: 'none'
+          display: 'flex', alignItems: 'center', gap: 10
         }}
       >
         <span style={{ fontSize: 14 }}>
           Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
           {' • '}Đã đặt: <b>{Object.keys(placed).length}/{bundle.provinces.length}</b>
         </span>
+        <button
+          title="Làm lại"
+          onClick={()=> location.reload()} // hoặc: setPlaced({}); setShowWin(false); setHasWon(false); setSeed((crypto.getRandomValues(new Uint32Array(1))[0])>>>0);
+          style={{
+            pointerEvents:'auto',
+            fontSize:12, padding:'4px 8px',
+            borderRadius:6, border:'1px solid #475569',
+            background:'#334155', color:'#fff'
+          }}
+        >↻</button>
       </div>
 
 
@@ -201,20 +217,22 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
               alt="Vietnam board"
             />
 
-            {/* Fill tỉnh đã đúng (atlas hoặc fallback) */}
-            <svg className="absolute inset-0 pointer-events-none z-10" viewBox={`0 0 ${vw} ${vh}`}>
+            {/* Fill tỉnh đã đúng (atlas hoặc SVG rời nếu board-aligned) */}
+            <svg
+              className="absolute inset-0 pointer-events-none"
+              viewBox={`0 0 ${vw} ${vh}`}
+              style={{ zIndex: 5 }}
+            >
               {bundle.provinces.map(p=>{
                 if (!placed[p.id]) return null;
-                const d = resolvePathForProvince(p, atlasPaths, extraPaths);  // ⬅ dùng hàm mới
-                if (!d) return null;
+                const d = pathForFill(p); if (!d) return null;
                 const c = colorForId(p.id);
                 return <path key={p.id} d={d} fill={c.fill} stroke={c.stroke} strokeWidth={1}/>;
               })}
             </svg>
 
-
             <div ref={boardRef} className="absolute inset-0">
-              {/* điểm neo + tick */}
+              {/* neo + tick */}
               {bundle.provinces.map(p=>{
                 const [x,y] = p.anchor_px; const ok = !!placed[p.id];
                 return (
@@ -224,7 +242,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
                   </div>
                 );
               })}
-              {/* aim circle khi đang kéo */}
+              {/* aim circle */}
               {drag?.pid && (() => {
                 const p = provinces.find(q=>q.id===drag.pid)!;
                 const tol = Math.max(p.snap_tolerance_px || 18, 28);
@@ -233,14 +251,19 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
             </div>
           </div>
 
-          {/* SIDEBAR (ẩn scrollbar, vẫn cuộn) */}
+          {/* SIDEBAR */}
           <aside className="relative w-[340px]">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-slate-300">
-                Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
-              </div>
-              <button className="text-xs underline" onClick={()=>location.reload()}>Làm lại</button>
+            {/* Header panel (sticky) */}
+            <div className="sticky top-0 z-20 flex items-center justify-between px-2 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
+              <div className="text-sm text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
+              <button
+                className="text-xs px-2 py-1 rounded border border-slate-600 bg-slate-700 text-slate-100 hover:bg-slate-600"
+                onClick={()=> location.reload()}
+              >
+                Làm lại
+              </button>
             </div>
+
 
             <div className="mt-3 border border-slate-700 rounded-lg bg-slate-800/60" style={{ height: vh }}>
               <div className="h-full p-3 no-scrollbar">
@@ -256,7 +279,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
         </div>
       </div>
 
-      {/* CHIP đang kéo (fixed) */}
+      {/* CHIP đang kéo */}
       {drag?.fixed && (
         <FloatingChip
           pid={drag.pid}
@@ -269,7 +292,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
         />
       )}
 
-      {/* TOAST feedback đúng/sai (cố định, không scale) */}
+      {/* TOAST feedback */}
       {feedback && (
         <div
           style={{
@@ -289,18 +312,13 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
       )}
 
       {/* POPUP thắng cuộc */}
-      {showWin && (
-        <WinDialog
-          ms={ms}
-          onSave={(name)=>{
-            const list = pushLB(LB_KEY, { name: name || 'Ẩn danh', ms });
-            alert(`Đã lưu! Top 1: ${list[0].name} – ${(list[0].ms/1000).toFixed(1)}s`);
-          }}
-          onClose={()=> setShowWin(false)}
-        />
-      )}
-    </div>
-  );
+      <WinDialog
+        ms={ms}
+        onSave={(name)=>{ const list = pushLB(LB_KEY, { name: name || 'Ẩn danh', ms }); alert(`Đã lưu! Top 1: ${list[0].name} – ${(list[0].ms/1000).toFixed(1)}s`); }}
+        onClose={()=> setShowWin(false)}
+      />
+      </div>
+    );
 }
 
 /* ---------- Components ---------- */

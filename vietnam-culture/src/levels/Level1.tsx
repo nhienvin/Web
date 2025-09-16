@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Bundle, Province } from "../types";
 import { dist, within } from "../core/math";
 import { useTimer } from "../core/useTimer";
@@ -7,13 +8,6 @@ import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
 
 /* ========= helpers ========= */
-type LBItem = { name: string; ms: number; ts?: number };
-
-function readLB(lbKey: string): LBItem[] {
-  try { return JSON.parse(localStorage.getItem(lbKey) || "[]"); }
-  catch { return []; }
-}
-
 function hash32(s: string) { let h = 2166136261>>>0; for (let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
 function colorForId(id: string) {
   const h = hash32(id) % 360;
@@ -38,7 +32,7 @@ function useStageScale(stageW:number, stageH:number, pad=24){
   return scale;
 }
 
-/* ========= fallback: đọc SVG tỉnh rời ========= */
+/* ========= fallback: SVG tỉnh rời ========= */
 type SvgMeta = { d: string; vb: {minX:number; minY:number; width:number; height:number} | null };
 const svgCache = new Map<string, SvgMeta>();
 function normalizeUrl(path: string){ return path?.startsWith('/') ? path : ('/'+path); }
@@ -67,11 +61,16 @@ function isBoardAligned(vb: SvgMeta["vb"], vw:number, vh:number){
          Math.abs(vb.width - vw) < eps && Math.abs(vb.height - vh) < eps;
 }
 
+/* ========= leaderboard read ========= */
+type LBItem = { name: string; ms: number; ts?: number };
+function readLB(lbKey: string): LBItem[] { try { return JSON.parse(localStorage.getItem(lbKey) || "[]"); } catch { return []; } }
+
 /* ========= main ========= */
 const LB_KEY = 'lb:pack1:level1';
+const PANEL_W = 360; // tăng chút để đủ 2–3 cột dễ nhìn
 
 export default function Level1({ bundle }: { bundle: Bundle }) {
-  const atlasPaths = useAtlasPaths("/assets/atlas.svg"); // nếu không có atlas, object này rỗng
+  const atlasPaths = useAtlasPaths("/assets/atlas.svg"); // nếu không có atlas => rỗng
 
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
   const [drag, setDrag] = useState<{ pid: string; fixed?: {x:number;y:number} }|null>(null);
@@ -79,31 +78,26 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
   const [feedback, setFeedback] = useState<null | 'ok' | 'bad'>(null);
   const [shake, setShake] = useState(false);
 
-  // random seed mỗi lần vào (không cần URL)
   const [seed, setSeed] = useState(()=> (crypto.getRandomValues(new Uint32Array(1))[0])>>>0);
 
   const boardRef = useRef<HTMLDivElement>(null);
-  const doneOnceRef = useRef(false); // chặn mở popup lại
+  const doneOnceRef = useRef(false);
   const [vx, vy, vw, vh] = bundle.viewBox;
 
-  // provinces (xáo trộn theo seed)
   const provinces = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
 
-  // Stage fit màn hình
-  const panelW = 340, gap = 16;
-  const stageW = vw + gap + panelW;
+  const stageW = vw + 16 + PANEL_W;
   const stageH = vh;
   const stageScale = useStageScale(stageW, stageH, 24);
 
-  // timer
   const solved = Object.keys(placed).length;
   const total = bundle?.provinces?.length ?? 0;
   const ready = total > 0;
-  const { ms } = useTimer(solved < total); // chạy khi chưa hoàn thành
+  const { ms } = useTimer(solved < total);
 
   const { playCorrect, playWrong, playWin } = useSfx();
 
-  // preload SVG rời (khi không có atlas)
+  // preload SVG rời
   const [extraMeta, setExtraMeta] = useState<Record<string, SvgMeta>>({});
   useEffect(()=>{
     (async ()=>{
@@ -118,10 +112,10 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
     })();
   }, [bundle.provinces, atlasPaths]);
 
-  // MỞ POPUP CHỈ KHI ready && chuyển false→true
+  // mở popup đúng lúc (chỉ 1 lần)
   useEffect(()=>{
-    if (!ready) return;                       // chưa có dữ liệu thì thôi
-    const done = solved >= total;             // đủ mảnh chưa
+    if (!ready) return;
+    const done = solved >= total;
     if (done && !doneOnceRef.current) {
       doneOnceRef.current = true;
       setShowWin(true);
@@ -136,7 +130,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
     setSeed((crypto.getRandomValues(new Uint32Array(1))[0])>>>0);
   }
 
-  // === snap: quy đổi clientXY về toạ độ viewBox gốc ===
+  // snap: quy đổi client -> viewBox
   function onTryDrop(pid: string, clientX:number, clientY:number) {
     const rect = boardRef.current!.getBoundingClientRect();
     const sx = rect.width  / vw;
@@ -144,7 +138,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
     const x = (clientX - rect.left) / sx;
     const y = (clientY - rect.top)  / sy;
 
-    const p = provinces.find(q=>q.id===pid)!;
+    const p = bundle.provinces.find(q=>q.id===pid)!;
     const ax = Math.min(Math.max(p.anchor_px[0], 0), vw);
     const ay = Math.min(Math.max(p.anchor_px[1], 0), vh);
     const tol = Math.max(p.snap_tolerance_px || 18, 28);
@@ -163,43 +157,44 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
     return ok;
   }
 
-  // path để fill (atlas ưu tiên; nếu không có, chỉ fill khi SVG rời cùng viewBox)
   function pathForFill(p: Province): string {
     const dAtlas = atlasPaths[p.id];
     if (dAtlas) return dAtlas;
     const meta = extraMeta[p.id];
     if (!meta) return "";
-    if (isBoardAligned(meta.vb, vw, vh)) return meta.d; // chuẩn
-    // SVG rời bị crop → không thể đặt đúng trong overlay
-    return "";
+    if (isBoardAligned(meta.vb, vw, vh)) return meta.d;
+    return ""; // SVG rời bị crop theo bbox => không thể đặt trùng vị trí toàn cục
   }
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
-      {/* HUD cố định */}
-      <div
-        style={{
-          position: 'fixed', top: 12, left: 12, zIndex: 2147483647,
-          background: 'rgba(30,41,59,.85)', color: '#fff',
-          border: '1px solid rgba(51,65,85,.9)', borderRadius: 8,
-          padding: '6px 10px', boxShadow: '0 2px 8px rgba(0,0,0,.35)',
-          display:'flex', alignItems:'center', gap:10
-        }}
-      >
-        <span style={{ fontSize: 14 }}>
-          Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
-          {' • '}Đã đặt: <b>{solved}/{total}</b>
-        </span>
-        <button
-          onClick={resetGame}
-          style={{ pointerEvents:'auto', fontSize:12, padding:'4px 8px',
-            borderRadius:6, border:'1px solid #475569',
-            background:'#334155', color:'#fff' }}
-          title="Làm lại (random thứ tự mới)"
-        >↻</button>
-      </div>
+      {/* HUD via portal: luôn nổi trên tất cả */}
+      {createPortal(
+        <div
+          style={{
+            position: 'fixed', top: 12, left: 12, zIndex: 2147483647,
+            background: 'rgba(30,41,59,.88)', color: '#fff',
+            border: '1px solid rgba(51,65,85,.9)', borderRadius: 8,
+            padding: '6px 10px', boxShadow: '0 2px 8px rgba(0,0,0,.35)',
+            display:'flex', alignItems:'center', gap:10
+          }}
+        >
+          <span style={{ fontSize: 14 }}>
+            Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
+            {' • '}Đã đặt: <b>{solved}/{total}</b>
+          </span>
+          <button
+            onClick={resetGame}
+            style={{ pointerEvents:'auto', fontSize:12, padding:'4px 8px',
+              borderRadius:6, border:'1px solid #475569',
+              background:'#334155', color:'#fff', cursor:'pointer' }}
+            title="Làm lại (random thứ tự mới)"
+          >↻</button>
+        </div>,
+        document.body
+      )}
 
-      {/* Stage center & scale */}
+      {/* Stage */}
       <div
         className="absolute"
         style={{
@@ -209,7 +204,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
           transformOrigin: 'center center'
         }}
       >
-        <div className="grid gap-4" style={{ display:'grid', gridTemplateColumns: `${vw}px ${panelW}px` }}>
+        <div className="grid gap-4" style={{ display:'grid', gridTemplateColumns: `${vw}px ${PANEL_W}px` }}>
           {/* BOARD */}
           <div className={`relative ${shake ? 'anim-shake' : ''}`} style={{ width: vw, height: vh }}>
             <img
@@ -229,25 +224,32 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
                 return <path key={`path-${p.id}`} d={d} fill={c.fill} stroke={c.stroke} strokeWidth={1}/>;
               })}
 
-              {/* layer label tên tỉnh */}
-              <g fontSize={12} textAnchor="middle" style={{ paintOrder:'stroke', stroke:'#fff', strokeWidth:3 }}>
+              {/* layer label tên tỉnh (trên cùng) */}
+              <g
+                fontSize={12}
+                textAnchor="middle"
+                style={{ pointerEvents:'none', paintOrder:'stroke', stroke:'#fff', strokeWidth:3 }}
+              >
                 {bundle.provinces.map(p=>{
                   if (!placed[p.id]) return null;
                   const [ax, ay] = p.anchor_px;
-                  return <text key={`label-${p.id}`} x={ax} y={ay-6} fill="#0f172a">{p.name_vi}</text>;
+                  return (
+                    <text key={`label-${p.id}`} x={ax} y={ay-6} fill="#0f172a">
+                      {p.name_vi}
+                    </text>
+                  );
                 })}
               </g>
             </svg>
 
 
             <div ref={boardRef} className="absolute inset-0">
-              {/* anchor dots */}
+              {/* chỉ chấm neo (KHÔNG hiện tên tỉnh trên bản đồ) */}
               {bundle.provinces.map(p=>{
                 const [x,y] = p.anchor_px; const ok = !!placed[p.id];
                 return (
-                  <div key={p.id} className="absolute" style={{ left:x-4, top:y-4, width:8, height:8 }}>
-                    <div className={`w-2 h-2 rounded-full ${ok?'bg-emerald-500':'bg-slate-400'} opacity-80`} />
-                    {ok && <div className="absolute left-3 -top-1 text-emerald-300 text-[11px]">✓ {p.name_vi}</div>}
+                  <div key={p.id} className="absolute" style={{ left:x-3, top:y-3, width:6, height:6 }}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${ok?'bg-emerald-500':'bg-slate-400'} opacity-80`} />
                   </div>
                 );
               })}
@@ -261,7 +263,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
           </div>
 
           {/* PANEL phải */}
-          <aside className="relative w-[340px]">
+          <aside className="relative w-[360px]">
             {/* Header sticky có nút “Làm lại” (dự phòng) */}
             <div className="sticky top-0 z-20 flex items-center justify-between px-2 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
               <div className="text-sm text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
@@ -273,14 +275,19 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
               </button>
             </div>
 
+            {/* Danh sách tên tỉnh: GRID 2–3 cột, chữ to */}
             <div className="mt-3 border border-slate-700 rounded-lg bg-slate-800/60" style={{ height: vh }}>
               <div className="h-full p-3 no-scrollbar">
-                {provinces.map(p=>(
-                  <NameChip key={p.id} province={p}
-                    disabled={!!placed[p.id]}
-                    onStart={(clientX, clientY)=> setDrag({ pid: p.id, fixed: { x: clientX-24, y: clientY-16 } })}
-                  />
-                ))}
+                <div className="grid grid-cols-2 xl:grid-cols-3 gap-2 auto-rows-[48px]">
+                  {provinces.map(p=>(
+                    <NameChip
+                      key={p.id}
+                      province={p}
+                      disabled={!!placed[p.id]}
+                      onStart={(clientX, clientY)=> setDrag({ pid: p.id, fixed: { x: clientX-28, y: clientY-18 } })}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </aside>
@@ -294,14 +301,14 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
           color={colorForId(drag.pid)}
           name={provinces.find(q=>q.id===drag.pid)?.name_vi || drag.pid}
           x={drag.fixed.x} y={drag.fixed.y}
-          onMove={(cx,cy)=> setDrag(d=> d ? ({ ...d, fixed:{ x:cx-24, y:cy-16 } }) : d)}
+          onMove={(cx,cy)=> setDrag(d=> d ? ({ ...d, fixed:{ x:cx-28, y:cy-18 } }) : d)}
           onUp={(cx,cy)=>{ onTryDrop(drag.pid, cx, cy); setDrag(null); }}
           onCancel={()=> setDrag(null)}
         />
       )}
 
       {/* TOAST feedback */}
-      {feedback && (
+      {feedback && createPortal(
         <div
           style={{
             position:'fixed', top: 14, left: '50%', transform: 'translateX(-50%)',
@@ -311,10 +318,11 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
           }}
         >
           {feedback==='ok' ? '✓ Đúng rồi!' : '✗ Chưa đúng, thử lại nhé!'}
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* POPUP thắng cuộc */}
+      {/* POPUP thắng cuộc (có Top 5, nút Đóng là tắt hẳn) */}
       {showWin && (
         <WinDialog
           lbKey={LB_KEY}
@@ -322,7 +330,6 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
           onClose={()=> setShowWin(false)}
         />
       )}
-
     </div>
   );
 }
@@ -339,12 +346,14 @@ function NameChip({ province, disabled, onStart }:{
   return (
     <div
       onPointerDown={onPointerDown}
-      className={`px-2 py-1 rounded border text-sm select-none mb-2 cursor-grab text-slate-900 ${disabled?'opacity-40 line-through pointer-events-none':''}`}
+      className={`h-12 w-full grid place-items-center rounded border text-base font-medium select-none cursor-grab text-slate-900
+                  ${disabled ? 'opacity-35 line-through pointer-events-none' : ''}`}
       style={{ background: color.chipBg, borderColor: color.chipBd }}
       title={province.name_en}
     >
-      {province.name_vi}
+      <span className="px-1 truncate">{province.name_vi}</span>
     </div>
+
   );
 }
 
@@ -367,7 +376,7 @@ function FloatingChip({
 
   return (
     <div className="fixed z-50 select-none pointer-events-none" style={{ left:x, top:y }}>
-      <div className="px-2 py-1 rounded border text-sm shadow text-slate-900"
+      <div className="px-3 py-2 rounded border text-base font-medium shadow text-slate-900"
            style={{ background: color.chipBg, borderColor: color.chipBd }}>
         {name}
       </div>
@@ -375,31 +384,21 @@ function FloatingChip({
   );
 }
 
-function WinDialog({ lbKey = 'lb:pack1:level1', ms, onClose }:{
-  lbKey?: string; ms:number; onClose:()=>void;
+function WinDialog({ lbKey, ms, onClose }:{
+  lbKey: string; ms:number; onClose:()=>void;
 }){
   const [name, setName] = useState("");
   const [savedName, setSavedName] = useState<string | null>(null);
   const [lb, setLb] = useState<LBItem[]>(() => readLB(lbKey));
-
-  // Top 5 hiện tại (trước khi lưu)
   const top5 = useMemo(() => lb.slice(0,5), [lb]);
 
   function handleSave(){
     const cleaned = (name ?? "").trim();
     const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
-    const list = pushLB(lbKey, { name: safeName, ms });   // pushLB trả về list đã sort
+    const list = pushLB(lbKey, { name: safeName, ms });
     setLb(list);
     setSavedName(safeName);
-    // Không đóng popup — để người chơi thấy mình lên BXH ngay
   }
-
-  // Tìm hạng của người chơi (nếu có)
-  const myRank = useMemo(()=>{
-    if (!savedName) return null;
-    const idx = lb.findIndex(e => e.name === savedName && e.ms === ms);
-    return idx >= 0 ? idx + 1 : null;
-  }, [lb, savedName, ms]);
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -411,7 +410,6 @@ function WinDialog({ lbKey = 'lb:pack1:level1', ms, onClose }:{
           <div className="mt-2 text-sm text-slate-500">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
         </div>
 
-        {/* BXH Top 5 */}
         <div className="mt-4">
           <div className="mb-2 text-sm font-semibold text-slate-700">🏆 Top 5</div>
           <div className="rounded border border-slate-200 overflow-hidden">
@@ -438,35 +436,28 @@ function WinDialog({ lbKey = 'lb:pack1:level1', ms, onClose }:{
             </table>
           </div>
 
-          {myRank && myRank > 5 && (
-            <div className="mt-2 text-xs text-slate-500 text-right">
-              Hạng của bạn: <b>#{myRank}</b>
+          <div className="mt-4">
+            <label className="text-sm text-slate-700">Tên bạn</label>
+            <div className="mt-1 flex gap-2">
+              <input
+                className="flex-1 border rounded px-3 py-2 text-sm"
+                placeholder="Nhập tên để lưu BXH"
+                value={name}
+                onChange={e=>setName(e.target.value)}
+              />
+              <button
+                className="px-3 py-2 text-sm rounded bg-emerald-600 text-white hover:bg-emerald-700"
+                onClick={handleSave}
+              >
+                Lưu
+              </button>
             </div>
-          )}
-        </div>
-
-        {/* Form lưu tên */}
-        <div className="mt-4">
-          <label className="text-sm text-slate-700">Tên bạn</label>
-          <div className="mt-1 flex gap-2">
-            <input
-              className="flex-1 border rounded px-3 py-2 text-sm"
-              placeholder="Nhập tên để lưu BXH"
-              value={name}
-              onChange={e=>setName(e.target.value)}
-            />
-            <button
-              className="px-3 py-2 text-sm rounded bg-emerald-600 text-white hover:bg-emerald-700"
-              onClick={handleSave}
-            >
-              Lưu
-            </button>
+            {savedName && (
+              <div className="mt-2 text-sm text-emerald-700">
+                ✅ Đã lưu: <b>{savedName}</b>
+              </div>
+            )}
           </div>
-          {savedName && (
-            <div className="mt-2 text-sm text-emerald-700">
-              ✅ Đã lưu với tên: <b>{savedName}</b>
-            </div>
-          )}
         </div>
 
         <div className="mt-4 flex items-center justify-end">
@@ -476,4 +467,3 @@ function WinDialog({ lbKey = 'lb:pack1:level1', ms, onClose }:{
     </div>
   );
 }
-

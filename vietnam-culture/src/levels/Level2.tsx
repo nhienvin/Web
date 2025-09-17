@@ -7,7 +7,7 @@ import { pushLB } from "../core/leaderboard";
 import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
 
-/* ========= helpers ========= */
+/* ===== helpers ===== */
 function hash32(s: string) { let h = 2166136261>>>0; for (let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
 function colorForId(id: string) {
   const h = hash32(id) % 360;
@@ -32,7 +32,7 @@ function useStageScale(stageW:number, stageH:number, pad=24){
   return scale;
 }
 
-/* ========= SVG rời: đọc path + viewBox ========= */
+/* ===== SVG rời ===== */
 type SvgMeta = { d: string; vb: {minX:number; minY:number; width:number; height:number} | null };
 const svgCache = new Map<string, SvgMeta>();
 function normalizeUrl(path: string){ return path?.startsWith('/') ? path : ('/'+path); }
@@ -61,7 +61,7 @@ function isBoardAligned(vb: SvgMeta["vb"], vw:number, vh:number){
          Math.abs(vb.width - vw) < eps && Math.abs(vb.height - vh) < eps;
 }
 
-/* ========= đo bbox để zoom mảnh trong ô ========= */
+/* ===== đo bbox để zoom mảnh trong ô ===== */
 type BBox = { x:number; y:number; width:number; height:number };
 let measureSvg: SVGSVGElement | null = null;
 function ensureMeasureSvg(){
@@ -92,11 +92,11 @@ function expandBBox(bb: BBox, padRatio=0.08): BBox {
   return { x: bb.x - pad, y: bb.y - pad, width: bb.width + pad*2, height: bb.height + pad*2 };
 }
 
-/* ========= leaderboard ========= */
+/* ===== leaderboard ===== */
 type LBItem = { name: string; ms: number; ts?: number };
 function readLB(lbKey: string): LBItem[] { try { return JSON.parse(localStorage.getItem(lbKey) || "[]"); } catch { return []; } }
 
-/* ========= main ========= */
+/* ===== main ===== */
 const LB_KEY = 'lb:pack1:level2';
 const PANEL_W = 360;
 
@@ -108,29 +108,44 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
   const [showWin, setShowWin] = useState(false);
   const [feedback, setFeedback] = useState<null | 'ok' | 'bad'>(null);
   const [shake, setShake] = useState(false);
-
   const [seed, setSeed] = useState(()=> (crypto.getRandomValues(new Uint32Array(1))[0])>>>0);
 
   const boardRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const portalElRef = useRef<HTMLDivElement|null>(null); // portal riêng, sẽ gỡ khi unmount
   const doneOnceRef = useRef(false);
   const [vx, vy, vw, vh] = bundle.viewBox;
+  // random danh sách mảnh
+  const pieces = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
+  // tạo container portal và dọn khi rời level (fix không click được ở menu)
+  useEffect(()=>{
+    const el = document.createElement('div');
+    el.setAttribute('data-level2-portal','');
+    document.body.appendChild(el);
+    portalElRef.current = el;
+    return ()=>{
+      if (el.parentNode) el.parentNode.removeChild(el);
+      portalElRef.current = null;
+    };
+  },[]);
 
-  // responsive: tính cols & tile từ bề rộng panel
+  // responsive: tính số cột & kích thước ô theo panel + chiều cao khả dụng (hạn chế scroll)
   const [panelWState, setPanelWState] = useState(PANEL_W);
-  const GAP = 12;       // gap giữa các ô
-  const PADX = 24;      // padding ngang trong khối list (p-3)
+  const GAP = 8, PADX = 24, PADY = 24;
+
   const cols = useMemo(()=>{
-    // thử 3 cột nếu đủ chỗ, không thì 2 cột
     const inner = Math.max(0, panelWState - PADX);
-    const minTile = 108; // mong muốn tối thiểu
-    const can3 = Math.floor((inner + GAP) / (minTile + GAP)) >= 3;
+    const minTileFor3 = 90; // muốn 3 cột nếu có thể
+    const can3 = Math.floor((inner + GAP) / (minTileFor3 + GAP)) >= 3;
     return can3 ? 3 : 2;
   }, [panelWState]);
+
   const tile = useMemo(()=>{
-    const inner = Math.max(0, panelWState - PADX);
-    return Math.max(96, Math.floor((inner - (cols-1)*GAP) / cols));
-  }, [panelWState, cols]);
+    const innerH = Math.max(0, vh - PADY);         // chiều cao usable
+    const rows = Math.ceil(pieces.length / cols);   // số hàng cần
+    const tIdeal = Math.floor((innerH - (rows - 1) * GAP) / rows);
+    return Math.max(72, Math.min(92, tIdeal));      // clamp 72–92
+  }, [vh, cols, pieces.length]);
 
   useEffect(()=>{
     const recalc = ()=> setPanelWState(panelRef.current?.clientWidth || PANEL_W);
@@ -138,9 +153,6 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
     window.addEventListener('resize', recalc);
     return ()=> window.removeEventListener('resize', recalc);
   },[]);
-
-  // random danh sách mảnh
-  const pieces = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
 
   // Stage fit
   const stageW = vw + 16 + PANEL_W;
@@ -157,17 +169,25 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
 
   // preload SVG rời (khi không có atlas)
   const [extraMeta, setExtraMeta] = useState<Record<string, SvgMeta>>({});
+  const [loadingCount, setLoadingCount] = useState(0);
   useEffect(()=>{
+    let alive = true;
     (async ()=>{
       const upd: Record<string, SvgMeta> = {};
+      let cnt = 0;
       for (const p of bundle.provinces){
         if (atlasPaths[p.id]) continue;
         if (!p.svg_path_file) continue;
+        cnt++;
         const meta = await fetchProvinceSvgMeta(p.svg_path_file);
+        if (!alive) return;
         if (meta.d) upd[p.id] = meta;
       }
+      if (!alive) return;
       if (Object.keys(upd).length) setExtraMeta(s=>({ ...s, ...upd }));
+      setLoadingCount(cnt);
     })();
+    return ()=>{ alive=false; };
   }, [bundle.provinces, atlasPaths]);
 
   // mở popup đúng lúc (1 lần)
@@ -181,7 +201,7 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
     }
   }, [ready, solved, total, playWin]);
 
-  // dọn DOM đo bbox khi unmount (an tâm vụ click menu)
+  // dọn DOM đo bbox khi unmount
   useEffect(()=>()=>{
     if (measureSvg && measureSvg.parentNode) {
       measureSvg.parentNode.removeChild(measureSvg);
@@ -190,13 +210,15 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
   },[]);
 
   function resetGame(){
+    setDrag(null);            // đảm bảo không kẹt drag
     setPlaced({});
     setShowWin(false);
     doneOnceRef.current = false;
     setSeed((crypto.getRandomValues(new Uint32Array(1))[0])>>>0);
   }
 
-  // snap: quy đổi client -> viewBox
+
+  // snap: client -> viewBox
   function tryDrop(pid: string, clientX:number, clientY:number) {
     const rect = boardRef.current!.getBoundingClientRect();
     const sx = rect.width  / vw;
@@ -232,13 +254,16 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
     return "";
   }
 
+  // tiện: portal root
+  const portalRoot = portalElRef.current || document.body;
+
   return (
     <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
-      {/* HUD qua portal – chuyển về góc phải để tránh đè nút Back/Menu */}
+      {/* HUD portal (góc phải) */}
       {createPortal(
         <div
           style={{
-            position: 'fixed', top: 12, right: 12, zIndex: 2147483647,
+            position: 'fixed', top: 12, left: 12, zIndex: 2147483647,
             background: 'rgba(30,41,59,.88)', color: '#fff',
             border: '1px solid rgba(51,65,85,.9)', borderRadius: 8,
             padding: '6px 10px', boxShadow: '0 2px 8px rgba(0,0,0,.35)',
@@ -257,7 +282,7 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
             title="Làm lại (random mảnh mới)"
           >↻</button>
         </div>,
-        document.body
+        portalRoot
       )}
 
       {/* Stage */}
@@ -279,7 +304,6 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
               className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-sm"
               alt="Vietnam blank board"
             />
-
             {/* Fill mảnh đã đặt */}
             <svg className="absolute inset-0 pointer-events-none" viewBox={`0 0 ${vw} ${vh}`} style={{ zIndex: 5 }}>
               {bundle.provinces.map(p=>{
@@ -289,7 +313,6 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
                 return <path key={p.id} d={d} fill={c.fill} stroke={c.stroke} strokeWidth={1}/>;
               })}
             </svg>
-
             <div ref={boardRef} className="absolute inset-0">
               {drag?.pid && (() => {
                 const p = bundle.provinces.find(q=>q.id===drag.pid)!;
@@ -299,7 +322,7 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
             </div>
           </div>
 
-          {/* PANEL mảnh: ô vuông responsive 2–3 cột, đều nhau */}
+          {/* PANEL mảnh: responsive 2–3 cột, ô nhỏ gọn 84–108px */}
           <aside ref={panelRef} className="relative w-[360px]">
             <div className="sticky top-0 z-20 flex items-center justify-between px-2 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
               <div className="text-sm text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
@@ -313,43 +336,41 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
 
             <div className="mt-3 border border-slate-700 rounded-lg bg-slate-800/60" style={{ height: vh }}>
               <div className="h-full p-3 no-scrollbar">
-                <div
-                  className="grid"
-                  style={{
-                    gridTemplateColumns: `repeat(${cols}, 1fr)`,
-                    gap: GAP,
-                  }}
-                >
-                  {pieces.map(p => (
+                <div className="grid" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: GAP }}>
+                  {pieces.map(p=>(
                     <PieceTile
                       key={p.id}
                       pid={p.id}
                       province={p}
                       atlasD={atlasPaths[p.id]}
                       extraMeta={extraMeta[p.id]}
+                      // CHỈ disable khi mảnh đã đặt rồi
                       disabled={!!placed[p.id]}
                       tile={tile}
-                      onStart={(cx, cy) => setDrag({ pid: p.id, pos: { x: cx - tile / 2, y: cy - tile / 2 } })}
+                      onStart={(cx, cy)=> setDrag({ pid: p.id, pos: { x: cx - tile/2, y: cy - tile/2 } })}
                     />
                   ))}
+
                 </div>
+                {!loadingCount && pieces.every(p => !(atlasPaths[p.id] || extraMeta[p.id])) && (
+                  <div className="mt-3 text-xs text-slate-400">Không tìm thấy SVG cho các mảnh.</div>
+                )}
               </div>
             </div>
           </aside>
         </div>
       </div>
 
-      {/* Mảnh đang kéo – bám đúng tâm con trỏ, phóng to theo bbox */}
+      {/* Mảnh đang kéo */}
       {drag?.pos && (
         <FloatingPiece
           pid={drag.pid}
-          name={bundle.provinces.find(q=>q.id===drag.pid)?.name_vi || drag.pid}
           atlasD={atlasPaths[drag.pid]}
           extraMeta={extraMeta[drag.pid]}
           x={drag.pos.x} y={drag.pos.y}
           tile={tile}
           onMove={(cx,cy)=> setDrag(d=> d ? ({ ...d, pos:{ x:cx - tile/2, y:cy - tile/2 } }) : d)}
-          onUp={(cx,cy)=>{ tryDrop(drag.pid, cx, cy); setDrag(null); }}
+          onUp={(cx,cy)=>{setDrag(null); tryDrop(drag.pid, cx, cy);  }}
           onCancel={()=> setDrag(null)}
         />
       )}
@@ -366,13 +387,13 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
         >
           {feedback==='ok' ? '✓ Đúng rồi!' : '✗ Chưa đúng, thử lại nhé!'}
         </div>,
-        document.body
+        portalRoot
       )}
 
       {/* POPUP thắng cuộc */}
       {showWin && (
         <WinDialog
-          lbKey={'lb:pack1:level2'}
+          lbKey={LB_KEY}
           ms={ms}
           onClose={()=> setShowWin(false)}
         />
@@ -398,9 +419,12 @@ function PieceTile({
   const color = colorForId(province.id);
 
   function handlePointerDown(e:React.PointerEvent){
-    if (disabled || !d) return;
-    onStart(e.clientX, e.clientY);
-  }
+  if (disabled) return;
+  e.preventDefault();
+  e.stopPropagation();
+  onStart(e.clientX, e.clientY);
+}
+
 
   const vbBBox = useMemo(()=>{
     if (!d) return null;
@@ -411,65 +435,68 @@ function PieceTile({
   return (
     <div
       onPointerDown={handlePointerDown}
-      className={`rounded border cursor-grab bg-slate-900/50 grid place-items-center
-                  ${disabled ? 'opacity-30 pointer-events-none' : ''}`}
+      className={`rounded border cursor-grab grid place-items-center
+                  ${disabled?'opacity-30 pointer-events-none bg-slate-900/30':'bg-slate-900/50'}`}
       style={{ borderColor: color.chipBd, height: tile, minHeight: tile }}
       title={province.name_vi}
     >
       {d && vbBBox ? (
-        <svg
-          width={tile - 12}
-          height={tile - 12}
-          viewBox={`${vbBBox.x} ${vbBBox.y} ${vbBBox.width} ${vbBBox.height}`}
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <path d={d} fill={color.fill} stroke={color.stroke} strokeWidth={1} />
+        <svg width={tile-10} height={tile-10}
+             viewBox={`${vbBBox.x} ${vbBBox.y} ${vbBBox.width} ${vbBBox.height}`}
+             preserveAspectRatio="xMidYMid meet">
+          <path d={d} fill={color.fill} stroke={color.stroke} strokeWidth={1}/>
         </svg>
       ) : (
-        <div className="text-xs text-slate-400">Không có SVG</div>
+        <div className="text-[11px] text-slate-400">Đang tải…</div>
       )}
     </div>
-
   );
 }
 
 function FloatingPiece({
-  pid, name, atlasD, extraMeta, x, y, tile, onMove, onUp, onCancel
+  pid, atlasD, extraMeta, x, y, tile, onMove, onUp, onCancel
 }:{
   pid: string;
-  name: string;
   atlasD?: string;
   extraMeta?: SvgMeta;
   x:number; y:number; tile:number;
   onMove:(cx:number,cy:number)=>void; onUp:(cx:number,cy:number)=>void; onCancel:()=>void;
 }){
-    useEffect(() => {
-    function move(ev: PointerEvent) { onMove(ev.clientX, ev.clientY); }
-    function up(ev: PointerEvent)  { cleanup(); onUp(ev.clientX, ev.clientY); }
-    function cancel()              { cleanup(); onCancel(); }
-    function vis() { if (document.hidden) cancel(); }
-    function blur() { cancel(); }
-
-    function cleanup() {
+  useEffect(()=>{
+    function move(ev:PointerEvent){ onMove(ev.clientX, ev.clientY); }
+    function up(ev:PointerEvent){ cleanup(); onUp(ev.clientX, ev.clientY); }
+    function cancel(){ cleanup(); onCancel(); }
+    function vis(){ if (document.hidden) cancel(); }
+    function blur(){ cancel(); }
+    function cleanup(){
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', cancel);
       window.removeEventListener('blur', blur);
       document.removeEventListener('visibilitychange', vis);
     }
-
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', cancel);
     window.addEventListener('blur', blur);
     document.addEventListener('visibilitychange', vis);
-
-    return () => cleanup();
+    return ()=> cleanup();
   }, [onMove, onUp, onCancel]);
 
 
   const d = atlasD || extraMeta?.d || "";
-  if (!d) return null;
+  if (!d) {
+    return (
+      <div className="fixed z-[3000] select-none pointer-events-none" style={{ left:x, top:y }}>
+        <div style={{
+          width: tile, height: tile,
+          borderRadius: 8, background: 'rgba(148,163,184,.35)',
+          border: '1px solid #64748b'
+        }}/>
+      </div>
+    );
+  }
+
 
   const vbBBox = (()=> {
     const bb = getBBoxForPath(`drag-${pid}`, d);
@@ -478,15 +505,11 @@ function FloatingPiece({
 
   return (
     <div className="fixed z-[3000] select-none pointer-events-none" style={{ left:x, top:y }}>
-      <svg
-        width={tile}
-        height={tile}
-        viewBox={`${vbBBox.x} ${vbBBox.y} ${vbBBox.width} ${vbBBox.height}`}
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <path d={d} fill="rgba(148,163,184,.96)" stroke="#334155" strokeWidth={1} />
+      <svg width={tile} height={tile}
+           viewBox={`${vbBBox.x} ${vbBBox.y} ${vbBBox.width} ${vbBBox.height}`}
+           preserveAspectRatio="xMidYMid meet">
+        <path d={d} fill="rgba(148,163,184,.96)" stroke="#334155" strokeWidth={1}/>
       </svg>
-
     </div>
   );
 }

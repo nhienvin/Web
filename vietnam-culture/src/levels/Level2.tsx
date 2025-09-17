@@ -370,7 +370,10 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
           x={drag.pos.x} y={drag.pos.y}
           tile={tile}
           onMove={(cx,cy)=> setDrag(d=> d ? ({ ...d, pos:{ x:cx - tile/2, y:cy - tile/2 } }) : d)}
-          onUp={(cx,cy)=>{setDrag(null); tryDrop(drag.pid, cx, cy);  }}
+          onUp={(cx,cy,pid)=>{                 // <-- nhận pid từ FloatingPiece
+            setDrag(null);                     // <-- clear ngay lập tức
+            tryDrop(pid, cx, cy);              // <-- rồi mới tính snap
+          }}
           onCancel={()=> setDrag(null)}
         />
       )}
@@ -460,14 +463,17 @@ function FloatingPiece({
   atlasD?: string;
   extraMeta?: SvgMeta;
   x:number; y:number; tile:number;
-  onMove:(cx:number,cy:number)=>void; onUp:(cx:number,cy:number)=>void; onCancel:()=>void;
+  onMove:(cx:number,cy:number)=>void; 
+  onUp:(cx:number,cy:number, pid:string)=>void;
+  onCancel:()=>void;
 }){
   useEffect(()=>{
     function move(ev:PointerEvent){ onMove(ev.clientX, ev.clientY); }
-    function up(ev:PointerEvent){ cleanup(); onUp(ev.clientX, ev.clientY); }
+    function up(ev:PointerEvent){ cleanup(); onUp(ev.clientX, ev.clientY, pid); }
     function cancel(){ cleanup(); onCancel(); }
     function vis(){ if (document.hidden) cancel(); }
     function blur(){ cancel(); }
+
     function cleanup(){
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
@@ -475,13 +481,15 @@ function FloatingPiece({
       window.removeEventListener('blur', blur);
       document.removeEventListener('visibilitychange', vis);
     }
+
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', cancel);
     window.addEventListener('blur', blur);
     document.addEventListener('visibilitychange', vis);
     return ()=> cleanup();
-  }, [onMove, onUp, onCancel]);
+  }, [onMove, onUp, onCancel, pid]);
+
 
 
   const d = atlasD || extraMeta?.d || "";

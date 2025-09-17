@@ -96,15 +96,79 @@ function expandBBox(bb: BBox, padRatio=0.08): BBox {
 type LBItem = { name: string; ms: number; ts?: number };
 function readLB(lbKey: string): LBItem[] { try { return JSON.parse(localStorage.getItem(lbKey) || "[]"); } catch { return []; } }
 
+/* ===== Drag toàn cục với ref đồng bộ ===== */
+type DragState = { pid: string; x: number; y: number; tile: number };
+
+function useGlobalDrag(onDrop:(pid:string, clientX:number, clientY:number)=>void){
+  const [drag, setDrag] = React.useState<DragState|null>(null);
+  const draggingRef = React.useRef(false);
+
+  React.useEffect(()=>{
+    if (!drag) return;
+    draggingRef.current = true;
+
+    function move(ev: PointerEvent){
+      setDrag(d => d ? ({ ...d, x: ev.clientX - d.tile/2, y: ev.clientY - d.tile/2 }) : d);
+    }
+    function reallyClear(){
+      draggingRef.current = false;
+      setDrag(null);
+    }
+    function up(ev: PointerEvent){
+      const pid = drag.pid;
+      cleanup();          // dọn listener trước
+      reallyClear();      // xả drag NGAY (mở khóa chọn mảnh khác)
+      onDrop(pid, ev.clientX, ev.clientY);
+    }
+    function cancel(){
+      cleanup();
+      reallyClear();
+    }
+    function vis(){ if (document.hidden) cancel(); }
+    function blur(){ cancel(); }
+
+    function cleanup(){
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', cancel);
+      window.removeEventListener('blur', blur);
+      document.removeEventListener('visibilitychange', vis);
+    }
+
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', cancel);
+    window.addEventListener('blur', blur);
+    document.addEventListener('visibilitychange', vis);
+    return ()=> cleanup();
+  }, [drag, onDrop]);
+
+  function start(pid:string, clientX:number, clientY:number, tile:number){
+    // Nếu vì lý do gì đó còn đang kéo → xả ngay rồi vẫn cho phép bắt đầu kéo mảnh mới
+    if (draggingRef.current) {
+      draggingRef.current = false;
+      setDrag(null);
+    }
+    setDrag({ pid, x: clientX - tile/2, y: clientY - tile/2, tile });
+  }
+
+  function clear(){
+    draggingRef.current = false;
+    setDrag(null);
+  }
+
+  return { drag, start, clear, draggingRef };
+}
+
+
 /* ===== main ===== */
 const LB_KEY = 'lb:pack1:level2';
 const PANEL_W = 360;
 
 export default function Level2({ bundle }: { bundle: Bundle }) {
-  const atlasPaths = useAtlasPaths("/assets/atlas.svg"); // nếu không có atlas => rỗng
+  const atlasPaths = useAtlasPaths("/assets/atlas.svg");
 
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
-  const [drag, setDrag] = useState<{ pid: string; pos?: {x:number;y:number} }|null>(null);
   const [showWin, setShowWin] = useState(false);
   const [feedback, setFeedback] = useState<null | 'ok' | 'bad'>(null);
   const [shake, setShake] = useState(false);
@@ -112,12 +176,10 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
 
   const boardRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const portalElRef = useRef<HTMLDivElement|null>(null); // portal riêng, sẽ gỡ khi unmount
   const doneOnceRef = useRef(false);
   const [vx, vy, vw, vh] = bundle.viewBox;
-  // random danh sách mảnh
-  const pieces = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
-  // tạo container portal và dọn khi rời level (fix không click được ở menu)
+  const portalElRef = useRef<HTMLDivElement|null>(null);
+  // portal riêng, dọn sạch khi unmount
   useEffect(()=>{
     const el = document.createElement('div');
     el.setAttribute('data-level2-portal','');
@@ -129,23 +191,24 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
     };
   },[]);
 
-  // responsive: tính số cột & kích thước ô theo panel + chiều cao khả dụng (hạn chế scroll)
+  // responsive: 2–3 cột, tile tính theo chiều cao để hạn chế scroll
   const [panelWState, setPanelWState] = useState(PANEL_W);
   const GAP = 8, PADX = 24, PADY = 24;
+  const piecesBase = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
 
   const cols = useMemo(()=>{
     const inner = Math.max(0, panelWState - PADX);
-    const minTileFor3 = 90; // muốn 3 cột nếu có thể
-    const can3 = Math.floor((inner + GAP) / (minTileFor3 + GAP)) >= 3;
+    const minFor3 = 88;
+    const can3 = Math.floor((inner + GAP) / (minFor3 + GAP)) >= 3;
     return can3 ? 3 : 2;
   }, [panelWState]);
 
   const tile = useMemo(()=>{
-    const innerH = Math.max(0, vh - PADY);         // chiều cao usable
-    const rows = Math.ceil(pieces.length / cols);   // số hàng cần
+    const innerH = Math.max(0, vh - PADY);
+    const rows = Math.ceil(piecesBase.length / cols);
     const tIdeal = Math.floor((innerH - (rows - 1) * GAP) / rows);
-    return Math.max(72, Math.min(92, tIdeal));      // clamp 72–92
-  }, [vh, cols, pieces.length]);
+    return Math.max(72, Math.min(92, tIdeal));
+  }, [vh, cols, piecesBase.length]);
 
   useEffect(()=>{
     const recalc = ()=> setPanelWState(panelRef.current?.clientWidth || PANEL_W);
@@ -153,11 +216,6 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
     window.addEventListener('resize', recalc);
     return ()=> window.removeEventListener('resize', recalc);
   },[]);
-
-  // Stage fit
-  const stageW = vw + 16 + PANEL_W;
-  const stageH = vh;
-  const stageScale = useStageScale(stageW, stageH, 24);
 
   // timer
   const solved = Object.keys(placed).length;
@@ -167,30 +225,26 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
 
   const { playCorrect, playWrong, playWin } = useSfx();
 
-  // preload SVG rời (khi không có atlas)
+  // preload SVG rời
   const [extraMeta, setExtraMeta] = useState<Record<string, SvgMeta>>({});
-  const [loadingCount, setLoadingCount] = useState(0);
   useEffect(()=>{
     let alive = true;
     (async ()=>{
       const upd: Record<string, SvgMeta> = {};
-      let cnt = 0;
       for (const p of bundle.provinces){
         if (atlasPaths[p.id]) continue;
         if (!p.svg_path_file) continue;
-        cnt++;
         const meta = await fetchProvinceSvgMeta(p.svg_path_file);
         if (!alive) return;
         if (meta.d) upd[p.id] = meta;
       }
       if (!alive) return;
       if (Object.keys(upd).length) setExtraMeta(s=>({ ...s, ...upd }));
-      setLoadingCount(cnt);
     })();
     return ()=>{ alive=false; };
   }, [bundle.provinces, atlasPaths]);
 
-  // mở popup đúng lúc (1 lần)
+  // popup thắng cuộc (1 lần)
   useEffect(()=>{
     if (!ready) return;
     const done = solved >= total;
@@ -209,14 +263,16 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
     }
   },[]);
 
+  // Drag controller
+  const dragCtl = useGlobalDrag((pid, cx, cy)=> tryDrop(pid, cx, cy));
+
   function resetGame(){
-    setDrag(null);            // đảm bảo không kẹt drag
+    dragCtl.clear();
     setPlaced({});
     setShowWin(false);
     doneOnceRef.current = false;
     setSeed((crypto.getRandomValues(new Uint32Array(1))[0])>>>0);
   }
-
 
   // snap: client -> viewBox
   function tryDrop(pid: string, clientX:number, clientY:number) {
@@ -242,7 +298,6 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
       setFeedback('bad'); setTimeout(()=>setFeedback(null), 700);
       playWrong();
     }
-    return ok;
   }
 
   function pathForFill(p: Province): string {
@@ -250,24 +305,24 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
     if (dAtlas) return dAtlas;
     const meta = extraMeta[p.id];
     if (!meta) return "";
-    if (isBoardAligned(meta.vb, vw, vh)) return meta.d; // chỉ fill khi trùng viewBox
+    if (isBoardAligned(meta.vb, vw, vh)) return meta.d;
     return "";
   }
 
-  // tiện: portal root
   const portalRoot = portalElRef.current || document.body;
+  const pieces = piecesBase;
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
-      {/* HUD portal (góc phải) */}
+      {/* HUD */}
       {createPortal(
         <div
           style={{
-            position: 'fixed', top: 12, left: 12, zIndex: 2147483647,
+            position: 'fixed', top: 12, right: 12, zIndex: 2147483647,
             background: 'rgba(30,41,59,.88)', color: '#fff',
             border: '1px solid rgba(51,65,85,.9)', borderRadius: 8,
             padding: '6px 10px', boxShadow: '0 2px 8px rgba(0,0,0,.35)',
-            display:'flex', alignItems:'center', gap:10
+            display:'flex', alignItems:'center', gap:10, pointerEvents:'auto'
           }}
         >
           <span style={{ fontSize: 14 }}>
@@ -276,7 +331,7 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
           </span>
           <button
             onClick={resetGame}
-            style={{ pointerEvents:'auto', fontSize:12, padding:'4px 8px',
+            style={{ fontSize:12, padding:'4px 8px',
               borderRadius:6, border:'1px solid #475569',
               background:'#334155', color:'#fff', cursor:'pointer' }}
             title="Làm lại (random mảnh mới)"
@@ -291,7 +346,7 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
         style={{
           left: '50%', top: '50%',
           width: vw + 16 + PANEL_W, height: vh,
-          transform: `translate(-50%,-50%) scale(${stageScale})`,
+          transform: `translate(-50%,-50%) scale(${useStageScale(vw + 16 + PANEL_W, vh, 24)})`,
           transformOrigin: 'center center'
         }}
       >
@@ -314,15 +369,15 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
               })}
             </svg>
             <div ref={boardRef} className="absolute inset-0">
-              {drag?.pid && (() => {
-                const p = bundle.provinces.find(q=>q.id===drag.pid)!;
+              {dragCtl.drag?.pid && (() => {
+                const p = bundle.provinces.find(q=>q.id===dragCtl.drag!.pid)!;
                 const tol = Math.max(p.snap_tolerance_px || 18, 28);
                 return <div className="aim" style={{ left: p.anchor_px[0]-tol, top: p.anchor_px[1]-tol, width: tol*2, height: tol*2 }}/>;
               })()}
             </div>
           </div>
 
-          {/* PANEL mảnh: responsive 2–3 cột, ô nhỏ gọn 84–108px */}
+          {/* PANEL mảnh */}
           <aside ref={panelRef} className="relative w-[360px]">
             <div className="sticky top-0 z-20 flex items-center justify-between px-2 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
               <div className="text-sm text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
@@ -337,24 +392,23 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
             <div className="mt-3 border border-slate-700 rounded-lg bg-slate-800/60" style={{ height: vh }}>
               <div className="h-full p-3 no-scrollbar">
                 <div className="grid" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: GAP }}>
-                  {pieces.map(p=>(
-                    <PieceTile
-                      key={p.id}
-                      pid={p.id}
-                      province={p}
-                      atlasD={atlasPaths[p.id]}
-                      extraMeta={extraMeta[p.id]}
-                      // CHỈ disable khi mảnh đã đặt rồi
-                      disabled={!!placed[p.id]}
-                      tile={tile}
-                      onStart={(cx, cy)=> setDrag({ pid: p.id, pos: { x: cx - tile/2, y: cy - tile/2 } })}
-                    />
-                  ))}
-
+                  {pieces.map(p=>{
+                    const dAtlas = atlasPaths[p.id];
+                    const dExtra = extraMeta[p.id]?.d;
+                    const hasPlaced = !!placed[p.id];
+                    return (
+                      <PieceTile
+                        key={p.id}
+                        pid={p.id}
+                        name={p.name_vi}
+                        d={dAtlas || dExtra || ""}
+                        disabled={hasPlaced || dragCtl.drag?.pid === p.id}
+                        tile={tile}
+                        onStart={(cx, cy)=> dragCtl.start(p.id, cx, cy, tile)}
+                      />
+                    );
+                  })}
                 </div>
-                {!loadingCount && pieces.every(p => !(atlasPaths[p.id] || extraMeta[p.id])) && (
-                  <div className="mt-3 text-xs text-slate-400">Không tìm thấy SVG cho các mảnh.</div>
-                )}
               </div>
             </div>
           </aside>
@@ -362,23 +416,16 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
       </div>
 
       {/* Mảnh đang kéo */}
-      {drag?.pos && (
+      {dragCtl.drag && (
         <FloatingPiece
-          pid={drag.pid}
-          atlasD={atlasPaths[drag.pid]}
-          extraMeta={extraMeta[drag.pid]}
-          x={drag.pos.x} y={drag.pos.y}
-          tile={tile}
-          onMove={(cx,cy)=> setDrag(d=> d ? ({ ...d, pos:{ x:cx - tile/2, y:cy - tile/2 } }) : d)}
-          onUp={(cx,cy,pid)=>{                 // <-- nhận pid từ FloatingPiece
-            setDrag(null);                     // <-- clear ngay lập tức
-            tryDrop(pid, cx, cy);              // <-- rồi mới tính snap
-          }}
-          onCancel={()=> setDrag(null)}
+          pid={dragCtl.drag.pid}
+          d={atlasPaths[dragCtl.drag.pid] || extraMeta[dragCtl.drag.pid]?.d || ""}
+          x={dragCtl.drag.x} y={dragCtl.drag.y}
+          tile={dragCtl.drag.tile}
         />
       )}
 
-      {/* TOAST feedback */}
+      {/* TOAST */}
       {feedback && createPortal(
         <div
           style={{
@@ -393,7 +440,6 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
         portalRoot
       )}
 
-      {/* POPUP thắng cuộc */}
       {showWin && (
         <WinDialog
           lbKey={LB_KEY}
@@ -408,40 +454,46 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
 /* ===== components ===== */
 
 function PieceTile({
-  pid, province, atlasD, extraMeta, disabled, tile, onStart
+  pid, name, d, disabled, tile, onStart
 }:{
   pid: string;
-  province: Province;
-  atlasD?: string;
-  extraMeta?: SvgMeta;
+  name: string;
+  d: string;               // có thể rỗng khi SVG chưa load
   disabled: boolean;
   tile: number;
   onStart: (cx:number, cy:number)=>void;
 }){
-  const d = atlasD || extraMeta?.d || "";
-  const color = colorForId(province.id);
-
-  function handlePointerDown(e:React.PointerEvent){
-  if (disabled) return;
-  e.preventDefault();
-  e.stopPropagation();
-  onStart(e.clientX, e.clientY);
-}
-
-
+  const color = colorForId(pid);
   const vbBBox = useMemo(()=>{
     if (!d) return null;
     const bb = getBBoxForPath(pid, d);
     return expandBBox(bb, 0.08);
   }, [pid, d]);
 
+  function handlePointerDownCapture(e:React.PointerEvent){
+    if (disabled) return;
+    e.preventDefault(); e.stopPropagation();
+    onStart(e.clientX, e.clientY);
+  }
+  function beginDrag(clientX:number, clientY:number, e:Event){
+    // chặn side-effect mặc định
+    if (e && 'preventDefault' in e) (e as any).preventDefault();
+    if (e && 'stopPropagation' in e) (e as any).stopPropagation();
+    if (disabled) return;
+    onStart(clientX, clientY);
+  }
   return (
     <div
-      onPointerDown={handlePointerDown}
-      className={`rounded border cursor-grab grid place-items-center
-                  ${disabled?'opacity-30 pointer-events-none bg-slate-900/30':'bg-slate-900/50'}`}
-      style={{ borderColor: color.chipBd, height: tile, minHeight: tile }}
-      title={province.name_vi}
+      onPointerDownCapture={(e)=> beginDrag(e.clientX, e.clientY, e.nativeEvent)}
+      onMouseDown={(e)=> beginDrag(e.clientX, e.clientY, e.nativeEvent)}
+      onTouchStart={(e)=> {
+        const t = e.touches?.[0];
+        if (t) beginDrag(t.clientX, t.clientY, e.nativeEvent);
+      }}
+      className={`rounded border grid place-items-center select-none
+        ${disabled?'opacity-30 pointer-events-none bg-slate-900/30':'cursor-grab bg-slate-900/50'}`}
+      style={{ height: tile, minHeight: tile, pointerEvents:'auto' as any }}
+      title={name}
     >
       {d && vbBBox ? (
         <svg width={tile-10} height={tile-10}
@@ -456,43 +508,11 @@ function PieceTile({
   );
 }
 
-function FloatingPiece({
-  pid, atlasD, extraMeta, x, y, tile, onMove, onUp, onCancel
-}:{
+function FloatingPiece({ pid, d, x, y, tile }:{
   pid: string;
-  atlasD?: string;
-  extraMeta?: SvgMeta;
+  d: string;
   x:number; y:number; tile:number;
-  onMove:(cx:number,cy:number)=>void; 
-  onUp:(cx:number,cy:number, pid:string)=>void;
-  onCancel:()=>void;
 }){
-  useEffect(()=>{
-    function move(ev:PointerEvent){ onMove(ev.clientX, ev.clientY); }
-    function up(ev:PointerEvent){ cleanup(); onUp(ev.clientX, ev.clientY, pid); }
-    function cancel(){ cleanup(); onCancel(); }
-    function vis(){ if (document.hidden) cancel(); }
-    function blur(){ cancel(); }
-
-    function cleanup(){
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', cancel);
-      window.removeEventListener('blur', blur);
-      document.removeEventListener('visibilitychange', vis);
-    }
-
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-    window.addEventListener('pointercancel', cancel);
-    window.addEventListener('blur', blur);
-    document.addEventListener('visibilitychange', vis);
-    return ()=> cleanup();
-  }, [onMove, onUp, onCancel, pid]);
-
-
-
-  const d = atlasD || extraMeta?.d || "";
   if (!d) {
     return (
       <div className="fixed z-[3000] select-none pointer-events-none" style={{ left:x, top:y }}>
@@ -504,8 +524,6 @@ function FloatingPiece({
       </div>
     );
   }
-
-
   const vbBBox = (()=> {
     const bb = getBBoxForPath(`drag-${pid}`, d);
     return expandBBox(bb, 0.08);
@@ -541,12 +559,10 @@ function WinDialog({ lbKey, ms, onClose }:{
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white text-slate-900 rounded-2xl shadow-xl p-5 w-[min(92vw,520px)] anim-pop">
-        <div className="text-center">
-          <div className="text-3xl">🎉</div>
-          <div className="mt-1 text-xl font-semibold">Xuất sắc!</div>
-          <div className="text-slate-600 mt-1">Bạn đã ghép xong bản đồ cấp 2.</div>
-          <div className="mt-2 text-sm text-slate-500">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
-        </div>
+        <div className="text-center text-3xl">🎉</div>
+        <div className="mt-1 text-xl font-semibold text-center">Xuất sắc!</div>
+        <div className="text-slate-600 mt-1 text-center">Bạn đã ghép xong bản đồ cấp 2.</div>
+        <div className="mt-2 text-sm text-slate-500 text-center">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
 
         <div className="mt-4">
           <div className="mb-2 text-sm font-semibold text-slate-700">🏆 Top 5</div>
@@ -596,6 +612,7 @@ function WinDialog({ lbKey, ms, onClose }:{
               </div>
             )}
           </div>
+
         </div>
 
         <div className="mt-4 flex items-center justify-end">

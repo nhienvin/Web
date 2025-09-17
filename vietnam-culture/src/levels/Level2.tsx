@@ -99,35 +99,47 @@ function readLB(lbKey: string): LBItem[] { try { return JSON.parse(localStorage.
 /* ===== Drag toàn cục với ref đồng bộ ===== */
 type DragState = { pid: string; x: number; y: number; tile: number };
 
-function useGlobalDrag(onDrop:(pid:string, clientX:number, clientY:number)=>void){
-  const [drag, setDrag] = React.useState<DragState|null>(null);
-  const draggingRef = React.useRef(false);
+function useGlobalDrag(
+  onDrop: (pid: string, clientX: number, clientY: number) => void
+){
+  const [drag, setDrag] = React.useState<DragState | null>(null);
 
-  React.useEffect(()=>{
+  // refs đồng bộ để tránh lỗi TS và closure kẹt
+  const dragRef = React.useRef<DragState | null>(null);
+  const activeRef = React.useRef(false);
+
+  React.useEffect(() => { dragRef.current = drag; }, [drag]);
+
+  React.useEffect(() => {
     if (!drag) return;
-    draggingRef.current = true;
+    activeRef.current = true;
 
-    function move(ev: PointerEvent){
-      setDrag(d => d ? ({ ...d, x: ev.clientX - d.tile/2, y: ev.clientY - d.tile/2 }) : d);
+    function move(ev: PointerEvent) {
+      // cập nhật vị trí theo chuột
+      setDrag(d => d ? ({ ...d, x: ev.clientX - d.tile / 2, y: ev.clientY - d.tile / 2 }) : d);
     }
-    function reallyClear(){
-      draggingRef.current = false;
+
+    function reallyClear() {
+      activeRef.current = false;
       setDrag(null);
     }
-    function up(ev: PointerEvent){
-      const pid = drag.pid;
-      cleanup();          // dọn listener trước
-      reallyClear();      // xả drag NGAY (mở khóa chọn mảnh khác)
-      onDrop(pid, ev.clientX, ev.clientY);
+
+    function up(ev: PointerEvent) {
+      const pid = dragRef.current?.pid;      // đọc từ ref → không lỗi TS
+      cleanup();
+      reallyClear();                         // xả drag NGAY để cho phép chọn mảnh khác
+      if (pid) onDrop(pid, ev.clientX, ev.clientY);
     }
-    function cancel(){
+
+    function cancel() {
       cleanup();
       reallyClear();
     }
-    function vis(){ if (document.hidden) cancel(); }
-    function blur(){ cancel(); }
 
-    function cleanup(){
+    function vis()  { if (document.hidden) cancel(); }
+    function blur() { cancel(); }
+
+    function cleanup() {
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', cancel);
@@ -140,25 +152,27 @@ function useGlobalDrag(onDrop:(pid:string, clientX:number, clientY:number)=>void
     window.addEventListener('pointercancel', cancel);
     window.addEventListener('blur', blur);
     document.addEventListener('visibilitychange', vis);
-    return ()=> cleanup();
+
+    return () => cleanup();
   }, [drag, onDrop]);
 
-  function start(pid:string, clientX:number, clientY:number, tile:number){
-    // Nếu vì lý do gì đó còn đang kéo → xả ngay rồi vẫn cho phép bắt đầu kéo mảnh mới
-    if (draggingRef.current) {
-      draggingRef.current = false;
+  function start(pid: string, clientX: number, clientY: number, tile: number) {
+    // nếu vì lý do gì đó còn đang kéo → xả ngay rồi vẫn cho phép kéo mới
+    if (activeRef.current) {
+      activeRef.current = false;
       setDrag(null);
     }
-    setDrag({ pid, x: clientX - tile/2, y: clientY - tile/2, tile });
+    setDrag({ pid, x: clientX - tile / 2, y: clientY - tile / 2, tile });
   }
 
-  function clear(){
-    draggingRef.current = false;
+  function clear() {
+    activeRef.current = false;
     setDrag(null);
   }
 
-  return { drag, start, clear, draggingRef };
+  return { drag, start, clear };
 }
+
 
 
 /* ===== main ===== */
@@ -458,49 +472,46 @@ function PieceTile({
 }:{
   pid: string;
   name: string;
-  d: string;               // có thể rỗng khi SVG chưa load
+  d: string;             // có thể rỗng nếu SVG chưa load
   disabled: boolean;
   tile: number;
   onStart: (cx:number, cy:number)=>void;
 }){
   const color = colorForId(pid);
-  const vbBBox = useMemo(()=>{
-    if (!d) return null;
-    const bb = getBBoxForPath(pid, d);
-    return expandBBox(bb, 0.08);
-  }, [pid, d]);
 
-  function handlePointerDownCapture(e:React.PointerEvent){
+  // bắt sự kiện sớm + chặn mặc định để tránh “kẹt”
+  function beginDrag(clientX:number, clientY:number, e: Event) {
     if (disabled) return;
-    e.preventDefault(); e.stopPropagation();
-    onStart(e.clientX, e.clientY);
-  }
-  function beginDrag(clientX:number, clientY:number, e:Event){
-    // chặn side-effect mặc định
-    if (e && 'preventDefault' in e) (e as any).preventDefault();
-    if (e && 'stopPropagation' in e) (e as any).stopPropagation();
-    if (disabled) return;
+    if ('preventDefault' in e) (e as any).preventDefault();
+    if ('stopPropagation' in e) (e as any).stopPropagation();
     onStart(clientX, clientY);
   }
+
   return (
     <div
       onPointerDownCapture={(e)=> beginDrag(e.clientX, e.clientY, e.nativeEvent)}
       onMouseDown={(e)=> beginDrag(e.clientX, e.clientY, e.nativeEvent)}
       onTouchStart={(e)=> {
-        const t = e.touches?.[0];
-        if (t) beginDrag(t.clientX, t.clientY, e.nativeEvent);
+        const t = e.touches?.[0]; if (t) beginDrag(t.clientX, t.clientY, e.nativeEvent);
       }}
       className={`rounded border grid place-items-center select-none
-        ${disabled?'opacity-30 pointer-events-none bg-slate-900/30':'cursor-grab bg-slate-900/50'}`}
-      style={{ height: tile, minHeight: tile, pointerEvents:'auto' as any }}
+                  ${disabled ? 'opacity-30 pointer-events-none bg-slate-900/30' : 'cursor-grab bg-slate-900/50'}`}
+      style={{ height: tile, minHeight: tile, pointerEvents: 'auto' as any, borderColor: color.chipBd }}
       title={name}
     >
-      {d && vbBBox ? (
-        <svg width={tile-10} height={tile-10}
-             viewBox={`${vbBBox.x} ${vbBBox.y} ${vbBBox.width} ${vbBBox.height}`}
-             preserveAspectRatio="xMidYMid meet">
-          <path d={d} fill={color.fill} stroke={color.stroke} strokeWidth={1}/>
-        </svg>
+      {/* Nếu có d thì vẽ SVG; nếu chưa có d thì hiện placeholder "Đang tải…" */}
+      {d ? (
+        (()=> {
+          const bb = getBBoxForPath(pid, d);
+          const vb = expandBBox(bb, 0.08);
+          return (
+            <svg width={tile-10} height={tile-10}
+                 viewBox={`${vb.x} ${vb.y} ${vb.width} ${vb.height}`}
+                 preserveAspectRatio="xMidYMid meet">
+              <path d={d} fill={color.fill} stroke={color.stroke} strokeWidth={1}/>
+            </svg>
+          );
+        })()
       ) : (
         <div className="text-[11px] text-slate-400">Đang tải…</div>
       )}
@@ -508,37 +519,34 @@ function PieceTile({
   );
 }
 
+
 function FloatingPiece({ pid, d, x, y, tile }:{
-  pid: string;
-  d: string;
-  x:number; y:number; tile:number;
+  pid: string; d: string; x:number; y:number; tile:number;
 }){
   if (!d) {
+    // placeholder khi SVG chưa có
     return (
       <div className="fixed z-[3000] select-none pointer-events-none" style={{ left:x, top:y }}>
         <div style={{
-          width: tile, height: tile,
-          borderRadius: 8, background: 'rgba(148,163,184,.35)',
-          border: '1px solid #64748b'
+          width: tile, height: tile, borderRadius: 8,
+          background: 'rgba(148,163,184,.35)', border: '1px solid #64748b'
         }}/>
       </div>
     );
   }
-  const vbBBox = (()=> {
-    const bb = getBBoxForPath(`drag-${pid}`, d);
-    return expandBBox(bb, 0.08);
-  })();
-
+  const bb = getBBoxForPath(`drag-${pid}`, d);
+  const vb = expandBBox(bb, 0.08);
   return (
     <div className="fixed z-[3000] select-none pointer-events-none" style={{ left:x, top:y }}>
       <svg width={tile} height={tile}
-           viewBox={`${vbBBox.x} ${vbBBox.y} ${vbBBox.width} ${vbBBox.height}`}
+           viewBox={`${vb.x} ${vb.y} ${vb.width} ${vb.height}`}
            preserveAspectRatio="xMidYMid meet">
         <path d={d} fill="rgba(148,163,184,.96)" stroke="#334155" strokeWidth={1}/>
       </svg>
     </div>
   );
 }
+
 
 function WinDialog({ lbKey, ms, onClose }:{
   lbKey: string; ms:number; onClose:()=>void;

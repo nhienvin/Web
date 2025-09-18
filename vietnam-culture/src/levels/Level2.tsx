@@ -1,632 +1,395 @@
+// src/levels/Level2.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import type { Bundle, Province } from "../types";
 import { dist, within } from "../core/math";
 import { useTimer } from "../core/useTimer";
 import { pushLB } from "../core/leaderboard";
 import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
-
-/* ===== helpers ===== */
-function hash32(s: string) { let h = 2166136261>>>0; for (let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
-function colorForId(id: string) {
-  const h = hash32(id) % 360;
-  return {
-    fill:   `hsl(${h} 75% 62%)`,
-    stroke: `hsl(${h} 55% 30%)`,
-    chipBg: `hsl(${h} 90% 94%)`,
-    chipBd: `hsl(${h} 70% 70%)`
+import { viewBoxNearAnchorSmart } from "../core/svg";
+import { createPortal } from "react-dom";
+// ---- helpers ----
+// === HUD portal setup (không bị scale) ===
+const portalElRef = useRef<HTMLDivElement | null>(null);
+useEffect(() => {
+  const el = document.createElement("div");
+  el.setAttribute("data-level2-portal", "");
+  document.body.appendChild(el);
+  portalElRef.current = el;
+  return () => {
+    if (el.parentNode) el.parentNode.removeChild(el);
+    portalElRef.current = null;
   };
-}
-function mulberry32(a:number){return function(){let t=(a+=0x6D2B79F5);t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),61);return((t^(t>>>14))>>>0)/4294967296;}}
-function shuffleSeeded<T>(arr:T[], seed:number){const rnd=mulberry32(seed);for(let i=arr.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
-function useStageScale(stageW:number, stageH:number, pad=24){
-  const [scale,setScale]=useState(1);
-  useEffect(()=>{
-    const recalc=()=>{ const aw=window.innerWidth-pad*2; const ah=window.innerHeight-pad*2;
-      setScale(Math.min(aw/stageW, ah/stageH, 1));
+}, []);
+const portalRoot = portalElRef.current || document.body;
+
+
+function useStageScale(stageW: number, stageH: number, pad = 24) {
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const recalc = () => {
+      const aw = window.innerWidth - pad * 2;
+      const ah = window.innerHeight - pad * 2;
+      setScale(Math.min(aw / stageW, ah / stageH, 1));
     };
-    recalc(); window.addEventListener('resize', recalc);
-    return ()=>window.removeEventListener('resize', recalc);
-  },[stageW,stageH,pad]);
+    recalc();
+    window.addEventListener("resize", recalc);
+    return () => window.removeEventListener("resize", recalc);
+  }, [stageW, stageH, pad]);
   return scale;
 }
 
-/* ===== SVG rời ===== */
-type SvgMeta = { d: string; vb: {minX:number; minY:number; width:number; height:number} | null };
-const svgCache = new Map<string, SvgMeta>();
-function normalizeUrl(path: string){ return path?.startsWith('/') ? path : ('/'+path); }
-function parseViewBox(txt: string){
-  const m = txt.match(/viewBox\s*=\s*["']\s*([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s*["']/i);
-  if (!m) return null;
-  return { minX: +m[1], minY: +m[2], width: +m[3], height: +m[4] };
-}
-async function fetchProvinceSvgMeta(url: string): Promise<SvgMeta>{
-  const key = normalizeUrl(url);
-  if (svgCache.has(key)) return svgCache.get(key)!;
-  const res = await fetch(key);
-  if (!res.ok) return { d:"", vb:null };
-  const txt = await res.text();
-  const vb = parseViewBox(txt);
-  const d = [...txt.matchAll(/<path[^>]*\sd=(?:"([^"]+)"|'([^']+)')/gi)]
-             .map(m => m[1] || m[2] || "").join(" ");
-  const meta = { d, vb };
-  svgCache.set(key, meta);
-  return meta;
-}
-function isBoardAligned(vb: SvgMeta["vb"], vw:number, vh:number){
-  if (!vb) return false;
-  const eps = 1e-3;
-  return Math.abs(vb.minX) < eps && Math.abs(vb.minY) < eps &&
-         Math.abs(vb.width - vw) < eps && Math.abs(vb.height - vh) < eps;
+function getDevFlag(): boolean {
+  try {
+    const qs = new URLSearchParams(window.location.search || "");
+    if (qs.get("dev") === "1") return true;
+    const hash = String(window.location.hash || "");
+    const hs = new URLSearchParams(hash.includes("?") ? hash.split("?")[1] : "");
+    if (hs.get("dev") === "1") return true;
+    return localStorage.getItem("dev") === "1";
+  } catch { return false; }
 }
 
-/* ===== đo bbox để zoom mảnh trong ô ===== */
-type BBox = { x:number; y:number; width:number; height:number };
-let measureSvg: SVGSVGElement | null = null;
-function ensureMeasureSvg(){
-  if (!measureSvg){
-    measureSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    measureSvg.setAttribute('viewBox','0 0 10 10');
-    measureSvg.style.position='absolute';
-    measureSvg.style.left='-10000px';
-    measureSvg.style.top='-10000px';
-    document.body.appendChild(measureSvg);
-  }
-}
-const bboxCache = new Map<string, BBox>();
-function getBBoxForPath(key: string, d: string): BBox {
-  if (bboxCache.has(key)) return bboxCache.get(key)!;
-  ensureMeasureSvg();
-  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-  path.setAttribute('d', d);
-  measureSvg!.appendChild(path);
-  const b = path.getBBox();
-  measureSvg!.removeChild(path);
-  const bb = { x:b.x, y:b.y, width:b.width, height:b.height };
-  bboxCache.set(key, bb);
-  return bb;
-}
-function expandBBox(bb: BBox, padRatio=0.08): BBox {
-  const pad = Math.max(bb.width, bb.height) * padRatio;
-  return { x: bb.x - pad, y: bb.y - pad, width: bb.width + pad*2, height: bb.height + pad*2 };
-}
+const LB_KEY = "lb:pack1:level2";
 
-/* ===== leaderboard ===== */
-type LBItem = { name: string; ms: number; ts?: number };
-function readLB(lbKey: string): LBItem[] { try { return JSON.parse(localStorage.getItem(lbKey) || "[]"); } catch { return []; } }
-
-/* ===== Drag toàn cục với ref đồng bộ ===== */
-type DragState = { pid: string; x: number; y: number; tile: number };
-
-function useGlobalDrag(
-  onDrop: (pid: string, clientX: number, clientY: number) => void
-){
-  const [drag, setDrag] = React.useState<DragState | null>(null);
-
-  // refs đồng bộ để tránh lỗi TS và closure kẹt
-  const dragRef = React.useRef<DragState | null>(null);
-  const activeRef = React.useRef(false);
-
-  React.useEffect(() => { dragRef.current = drag; }, [drag]);
-
-  React.useEffect(() => {
-    if (!drag) return;
-    activeRef.current = true;
-
-    function move(ev: PointerEvent) {
-      // cập nhật vị trí theo chuột
-      setDrag(d => d ? ({ ...d, x: ev.clientX - d.tile / 2, y: ev.clientY - d.tile / 2 }) : d);
-    }
-
-    function reallyClear() {
-      activeRef.current = false;
-      setDrag(null);
-    }
-
-    function up(ev: PointerEvent) {
-      const pid = dragRef.current?.pid;      // đọc từ ref → không lỗi TS
-      cleanup();
-      reallyClear();                         // xả drag NGAY để cho phép chọn mảnh khác
-      if (pid) onDrop(pid, ev.clientX, ev.clientY);
-    }
-
-    function cancel() {
-      cleanup();
-      reallyClear();
-    }
-
-    function vis()  { if (document.hidden) cancel(); }
-    function blur() { cancel(); }
-
-    function cleanup() {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', cancel);
-      window.removeEventListener('blur', blur);
-      document.removeEventListener('visibilitychange', vis);
-    }
-
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-    window.addEventListener('pointercancel', cancel);
-    window.addEventListener('blur', blur);
-    document.addEventListener('visibilitychange', vis);
-
-    return () => cleanup();
-  }, [drag, onDrop]);
-
-  function start(pid: string, clientX: number, clientY: number, tile: number) {
-    // nếu vì lý do gì đó còn đang kéo → xả ngay rồi vẫn cho phép kéo mới
-    if (activeRef.current) {
-      activeRef.current = false;
-      setDrag(null);
-    }
-    setDrag({ pid, x: clientX - tile / 2, y: clientY - tile / 2, tile });
-  }
-
-  function clear() {
-    activeRef.current = false;
-    setDrag(null);
-  }
-
-  return { drag, start, clear };
-}
-
-
-
-/* ===== main ===== */
-const LB_KEY = 'lb:pack1:level2';
-const PANEL_W = 360;
-
+// ---- main ----
 export default function Level2({ bundle }: { bundle: Bundle }) {
-  const atlasPaths = useAtlasPaths("/assets/atlas.svg");
-
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
-  const [showWin, setShowWin] = useState(false);
-  const [feedback, setFeedback] = useState<null | 'ok' | 'bad'>(null);
+  const [activePid, setActivePid] = useState<string | null>(null);
+  const done = Object.keys(placed).length === bundle.provinces.length;
+  const { ms } = useTimer(!done);
+  const [name, setName] = useState("");
+  const { playCorrect, playWrong } = useSfx();
   const [shake, setShake] = useState(false);
-  const [seed, setSeed] = useState(()=> (crypto.getRandomValues(new Uint32Array(1))[0])>>>0);
+  const [dev, setDev] = useState(getDevFlag());
 
+  const atlasPaths = useAtlasPaths("/assets/atlas.svg");
   const boardRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const doneOnceRef = useRef(false);
   const [vx, vy, vw, vh] = bundle.viewBox;
-  const portalElRef = useRef<HTMLDivElement|null>(null);
-  // portal riêng, dọn sạch khi unmount
-  useEffect(()=>{
-    const el = document.createElement('div');
-    el.setAttribute('data-level2-portal','');
-    document.body.appendChild(el);
-    portalElRef.current = el;
-    return ()=>{
-      if (el.parentNode) el.parentNode.removeChild(el);
-      portalElRef.current = null;
-    };
-  },[]);
+  const startPositions = useMemo(() => randomStartPositions(bundle.provinces), [bundle]);
 
-  // responsive: 2–3 cột, tile tính theo chiều cao để hạn chế scroll
-  const [panelWState, setPanelWState] = useState(PANEL_W);
-  const GAP = 8, PADX = 24, PADY = 24;
-  const piecesBase = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
+function tryDrop(pid: string, cx: number, cy: number) {
+  const el = boardRef.current!;
+  const r = el.getBoundingClientRect();
 
-  const cols = useMemo(()=>{
-    const inner = Math.max(0, panelWState - PADX);
-    const minFor3 = 88;
-    const can3 = Math.floor((inner + GAP) / (minFor3 + GAP)) >= 3;
-    return can3 ? 3 : 2;
-  }, [panelWState]);
+  // thêm scale-safe:
+  const sx = r.width / vw;
+  const sy = r.height / vh;
+  const x = (cx - r.left) / sx;
+  const y = (cy - r.top) / sy;
 
-  const tile = useMemo(()=>{
-    const innerH = Math.max(0, vh - PADY);
-    const rows = Math.ceil(piecesBase.length / cols);
-    const tIdeal = Math.floor((innerH - (rows - 1) * GAP) / rows);
-    return Math.max(72, Math.min(92, tIdeal));
-  }, [vh, cols, piecesBase.length]);
+  const p = bundle.provinces.find(q => q.id === pid)!;
 
-  useEffect(()=>{
-    const recalc = ()=> setPanelWState(panelRef.current?.clientWidth || PANEL_W);
-    recalc();
-    window.addEventListener('resize', recalc);
-    return ()=> window.removeEventListener('resize', recalc);
-  },[]);
+  const ax = Math.min(Math.max(p.anchor_px[0], 0), vw);
+  const ay = Math.min(Math.max(p.anchor_px[1], 0), vh);
 
-  // timer
-  const solved = Object.keys(placed).length;
-  const total = bundle?.provinces?.length ?? 0;
-  const ready = total > 0;
-  const { ms } = useTimer(solved < total);
+  const tol = Math.max(p.snap_tolerance_px || 18, 36);
+  const ok = within(dist(x, y, ax, ay), tol);
 
-  const { playCorrect, playWrong, playWin } = useSfx();
+  if (ok) {
+    setPlaced(s => ({ ...s, [pid]: true }));
+    playCorrect();
+  } else {
+    setShake(true); setTimeout(() => setShake(false), 480);
+    if (navigator.vibrate) navigator.vibrate(50);
+    playWrong();
+  }
+  return ok;
+}
 
-  // preload SVG rời
-  const [extraMeta, setExtraMeta] = useState<Record<string, SvgMeta>>({});
-  useEffect(()=>{
-    let alive = true;
-    (async ()=>{
-      const upd: Record<string, SvgMeta> = {};
-      for (const p of bundle.provinces){
-        if (atlasPaths[p.id]) continue;
-        if (!p.svg_path_file) continue;
-        const meta = await fetchProvinceSvgMeta(p.svg_path_file);
-        if (!alive) return;
-        if (meta.d) upd[p.id] = meta;
-      }
-      if (!alive) return;
-      if (Object.keys(upd).length) setExtraMeta(s=>({ ...s, ...upd }));
-    })();
-    return ()=>{ alive=false; };
-  }, [bundle.provinces, atlasPaths]);
 
-  // popup thắng cuộc (1 lần)
-  useEffect(()=>{
-    if (!ready) return;
-    const done = solved >= total;
-    if (done && !doneOnceRef.current) {
-      doneOnceRef.current = true;
-      setShowWin(true);
-      playWin();
-    }
-  }, [ready, solved, total, playWin]);
-
-  // dọn DOM đo bbox khi unmount
-  useEffect(()=>()=>{
-    if (measureSvg && measureSvg.parentNode) {
-      measureSvg.parentNode.removeChild(measureSvg);
-      measureSvg = null;
-    }
-  },[]);
-
-  // Drag controller
-  const dragCtl = useGlobalDrag((pid, cx, cy)=> tryDrop(pid, cx, cy));
-
-  function resetGame(){
-    dragCtl.clear();
-    setPlaced({});
-    setShowWin(false);
-    doneOnceRef.current = false;
-    setSeed((crypto.getRandomValues(new Uint32Array(1))[0])>>>0);
+  function onSave() {
+    const list = pushLB(LB_KEY, { name: name || "Ẩn danh", ms });
+    alert(`Đã lưu! Top 1: ${list[0].name} – ${(list[0].ms / 1000).toFixed(1)}s`);
   }
 
-  // snap: client -> viewBox
-  function tryDrop(pid: string, clientX:number, clientY:number) {
-    const rect = boardRef.current!.getBoundingClientRect();
-    const sx = rect.width  / vw;
-    const sy = rect.height / vh;
-    const x = (clientX - rect.left) / sx;
-    const y = (clientY - rect.top)  / sy;
+  const activeProvince = activePid ? bundle.provinces.find(p => p.id === activePid) : null;
+  const tol = activeProvince ? Math.max(activeProvince.snap_tolerance_px || 18, 36) : 0;
 
-    const p = bundle.provinces.find(q=>q.id===pid)!;
-    const ax = Math.min(Math.max(p.anchor_px[0], 0), vw);
-    const ay = Math.min(Math.max(p.anchor_px[1], 0), vh);
-    const tol = Math.max(p.snap_tolerance_px || 18, 28);
-    const ok = within(dist(x,y, ax,ay), tol);
+  // kích thước stage gốc (chưa scale)
+  const PANEL_W = 340;
+  const GAP = 16;
+  const stageW = vw + GAP + PANEL_W;
+  const stageH = vh;
+  const stageScale = useStageScale(stageW, stageH, 24);
 
-    if (ok) {
-      setPlaced(s=>({ ...s, [pid]: true }));
-      setFeedback('ok'); setTimeout(()=>setFeedback(null), 700);
-      playCorrect();
-    } else {
-      setShake(true); setTimeout(()=>setShake(false), 480);
-      if (navigator.vibrate) navigator.vibrate(50);
-      setFeedback('bad'); setTimeout(()=>setFeedback(null), 700);
-      playWrong();
-    }
-  }
-
-  function pathForFill(p: Province): string {
-    const dAtlas = atlasPaths[p.id];
-    if (dAtlas) return dAtlas;
-    const meta = extraMeta[p.id];
-    if (!meta) return "";
-    if (isBoardAligned(meta.vb, vw, vh)) return meta.d;
-    return "";
-  }
-
-  const portalRoot = portalElRef.current || document.body;
-  const pieces = piecesBase;
-
-  return (
-    <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
-      {/* HUD */}
+  return (<>
+    {/* === HUD overlay: luôn rõ, không bị thu nhỏ === */}
       {createPortal(
         <div
-          style={{
-            position: 'fixed', top: 12, right: 12, zIndex: 2147483647,
-            background: 'rgba(30,41,59,.88)', color: '#fff',
-            border: '1px solid rgba(51,65,85,.9)', borderRadius: 8,
-            padding: '6px 10px', boxShadow: '0 2px 8px rgba(0,0,0,.35)',
-            display:'flex', alignItems:'center', gap:10, pointerEvents:'auto'
-          }}
+          className="fixed top-3 right-3 z-[2147483647] flex items-center gap-2
+                    bg-slate-800/90 text-white border border-slate-700 rounded-lg
+                    px-3 py-2 shadow-lg pointer-events-auto"
         >
-          <span style={{ fontSize: 14 }}>
-            Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
-            {' • '}Đã đặt: <b>{solved}/{total}</b>
+          <span className="text-sm">
+            Thời gian: <b>{(ms / 1000).toFixed(1)}s</b>
           </span>
           <button
-            onClick={resetGame}
-            style={{ fontSize:12, padding:'4px 8px',
-              borderRadius:6, border:'1px solid #475569',
-              background:'#334155', color:'#fff', cursor:'pointer' }}
-            title="Làm lại (random mảnh mới)"
-          >↻</button>
+            className="text-xs px-2 py-1 rounded border border-slate-600 bg-slate-700 hover:bg-slate-600"
+            onClick={() => location.reload()}
+            title="Làm lại"
+          >
+            ↻
+          </button>
+          <button
+            className="text-[11px] px-2 py-1 rounded border border-slate-600 bg-slate-700"
+            onClick={() => { const next = !dev; setDev(next); localStorage.setItem("dev", next ? "1":"0"); }}
+            title="Bật/tắt bảng DEV"
+          >
+            DEV {dev ? "ON" : "OFF"}
+          </button>
         </div>,
         portalRoot
       )}
-
-      {/* Stage */}
+    <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
+      {/* Stage center + scale để vừa màn hình */}
       <div
         className="absolute"
         style={{
-          left: '50%', top: '50%',
-          width: vw + 16 + PANEL_W, height: vh,
-          transform: `translate(-50%,-50%) scale(${useStageScale(vw + 16 + PANEL_W, vh, 24)})`,
-          transformOrigin: 'center center'
+          left: "50%",
+          top: "50%",
+          width: stageW,
+          height: stageH,
+          transform: `translate(-50%,-50%) scale(${stageScale})`,
+          transformOrigin: "center center",
         }}
       >
-        <div className="grid gap-4" style={{ display:'grid', gridTemplateColumns: `${vw}px ${PANEL_W}px` }}>
-          {/* BOARD */}
-          <div className={`relative ${shake ? 'anim-shake' : ''}`} style={{ width: vw, height: vh }}>
+        <div
+          className="grid gap-4"
+          style={{ display: "grid", gridTemplateColumns: `${vw}px ${PANEL_W}px` }}
+        >
+          {/* BOARD (giữ nguyên, chỉ thêm border/shadow phù hợp nền tối) */}
+          <div className={`relative ${shake ? "anim-shake" : ""}`} style={{ width: vw, height: vh }}>
             <img
               src="/assets/board_blank_outline.svg"
-              width={vw} height={vh}
-              className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-sm"
-              alt="Vietnam blank board"
+              width={vw}
+              height={vh}
+              className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-lg"
             />
-            {/* Fill mảnh đã đặt */}
-            <svg className="absolute inset-0 pointer-events-none" viewBox={`0 0 ${vw} ${vh}`} style={{ zIndex: 5 }}>
-              {bundle.provinces.map(p=>{
+            <svg className="absolute inset-0 pointer-events-none" viewBox={`0 0 ${vw} ${vh}`}>
+              {bundle.provinces.map(p => {
                 if (!placed[p.id]) return null;
-                const d = pathForFill(p); if (!d) return null;
-                const c = colorForId(p.id);
-                return <path key={p.id} d={d} fill={c.fill} stroke={c.stroke} strokeWidth={1}/>;
+                const d = atlasPaths[p.id];
+                if (!d) return null;
+                return (
+                  <path
+                    key={p.id}
+                    d={d}
+                    fill="rgba(16,185,129,.22)"
+                    stroke="rgba(5,150,105,.95)"
+                    strokeWidth={1}
+                  />
+                );
               })}
             </svg>
             <div ref={boardRef} className="absolute inset-0">
-              {dragCtl.drag?.pid && (() => {
-                const p = bundle.provinces.find(q=>q.id===dragCtl.drag!.pid)!;
-                const tol = Math.max(p.snap_tolerance_px || 18, 28);
-                return <div className="aim" style={{ left: p.anchor_px[0]-tol, top: p.anchor_px[1]-tol, width: tol*2, height: tol*2 }}/>;
-              })()}
+              {activeProvince && (
+                <div
+                  className="aim"
+                  style={{
+                    left: activeProvince.anchor_px[0] - tol,
+                    top: activeProvince.anchor_px[1] - tol,
+                    width: tol * 2,
+                    height: tol * 2
+                  }}
+                />
+              )}
             </div>
           </div>
 
-          {/* PANEL mảnh */}
-          <aside ref={panelRef} className="relative w-[360px]">
-            <div className="sticky top-0 z-20 flex items-center justify-between px-2 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
-              <div className="text-sm text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
-              <button
-                className="text-xs px-2 py-1 rounded border border-slate-600 bg-slate-700 text-slate-100 hover:bg-slate-600"
-                onClick={resetGame}
-              >
-                Làm lại
-              </button>
-            </div>
-
-            <div className="mt-3 border border-slate-700 rounded-lg bg-slate-800/60" style={{ height: vh }}>
-              <div className="h-full p-3 no-scrollbar">
-                <div className="grid" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: GAP }}>
-                  {pieces.map(p=>{
-                    const dAtlas = atlasPaths[p.id];
-                    const dExtra = extraMeta[p.id]?.d;
-                    const hasPlaced = !!placed[p.id];
-                    return (
-                      <PieceTile
-                        key={p.id}
-                        pid={p.id}
-                        name={p.name_vi}
-                        d={dAtlas || dExtra || ""}
-                        disabled={hasPlaced || dragCtl.drag?.pid === p.id}
-                        tile={tile}
-                        onStart={(cx, cy)=> dragCtl.start(p.id, cx, cy, tile)}
-                      />
-                    );
-                  })}
-                </div>
+          {/* PANEL MẢNH – giữ header (thời gian/nút), container tối, KHÔNG tạo scroll toàn trang */}
+          <aside className="relative w-[340px]">
+            <div className="flex items-center justify-between text-slate-200">
+              <div className="text-sm">
+                Thời gian: <b>{(ms / 1000).toFixed(1)}s</b>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="text-xs underline" onClick={() => location.reload()}>
+                  Làm lại
+                </button>
+                <button
+                  className="text-[11px] px-2 py-1 rounded border border-slate-600 bg-slate-700"
+                  onClick={() => {
+                    const next = !dev; setDev(next);
+                    localStorage.setItem("dev", next ? "1" : "0");
+                  }}
+                >
+                  DEV {dev ? "ON" : "OFF"}
+                </button>
               </div>
             </div>
+
+            <div
+              className="mt-3 relative rounded-lg border bg-slate-800/70 border-slate-700"
+              style={{ height: vh }}
+            >
+              <div className="h-full overflow-y-scroll p-3 scroll-stable">
+                {bundle.provinces.map((p, i) => (
+                  <Piece
+                    key={p.id}
+                    p={p}
+                    defaultPos={startPositions[i]}
+                    locked={!!placed[p.id]}
+                    onDrop={(x, y) => tryDrop(p.id, x, y)}
+                    onDragState={(s) => setActivePid(s ? p.id : null)}
+                    d={atlasPaths[p.id] || ""}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {done && (
+              <div className="mt-4 p-3 rounded-lg border bg-slate-800/80 border-slate-700 text-slate-100">
+                <div className="font-semibold">Hoàn thành! {(ms / 1000).toFixed(1)}s</div>
+                <input
+                  className="mt-2 w-full border rounded px-2 py-1 bg-slate-900 border-slate-600"
+                  placeholder="Tên bạn"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <button className="mt-2 px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700" onClick={onSave}>
+                  Lưu BXH Top-5
+                </button>
+              </div>
+            )}
           </aside>
         </div>
       </div>
 
-      {/* Mảnh đang kéo */}
-      {dragCtl.drag && (
-        <FloatingPiece
-          pid={dragCtl.drag.pid}
-          d={atlasPaths[dragCtl.drag.pid] || extraMeta[dragCtl.drag.pid]?.d || ""}
-          x={dragCtl.drag.x} y={dragCtl.drag.y}
-          tile={dragCtl.drag.tile}
-        />
-      )}
-
-      {/* TOAST */}
-      {feedback && createPortal(
-        <div
-          style={{
-            position:'fixed', top: 14, left: '50%', transform: 'translateX(-50%)',
-            zIndex: 2147483000, padding: '6px 10px', borderRadius: 8, color: '#fff',
-            background: feedback==='ok' ? 'rgba(5,150,105,.95)' : 'rgba(244,63,94,.95)',
-            boxShadow: '0 2px 8px rgba(0,0,0,.35)'
-          }}
-        >
-          {feedback==='ok' ? '✓ Đúng rồi!' : '✗ Chưa đúng, thử lại nhé!'}
-        </div>,
-        portalRoot
-      )}
-
-      {showWin && (
-        <WinDialog
-          lbKey={LB_KEY}
-          ms={ms}
-          onClose={()=> setShowWin(false)}
-        />
-      )}
+      {/* AnchorTuner giữ nguyên, overlay phía ngoài stage */}
+      {dev && <AnchorTuner bundle={bundle} vw={vw} vh={vh} />}
     </div>
+    </>
   );
 }
 
-/* ===== components ===== */
-
-function PieceTile({
-  pid, name, d, disabled, tile, onStart
+// ---- Piece: icon kéo (ẩn sau khi đặt đúng) ----
+function Piece({
+  p, defaultPos, locked, onDrop, onDragState, d
 }:{
-  pid: string;
-  name: string;
-  d: string;             // có thể rỗng nếu SVG chưa load
-  disabled: boolean;
-  tile: number;
-  onStart: (cx:number, cy:number)=>void;
-}){
-  const color = colorForId(pid);
+  p: Province;
+  defaultPos: { x: number; y: number };
+  locked: boolean;
+  onDrop: (clientX: number, clientY: number) => boolean;
+  onDragState: (dragging: boolean) => void;
+  d: string; // path từ atlas
+}) {
+  const [pos, setPos] = useState(defaultPos);
+  const [fixedPos, setFixedPos] = useState<{ x: number; y: number } | null>(null);
 
-  // bắt sự kiện sớm + chặn mặc định để tránh “kẹt”
-  function beginDrag(clientX:number, clientY:number, e: Event) {
-    if (disabled) return;
-    if ('preventDefault' in e) (e as any).preventDefault();
-    if ('stopPropagation' in e) (e as any).stopPropagation();
-    onStart(clientX, clientY);
+  // nếu đã đặt đúng -> ẩn icon
+  useEffect(() => { if (locked) { setFixedPos(null); onDragState(false); } }, [locked, onDragState]);
+  if (locked) return null;
+
+  function onPointerDown(e: React.PointerEvent) {
+    const el = e.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    const dx = e.clientX - rect.left;
+    const dy = e.clientY - rect.top;
+    onDragState(true);
+    setFixedPos({ x: e.clientX - dx, y: e.clientY - dy });
+    el.setPointerCapture(e.pointerId);
+
+    function move(ev: PointerEvent) { setFixedPos({ x: ev.clientX - dx, y: ev.clientY - dy }); }
+    function up(ev: PointerEvent) {
+      try { el.releasePointerCapture(e.pointerId); } catch {}
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      const ok = onDrop(ev.clientX, ev.clientY);
+      if (!ok) setFixedPos(null);
+      onDragState(false);
+    }
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up, { once: true });
   }
 
-  return (
-    <div
-      onPointerDownCapture={(e)=> beginDrag(e.clientX, e.clientY, e.nativeEvent)}
-      onMouseDown={(e)=> beginDrag(e.clientX, e.clientY, e.nativeEvent)}
-      onTouchStart={(e)=> {
-        const t = e.touches?.[0]; if (t) beginDrag(t.clientX, t.clientY, e.nativeEvent);
-      }}
-      className={`rounded border grid place-items-center select-none
-                  ${disabled ? 'opacity-30 pointer-events-none bg-slate-900/30' : 'cursor-grab bg-slate-900/50'}`}
-      style={{ height: tile, minHeight: tile, pointerEvents: 'auto' as any, borderColor: color.chipBd }}
-      title={name}
-    >
-      {/* Nếu có d thì vẽ SVG; nếu chưa có d thì hiện placeholder "Đang tải…" */}
-      {d ? (
-        (()=> {
-          const bb = getBBoxForPath(pid, d);
-          const vb = expandBBox(bb, 0.08);
-          return (
-            <svg width={tile-10} height={tile-10}
-                 viewBox={`${vb.x} ${vb.y} ${vb.width} ${vb.height}`}
-                 preserveAspectRatio="xMidYMid meet">
-              <path d={d} fill={color.fill} stroke={color.stroke} strokeWidth={1}/>
-            </svg>
-          );
-        })()
-      ) : (
-        <div className="text-[11px] text-slate-400">Đang tải…</div>
-      )}
-    </div>
-  );
-}
+  // cắt icon quanh anchor để bỏ cụm đảo xa (Trường Sa…)
+  const vb = d
+    ? viewBoxNearAnchorSmart(d, p.anchor_px[0], p.anchor_px[1], 6, 600, 220)
+    : { x: 0, y: 0, w: 100, h: 100 };
 
-
-function FloatingPiece({ pid, d, x, y, tile }:{
-  pid: string; d: string; x:number; y:number; tile:number;
-}){
-  if (!d) {
-    // placeholder khi SVG chưa có
-    return (
-      <div className="fixed z-[3000] select-none pointer-events-none" style={{ left:x, top:y }}>
-        <div style={{
-          width: tile, height: tile, borderRadius: 8,
-          background: 'rgba(148,163,184,.35)', border: '1px solid #64748b'
-        }}/>
-      </div>
-    );
-  }
-  const bb = getBBoxForPath(`drag-${pid}`, d);
-  const vb = expandBBox(bb, 0.08);
-  return (
-    <div className="fixed z-[3000] select-none pointer-events-none" style={{ left:x, top:y }}>
-      <svg width={tile} height={tile}
-           viewBox={`${vb.x} ${vb.y} ${vb.width} ${vb.height}`}
-           preserveAspectRatio="xMidYMid meet">
-        <path d={d} fill="rgba(148,163,184,.96)" stroke="#334155" strokeWidth={1}/>
+  const icon = d
+    ? <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} width={48} height={48} preserveAspectRatio="xMidYMid meet">
+        <path d={d} fill="#fff" stroke="#334155" strokeWidth={1.2} />
       </svg>
+    : <div className="w-12 h-12 rounded bg-slate-200 animate-pulse" />;
+
+  return fixedPos ? (
+    <div
+      className="fixed z-50 select-none"
+      style={{ left: fixedPos.x, top: fixedPos.y, width: 48, height: 48, cursor: "grabbing" }}
+      onPointerDown={onPointerDown}
+      title={p.name_vi}
+    >
+      {icon}
+    </div>
+  ) : (
+    <div
+      className="absolute select-none"
+      style={{ left: pos.x, top: pos.y, width: 48, height: 48, cursor: "grab" }}
+      onPointerDown={onPointerDown}
+      title={p.name_vi}
+    >
+      {icon}
     </div>
   );
 }
 
+// ---- Dev: chỉnh anchor nhanh ----
+function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: number }) {
+  const [pid, setPid] = useState(bundle.provinces[0]?.id || "");
+  const [anchors, setAnchors] = useState<Record<string, [number, number]>>(
+    Object.fromEntries(bundle.provinces.map(p => [p.id, [...p.anchor_px] as [number, number]]))
+  );
+  const cur = bundle.provinces.find(p => p.id === pid);
 
-function WinDialog({ lbKey, ms, onClose }:{
-  lbKey: string; ms:number; onClose:()=>void;
-}){
-  const [name, setName] = useState("");
-  const [savedName, setSavedName] = useState<string | null>(null);
-  const [lb, setLb] = useState<LBItem[]>(() => readLB(lbKey));
-  const top5 = useMemo(() => lb.slice(0,5), [lb]);
+  function onClickBoard(e: React.MouseEvent<HTMLDivElement>) {
+    const host = e.currentTarget as HTMLElement;
+    const r = host.getBoundingClientRect();
+    const x = Math.min(Math.max(e.clientX - r.left, 0), vw);
+    const y = Math.min(Math.max(e.clientY - r.top, 0), vh);
+    setAnchors(a => ({ ...a, [pid]: [x, y] }));
+  }
 
-  function handleSave(){
-    const cleaned = (name ?? "").trim();
-    const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
-    const list = pushLB(lbKey, { name: safeName, ms });
-    setLb(list);
-    setSavedName(safeName);
+  function download() {
+    const rows = bundle.provinces.map(p => {
+      const [x, y] = anchors[p.id];
+      return { province_id: p.id, anchor_x: +x.toFixed(1), anchor_y: +y.toFixed(1) };
+    });
+    const blob = new Blob([JSON.stringify(rows, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "slots.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white text-slate-900 rounded-2xl shadow-xl p-5 w-[min(92vw,520px)] anim-pop">
-        <div className="text-center text-3xl">🎉</div>
-        <div className="mt-1 text-xl font-semibold text-center">Xuất sắc!</div>
-        <div className="text-slate-600 mt-1 text-center">Bạn đã ghép xong bản đồ cấp 2.</div>
-        <div className="mt-2 text-sm text-slate-500 text-center">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
+    <div className="fixed bottom-4 left-4 z-50 bg-white/90 backdrop-blur rounded-lg border shadow p-3 w-[360px]">
+      <div className="font-semibold mb-2">AnchorTuner (DEV)</div>
+      <div className="flex items-center gap-2">
+        <label className="text-sm">Tỉnh:</label>
+        <select className="border rounded px-2 py-1 text-sm flex-1" value={pid} onChange={e => setPid(e.target.value)}>
+          {bundle.provinces.map(p => <option key={p.id} value={p.id}>{p.id} – {p.name_vi}</option>)}
+        </select>
+        <button className="px-2 py-1 text-sm rounded bg-slate-800 text-white" onClick={download}>Export slots.json</button>
+      </div>
+      <div className="text-xs text-slate-600 mt-1">Click lên ảnh dưới để đặt anchor cho tỉnh đang chọn.</div>
 
-        <div className="mt-4">
-          <div className="mb-2 text-sm font-semibold text-slate-700">🏆 Top 5</div>
-          <div className="rounded border border-slate-200 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="text-left px-3 py-2 w-12">#</th>
-                  <th className="text-left px-3 py-2">Tên</th>
-                  <th className="text-right px-3 py-2 w-24">Thời gian</th>
-                </tr>
-              </thead>
-              <tbody>
-                {top5.length === 0 && (
-                  <tr><td colSpan={3} className="px-3 py-3 text-center text-slate-500">Chưa có dữ liệu</td></tr>
-                )}
-                {top5.map((r, i) => (
-                  <tr key={i} className="border-t">
-                    <td className="px-3 py-1.5">{i+1}</td>
-                    <td className="px-3 py-1.5">{r.name}</td>
-                    <td className="px-3 py-1.5 text-right">{(r.ms/1000).toFixed(1)}s</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div className="mt-2 relative border rounded bg-white" style={{ width: vw/2, height: vh/2 }}>
+        <img src="/assets/board_blank_outline.svg" width={vw/2} height={vh/2} className="opacity-30" />
+        <div className="absolute inset-0" onClick={onClickBoard} />
+        {Object.entries(anchors).map(([id, [x, y]]) => (
+          <div key={id} className="absolute" style={{ left: x/2 - 3, top: y/2 - 3 }}>
+            <div className={`w-[6px] h-[6px] rounded-full ${id === pid ? "bg-emerald-600" : "bg-slate-400"}`} />
           </div>
-
-          <div className="mt-4">
-            <label className="text-sm text-slate-700">Tên bạn</label>
-            <div className="mt-1 flex gap-2">
-              <input
-                className="flex-1 border rounded px-3 py-2 text-sm"
-                placeholder="Nhập tên để lưu BXH"
-                value={name}
-                onChange={e=>setName(e.target.value)}
-              />
-              <button
-                className="px-3 py-2 text-sm rounded bg-emerald-600 text-white hover:bg-emerald-700"
-                onClick={handleSave}
-              >
-                Lưu
-              </button>
-            </div>
-            {savedName && (
-              <div className="mt-2 text-sm text-emerald-700">
-                ✅ Đã lưu: <b>{savedName}</b>
-              </div>
-            )}
-          </div>
-
-        </div>
-
-        <div className="mt-4 flex items-center justify-end">
-          <button className="px-3 py-1.5 text-sm rounded border" onClick={onClose}>Đóng</button>
-        </div>
+        ))}
       </div>
     </div>
   );
+}
+
+// ---- utils ----
+function randomStartPositions(list: Province[]) {
+  return list.map((_, i) => ({ x: 40 + (i % 2) * 140, y: 30 + Math.floor(i / 2) * 60 }));
 }

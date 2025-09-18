@@ -181,6 +181,27 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
                   />
                 );
               })}
+              <g
+                fontSize={12}
+                textAnchor="middle"
+                style={{ pointerEvents: "none", paintOrder: "stroke", stroke: "#fff", strokeWidth: 3 }}
+              >
+                {bundle.provinces.map(p => {
+                  const [ax, ay] = p.anchor_px;
+                  const isPlaced = !!placed[p.id];
+                  return (
+                    <text
+                      key={`label-${p.id}`}
+                      x={ax}
+                      y={ay - 6}
+                      fill={isPlaced ? "#0f172a" : "#1e293b"}
+                      opacity={isPlaced ? 1 : 0.7}
+                    >
+                      {p.name_vi}
+                    </text>
+                  );
+                })}
+              </g>
             </svg>
             <div ref={boardRef} className="absolute inset-0">
               {activeProvince && (
@@ -242,8 +263,8 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
     </>
   );
 }
-
-// ---- Piece: icon kéo (ẩn sau khi đặt đúng) ----
+// ---- Piece: icon kéo (dính chuột; ẩn sau khi đặt đúng) ----
+// ---- Piece: icon kéo (dính đúng điểm click; vẽ qua portal để khỏi lệch) ----
 function Piece({
   p, defaultPos, locked, onDrop, onDragState, d
 }:{
@@ -254,52 +275,73 @@ function Piece({
   onDragState: (dragging: boolean) => void;
   d: string; // path từ atlas
 }) {
-  const [pos, setPos] = useState(defaultPos);
-  const [fixedPos, setFixedPos] = useState<{ x: number; y: number } | null>(null);
+  const [pos, setPos] = useState(defaultPos);                // vị trí trong panel (khi KHÔNG kéo)
+  const [dragging, setDragging] = useState(false);
+  const [dragXY, setDragXY] = useState<{x:number; y:number}>({x:0,y:0}); // toạ độ viewport khi kéo (fixed)
+  const offRef = useRef({ dx: 0, dy: 0 });                   // offset điểm click trong icon
+  const pointerIdRef = useRef<number | null>(null);
 
   // nếu đã đặt đúng -> ẩn icon
-  useEffect(() => { if (locked) { setFixedPos(null); onDragState(false); } }, [locked, onDragState]);
+  useEffect(() => {
+    if (locked) {
+      setDragging(false);
+      onDragState(false);
+    }
+  }, [locked, onDragState]);
+
   if (locked) return null;
 
   function onPointerDown(e: React.PointerEvent) {
-  e.preventDefault();              // <- NGĂN default (chọn text, drag ảnh)
-  e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-  const el = e.currentTarget as HTMLElement;
-  const rect = el.getBoundingClientRect();
+    const el = e.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
 
-  // MODE bám giữa icon (48x48) để cảm giác "dính" hơn.
-  const CENTER = true;
-  const dx = CENTER ? 24 : (e.clientX - rect.left);
-  const dy = CENTER ? 24 : (e.clientY - rect.top);
+    // *** BÁM ĐÚNG ĐIỂM CLICK ***
+    offRef.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+    pointerIdRef.current = e.pointerId;
 
-  onDragState(true);
-  setFixedPos({ x: e.clientX - dx, y: e.clientY - dy });
+    // chuyển chế độ kéo
+    setDragging(true);
+    onDragState(true);
 
-  el.setPointerCapture(e.pointerId);
+    // set vị trí bắt đầu cho layer kéo (viewport coords)
+    setDragXY({ x: e.clientX, y: e.clientY });
 
-  function move(ev: PointerEvent) {
-    // luôn bám theo clientX/Y
-    setFixedPos({ x: ev.clientX - dx, y: ev.clientY - dy });
-    ev.preventDefault?.();         // <- tránh cuộn ngoài ý muốn trên mobile
+    // giữ capture trên CHÍNH phần tử này
+    el.setPointerCapture(e.pointerId);
+
+    const move = (ev: PointerEvent) => {
+      // cập nhật theo viewport, chặn scroll trên mobile
+      setDragXY({ x: ev.clientX, y: ev.clientY });
+      ev.preventDefault?.();
+    };
+
+    const up = (ev: PointerEvent) => {
+      try { if (pointerIdRef.current != null) el.releasePointerCapture(pointerIdRef.current); } catch {}
+      window.removeEventListener("pointermove", move as any);
+      window.removeEventListener("pointerup", up as any);
+      window.removeEventListener("pointercancel", up as any);
+
+      // thử thả lên board (dựa vào clientX/Y thật)
+      const ok = onDrop(ev.clientX, ev.clientY);
+      if (!ok) {
+        // quay về icon trong panel
+        setDragging(false);
+        onDragState(false);
+      } else {
+        // parent chuyển locked=true -> component tự ẩn
+        setDragging(false);
+        onDragState(false);
+      }
+      pointerIdRef.current = null;
+    };
+
+    window.addEventListener("pointermove", move as any, { passive: false });
+    window.addEventListener("pointerup", up as any, { once: true });
+    window.addEventListener("pointercancel", up as any, { once: true });
   }
-
-  function up(ev: PointerEvent) {
-    try { el.releasePointerCapture(e.pointerId); } catch {}
-    window.removeEventListener("pointermove", move);
-    window.removeEventListener("pointerup", up);
-    window.removeEventListener("pointercancel", up);    // <- thêm cancel
-    const ok = onDrop(ev.clientX, ev.clientY);
-    if (!ok) setFixedPos(null);
-    onDragState(false);
-  }
-
-  window.addEventListener("pointermove", move, { passive: false }); // <- passive:false
-  window.addEventListener("pointerup", up, { once: true });
-  window.addEventListener("pointercancel", up, { once: true });
-}
-
-
 
   // cắt icon quanh anchor để bỏ cụm đảo xa (Trường Sa…)
   const vb = d
@@ -312,25 +354,47 @@ function Piece({
       </svg>
     : <div className="w-12 h-12 rounded bg-slate-200 animate-pulse" />;
 
-  return fixedPos ? (
-    <div
-    className="fixed z-50 select-none pointer-events-none"  // <- thêm pointer-events-none
-    style={{ left: fixedPos.x, top: fixedPos.y, width: 48, height: 48, cursor: "grabbing" }}
-    title={p.name_vi}
-  >
-      {icon}
-    </div>
-  ) : (
-    <div
-      className="absolute select-none"
-      style={{ left: pos.x, top: pos.y, width: 48, height: 48, cursor: "grab" }}
-      onPointerDown={onPointerDown}
-      title={p.name_vi}
-    >
-      {icon}
-    </div>
+  // 1) Nút trong panel (KHÔNG kéo): absolute trong panel, nhận pointerdown
+  // 2) Khi kéo: icon bay qua portal ở body, position:fixed theo viewport → hết lệch
+  return (
+    <>
+      <div
+        onPointerDown={onPointerDown}
+        className={`absolute select-none ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+        style={{
+          left: pos.x,
+          top: pos.y,
+          width: 48,
+          height: 48,
+          // Khi đang kéo, ẩn nút gốc để tránh double-image
+          opacity: dragging ? 0 : 1,
+          pointerEvents: dragging ? "none" : "auto",
+          zIndex: 1,
+        }}
+        title={p.name_vi}
+      >
+        {icon}
+      </div>
+
+      {dragging && createPortal(
+        <div
+          className="fixed z-[3000] select-none pointer-events-none"
+          style={{
+            left: dragXY.x - offRef.current.dx,
+            top:  dragXY.y - offRef.current.dy,
+            width: 48,
+            height: 48,
+          }}
+        >
+          {icon}
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
+
+
 
 // ---- Dev: chỉnh anchor nhanh ----
 function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: number }) {
@@ -388,5 +452,15 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
 
 // ---- utils ----
 function randomStartPositions(list: Province[]) {
-  return list.map((_, i) => ({ x: 40 + (i % 2) * 140, y: 30 + Math.floor(i / 2) * 60 }));
+  const slots = list.map((_, i) => ({
+    x: 40 + (i % 2) * 140,
+    y: 30 + Math.floor(i / 2) * 60,
+  }));
+  for (let i = slots.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = slots[i];
+    slots[i] = slots[j];
+    slots[j] = tmp;
+  }
+  return slots;
 }

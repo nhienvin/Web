@@ -9,19 +9,7 @@ import { useAtlasPaths } from "../core/useAtlas";
 import { viewBoxNearAnchorSmart } from "../core/svg";
 import { createPortal } from "react-dom";
 // ---- helpers ----
-// === HUD portal setup (không bị scale) ===
-const portalElRef = useRef<HTMLDivElement | null>(null);
-useEffect(() => {
-  const el = document.createElement("div");
-  el.setAttribute("data-level2-portal", "");
-  document.body.appendChild(el);
-  portalElRef.current = el;
-  return () => {
-    if (el.parentNode) el.parentNode.removeChild(el);
-    portalElRef.current = null;
-  };
-}, []);
-const portalRoot = portalElRef.current || document.body;
+
 
 
 function useStageScale(stageW: number, stageH: number, pad = 24) {
@@ -67,35 +55,47 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
   const boardRef = useRef<HTMLDivElement>(null);
   const [vx, vy, vw, vh] = bundle.viewBox;
   const startPositions = useMemo(() => randomStartPositions(bundle.provinces), [bundle]);
+// === HUD portal setup (không bị scale) ===
+  const portalElRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = document.createElement("div");
+    el.setAttribute("data-level2-portal", "");
+    document.body.appendChild(el);
+    portalElRef.current = el;
+    return () => {
+      if (el.parentNode) el.parentNode.removeChild(el);
+      portalElRef.current = null;
+    };
+  }, []);
+  const portalRoot = portalElRef.current || document.body;
+  function tryDrop(pid: string, cx: number, cy: number) {
+    const el = boardRef.current!;
+    const r = el.getBoundingClientRect();
 
-function tryDrop(pid: string, cx: number, cy: number) {
-  const el = boardRef.current!;
-  const r = el.getBoundingClientRect();
+    // thêm scale-safe:
+    const sx = r.width / vw;
+    const sy = r.height / vh;
+    const x = (cx - r.left) / sx;
+    const y = (cy - r.top) / sy;
 
-  // thêm scale-safe:
-  const sx = r.width / vw;
-  const sy = r.height / vh;
-  const x = (cx - r.left) / sx;
-  const y = (cy - r.top) / sy;
+    const p = bundle.provinces.find(q => q.id === pid)!;
 
-  const p = bundle.provinces.find(q => q.id === pid)!;
+    const ax = Math.min(Math.max(p.anchor_px[0], 0), vw);
+    const ay = Math.min(Math.max(p.anchor_px[1], 0), vh);
 
-  const ax = Math.min(Math.max(p.anchor_px[0], 0), vw);
-  const ay = Math.min(Math.max(p.anchor_px[1], 0), vh);
+    const tol = Math.max(p.snap_tolerance_px || 18, 36);
+    const ok = within(dist(x, y, ax, ay), tol);
 
-  const tol = Math.max(p.snap_tolerance_px || 18, 36);
-  const ok = within(dist(x, y, ax, ay), tol);
-
-  if (ok) {
-    setPlaced(s => ({ ...s, [pid]: true }));
-    playCorrect();
-  } else {
-    setShake(true); setTimeout(() => setShake(false), 480);
-    if (navigator.vibrate) navigator.vibrate(50);
-    playWrong();
+    if (ok) {
+      setPlaced(s => ({ ...s, [pid]: true }));
+      playCorrect();
+    } else {
+      setShake(true); setTimeout(() => setShake(false), 480);
+      if (navigator.vibrate) navigator.vibrate(50);
+      playWrong();
+    }
+    return ok;
   }
-  return ok;
-}
 
 
   function onSave() {
@@ -117,7 +117,7 @@ function tryDrop(pid: string, cx: number, cy: number) {
     {/* === HUD overlay: luôn rõ, không bị thu nhỏ === */}
       {createPortal(
         <div
-          className="fixed top-3 right-3 z-[2147483647] flex items-center gap-2
+          className="fixed top-2 left-3 z-[2147483647] flex items-center gap-2
                     bg-slate-800/90 text-white border border-slate-700 rounded-lg
                     px-3 py-2 shadow-lg pointer-events-auto"
         >
@@ -199,31 +199,11 @@ function tryDrop(pid: string, cx: number, cy: number) {
 
           {/* PANEL MẢNH – giữ header (thời gian/nút), container tối, KHÔNG tạo scroll toàn trang */}
           <aside className="relative w-[340px]">
-            <div className="flex items-center justify-between text-slate-200">
-              <div className="text-sm">
-                Thời gian: <b>{(ms / 1000).toFixed(1)}s</b>
-              </div>
-              <div className="flex items-center gap-2">
-                <button className="text-xs underline" onClick={() => location.reload()}>
-                  Làm lại
-                </button>
-                <button
-                  className="text-[11px] px-2 py-1 rounded border border-slate-600 bg-slate-700"
-                  onClick={() => {
-                    const next = !dev; setDev(next);
-                    localStorage.setItem("dev", next ? "1" : "0");
-                  }}
-                >
-                  DEV {dev ? "ON" : "OFF"}
-                </button>
-              </div>
-            </div>
-
             <div
               className="mt-3 relative rounded-lg border bg-slate-800/70 border-slate-700"
               style={{ height: vh }}
             >
-              <div className="h-full overflow-y-scroll p-3 scroll-stable">
+              <div className="h-full overflow-y-scroll p-3 scroll-stable touch-none">
                 {bundle.provinces.map((p, i) => (
                   <Piece
                     key={p.id}
@@ -282,26 +262,44 @@ function Piece({
   if (locked) return null;
 
   function onPointerDown(e: React.PointerEvent) {
-    const el = e.currentTarget as HTMLElement;
-    const rect = el.getBoundingClientRect();
-    const dx = e.clientX - rect.left;
-    const dy = e.clientY - rect.top;
-    onDragState(true);
-    setFixedPos({ x: e.clientX - dx, y: e.clientY - dy });
-    el.setPointerCapture(e.pointerId);
+  e.preventDefault();              // <- NGĂN default (chọn text, drag ảnh)
+  e.stopPropagation();
 
-    function move(ev: PointerEvent) { setFixedPos({ x: ev.clientX - dx, y: ev.clientY - dy }); }
-    function up(ev: PointerEvent) {
-      try { el.releasePointerCapture(e.pointerId); } catch {}
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      const ok = onDrop(ev.clientX, ev.clientY);
-      if (!ok) setFixedPos(null);
-      onDragState(false);
-    }
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up, { once: true });
+  const el = e.currentTarget as HTMLElement;
+  const rect = el.getBoundingClientRect();
+
+  // MODE bám giữa icon (48x48) để cảm giác "dính" hơn.
+  const CENTER = true;
+  const dx = CENTER ? 24 : (e.clientX - rect.left);
+  const dy = CENTER ? 24 : (e.clientY - rect.top);
+
+  onDragState(true);
+  setFixedPos({ x: e.clientX - dx, y: e.clientY - dy });
+
+  el.setPointerCapture(e.pointerId);
+
+  function move(ev: PointerEvent) {
+    // luôn bám theo clientX/Y
+    setFixedPos({ x: ev.clientX - dx, y: ev.clientY - dy });
+    ev.preventDefault?.();         // <- tránh cuộn ngoài ý muốn trên mobile
   }
+
+  function up(ev: PointerEvent) {
+    try { el.releasePointerCapture(e.pointerId); } catch {}
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    window.removeEventListener("pointercancel", up);    // <- thêm cancel
+    const ok = onDrop(ev.clientX, ev.clientY);
+    if (!ok) setFixedPos(null);
+    onDragState(false);
+  }
+
+  window.addEventListener("pointermove", move, { passive: false }); // <- passive:false
+  window.addEventListener("pointerup", up, { once: true });
+  window.addEventListener("pointercancel", up, { once: true });
+}
+
+
 
   // cắt icon quanh anchor để bỏ cụm đảo xa (Trường Sa…)
   const vb = d
@@ -316,11 +314,10 @@ function Piece({
 
   return fixedPos ? (
     <div
-      className="fixed z-50 select-none"
-      style={{ left: fixedPos.x, top: fixedPos.y, width: 48, height: 48, cursor: "grabbing" }}
-      onPointerDown={onPointerDown}
-      title={p.name_vi}
-    >
+    className="fixed z-50 select-none pointer-events-none"  // <- thêm pointer-events-none
+    style={{ left: fixedPos.x, top: fixedPos.y, width: 48, height: 48, cursor: "grabbing" }}
+    title={p.name_vi}
+  >
       {icon}
     </div>
   ) : (

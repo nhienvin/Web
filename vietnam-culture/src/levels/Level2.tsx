@@ -1,5 +1,5 @@
 // src/levels/Level2.tsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Bundle, Province } from "../types";
 import { dist, within } from "../core/math";
 import { useTimer } from "../core/useTimer";
@@ -40,21 +40,31 @@ function getDevFlag(): boolean {
 
 const LB_KEY = "lb:pack1:level2";
 
+type LBItem = { name: string; ms: number };
+function readLB(key: string): LBItem[] {
+  try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
+}
+
 // ---- main ----
 export default function Level2({ bundle }: { bundle: Bundle }) {
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
   const [activePid, setActivePid] = useState<string | null>(null);
   const done = Object.keys(placed).length === bundle.provinces.length;
-  const { ms } = useTimer(!done);
-  const [name, setName] = useState("");
-  const { playCorrect, playWrong } = useSfx();
+  const { ms, reset: resetTimer } = useTimer(!done);
+  const { playCorrect, playWrong, playWin } = useSfx();
   const [shake, setShake] = useState(false);
   const [dev, setDev] = useState(getDevFlag());
+  const [showWin, setShowWin] = useState(false);
+  const doneRef = useRef<boolean>(false);
 
   const atlasPaths = useAtlasPaths("/assets/atlas.svg");
   const boardRef = useRef<HTMLDivElement>(null);
   const [vx, vy, vw, vh] = bundle.viewBox;
-  const startPositions = useMemo(() => randomStartPositions(bundle.provinces), [bundle]);
+  const [startPositions, setStartPositions] = useState(() => randomStartPositions(bundle.provinces));
+  const [colorMap, setColorMap] = useState<ProvinceColorMap>(() => randomColorMap(bundle.provinces));
+  const uniqueId = useId().replace(/:/g, "");
+  const gradientId = `${uniqueId}-gradient`;
+  const shadowId = `${uniqueId}-shadow`;
 // === HUD portal setup (không bị scale) ===
   const portalElRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -68,6 +78,34 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
     };
   }, []);
   const portalRoot = portalElRef.current || document.body;
+
+  useEffect(() => {
+    setStartPositions(randomStartPositions(bundle.provinces));
+    setColorMap(randomColorMap(bundle.provinces));
+  }, [bundle]);
+
+  useEffect(() => {
+    if (!done) {
+      doneRef.current = false;
+      return;
+    }
+    if (doneRef.current) return;
+    doneRef.current = true;
+    setShowWin(true);
+    playWin();
+  }, [done, playWin]);
+
+  function resetGame() {
+    setPlaced({});
+    setActivePid(null);
+    setShowWin(false);
+    setShake(false);
+    doneRef.current = false;
+    setStartPositions(randomStartPositions(bundle.provinces));
+    setColorMap(randomColorMap(bundle.provinces));
+    resetTimer();
+  }
+
   function tryDrop(pid: string, cx: number, cy: number) {
     const el = boardRef.current!;
     const r = el.getBoundingClientRect();
@@ -98,11 +136,6 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
   }
 
 
-  function onSave() {
-    const list = pushLB(LB_KEY, { name: name || "Ẩn danh", ms });
-    alert(`Đã lưu! Top 1: ${list[0].name} – ${(list[0].ms / 1000).toFixed(1)}s`);
-  }
-
   const activeProvince = activePid ? bundle.provinces.find(p => p.id === activePid) : null;
   const tol = activeProvince ? Math.max(activeProvince.snap_tolerance_px || 18, 36) : 0;
 
@@ -126,7 +159,7 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
           </span>
           <button
             className="text-xs px-2 py-1 rounded border border-slate-600 bg-slate-700 hover:bg-slate-600"
-            onClick={() => location.reload()}
+            onClick={resetGame}
             title="Làm lại"
           >
             ↻
@@ -160,23 +193,49 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
         >
           {/* BOARD (giữ nguyên, chỉ thêm border/shadow phù hợp nền tối) */}
           <div className={`relative ${shake ? "anim-shake" : ""}`} style={{ width: vw, height: vh }}>
-            <img
-              src="/assets/board_blank_outline.svg"
-              width={vw}
-              height={vh}
-              className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-lg"
-            />
+            <div
+              aria-hidden
+              className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-lg overflow-hidden"
+              style={{ width: '100%', height: '100%' }}
+            >
+              <svg
+                className="block h-full w-full"
+                viewBox={`0 0 ${vw} ${vh}`}
+                preserveAspectRatio="xMidYMid meet"
+              >
+                <defs>
+                  <linearGradient id={gradientId} x1="4%" y1="0%" x2="96%" y2="100%">
+                    <stop offset="0%" stopColor="rgba(15,23,42,0.95)" />
+                    <stop offset="100%" stopColor="rgba(30,41,59,0.85)" />
+                  </linearGradient>
+                  <filter id={shadowId} x="-4%" y="-4%" width="108%" height="108%" colorInterpolationFilters="sRGB">
+                    <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#020617" floodOpacity="0.8" />
+                  </filter>
+                </defs>
+                <rect width={vw} height={vh} fill={`url(#${gradientId})`} />
+                <g fill="rgba(4, 34, 104, 0.92)" filter={`url(#${shadowId})`}>
+                  {bundle.provinces.map(p => {
+                    const d = atlasPaths[p.id];
+                    if (!d) return null;
+                    return <path key={`bg-${p.id}`} d={d} />;
+                  })}
+                </g>
+              </svg>
+            </div>
             <svg className="absolute inset-0 pointer-events-none" viewBox={`0 0 ${vw} ${vh}`}>
               {bundle.provinces.map(p => {
                 if (!placed[p.id]) return null;
                 const d = atlasPaths[p.id];
                 if (!d) return null;
+                const color = colorMap[p.id];
+                const fillColor = color?.fill || "rgba(226, 238, 118, 0.95)";
+                const strokeColor = color?.stroke || "rgba(86, 233, 186, 0.95)";
                 return (
                   <path
                     key={p.id}
                     d={d}
-                    fill="rgba(16,185,129,.22)"
-                    stroke="rgba(5,150,105,.95)"
+                    fill={fillColor}
+                    stroke={strokeColor}
                     strokeWidth={1}
                   />
                 );
@@ -184,19 +243,13 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
               <g
                 fontSize={12}
                 textAnchor="middle"
-                style={{ pointerEvents: "none", paintOrder: "stroke", stroke: "#fff", strokeWidth: 3 }}
+                style={{ pointerEvents: "none", paintOrder: "stroke", stroke: "rgba(15,23,42,0.85)", strokeWidth: 4 }}
               >
                 {bundle.provinces.map(p => {
+                  if (!placed[p.id]) return null;
                   const [ax, ay] = p.anchor_px;
-                  const isPlaced = !!placed[p.id];
                   return (
-                    <text
-                      key={`label-${p.id}`}
-                      x={ax}
-                      y={ay - 6}
-                      fill={isPlaced ? "#0f172a" : "#1e293b"}
-                      opacity={isPlaced ? 1 : 0.7}
-                    >
+                    <text key={`label-${p.id}`} x={ax} y={ay - 6} fill="#f8fafc">
                       {p.name_vi}
                     </text>
                   );
@@ -224,7 +277,7 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
               className="mt-3 relative rounded-lg border bg-slate-800/70 border-slate-700"
               style={{ height: vh }}
             >
-              <div className="h-full overflow-y-scroll p-3 scroll-stable touch-none">
+              <div className="h-full overflow-y-auto p-3 scroll-stable touch-none">
                 {bundle.provinces.map((p, i) => (
                   <Piece
                     key={p.id}
@@ -234,22 +287,20 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
                     onDrop={(x, y) => tryDrop(p.id, x, y)}
                     onDragState={(s) => setActivePid(s ? p.id : null)}
                     d={atlasPaths[p.id] || ""}
+                    color={colorMap[p.id]}
                   />
                 ))}
               </div>
             </div>
 
-            {done && (
-              <div className="mt-4 p-3 rounded-lg border bg-slate-800/80 border-slate-700 text-slate-100">
+            {done && !showWin && (
+              <div className="mt-4 rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-slate-100">
                 <div className="font-semibold">Hoàn thành! {(ms / 1000).toFixed(1)}s</div>
-                <input
-                  className="mt-2 w-full border rounded px-2 py-1 bg-slate-900 border-slate-600"
-                  placeholder="Tên bạn"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-                <button className="mt-2 px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700" onClick={onSave}>
-                  Lưu BXH Top-5
+                <button
+                  className="mt-2 w-full rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                  onClick={() => setShowWin(true)}
+                >
+                  Xem bảng xếp hạng
                 </button>
               </div>
             )}
@@ -260,13 +311,21 @@ export default function Level2({ bundle }: { bundle: Bundle }) {
       {/* AnchorTuner giữ nguyên, overlay phía ngoài stage */}
       {dev && <AnchorTuner bundle={bundle} vw={vw} vh={vh} />}
     </div>
+
+    {showWin && (
+      <WinDialog
+        lbKey={LB_KEY}
+        ms={ms}
+        onClose={() => setShowWin(false)}
+      />
+    )}
     </>
   );
 }
 // ---- Piece: icon kéo (dính chuột; ẩn sau khi đặt đúng) ----
 // ---- Piece: icon kéo (dính đúng điểm click; vẽ qua portal để khỏi lệch) ----
 function Piece({
-  p, defaultPos, locked, onDrop, onDragState, d
+  p, defaultPos, locked, onDrop, onDragState, d, color
 }:{
   p: Province;
   defaultPos: { x: number; y: number };
@@ -274,11 +333,15 @@ function Piece({
   onDrop: (clientX: number, clientY: number) => boolean;
   onDragState: (dragging: boolean) => void;
   d: string; // path từ atlas
+  color?: ProvinceColor;
 }) {
   const [pos, setPos] = useState(defaultPos);                // vị trí trong panel (khi KHÔNG kéo)
   const [dragging, setDragging] = useState(false);
   const [dragXY, setDragXY] = useState<{x:number; y:number}>({x:0,y:0}); // toạ độ viewport khi kéo (fixed)
   const offRef = useRef({ dx: 0, dy: 0 });                   // offset điểm click trong icon
+  useEffect(() => {
+    setPos(defaultPos);
+  }, [defaultPos]);
   const pointerIdRef = useRef<number | null>(null);
 
   // nếu đã đặt đúng -> ẩn icon
@@ -348,32 +411,51 @@ function Piece({
     ? viewBoxNearAnchorSmart(d, p.anchor_px[0], p.anchor_px[1], 6, 600, 220)
     : { x: 0, y: 0, w: 100, h: 100 };
 
+  const iconFill = color?.iconFill || "#f1f5f9";
+  const iconStroke = color?.iconStroke || "#334155";
   const icon = d
     ? <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} width={48} height={48} preserveAspectRatio="xMidYMid meet">
-        <path d={d} fill="#fff" stroke="#334155" strokeWidth={1.2} />
+        <path d={d} fill={iconFill} stroke={iconStroke} strokeWidth={1.2} />
       </svg>
     : <div className="w-12 h-12 rounded bg-slate-200 animate-pulse" />;
 
-  // 1) Nút trong panel (KHÔNG kéo): absolute trong panel, nhận pointerdown
-  // 2) Khi kéo: icon bay qua portal ở body, position:fixed theo viewport → hết lệch
+  const renderContent = (floating: boolean) => (
+    <div className="flex flex-col items-center text-center">
+      <div className="w-12 h-12 flex items-center justify-center">{icon}</div>
+      <div
+        className={`mt-1 text-[11px] font-semibold leading-tight px-1 ${floating ?
+          "text-white bg-slate-900/85 rounded" :
+          "text-slate-100 drop-shadow"
+        }`}
+      >
+        {p.name_vi}
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div
         onPointerDown={onPointerDown}
-        className={`absolute select-none ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+        className={`select-none ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
         style={{
+          position: dragging ? "fixed" : "absolute",
           left: pos.x,
           top: pos.y,
-          width: 48,
-          height: 48,
-          // Khi đang kéo, ẩn nút gốc để tránh double-image
+          width: 76,
+          minHeight: 74,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          gap: 4,
           opacity: dragging ? 0 : 1,
           pointerEvents: dragging ? "none" : "auto",
-          zIndex: 1,
+          zIndex: dragging ? 50 : 1,
         }}
         title={p.name_vi}
       >
-        {icon}
+        {renderContent(false)}
       </div>
 
       {dragging && createPortal(
@@ -382,17 +464,128 @@ function Piece({
           style={{
             left: dragXY.x - offRef.current.dx,
             top:  dragXY.y - offRef.current.dy,
-            width: 48,
-            height: 48,
+            width: 76,
+            minHeight: 74,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            gap: 4,
           }}
         >
-          {icon}
+          {renderContent(true)}
         </div>,
         document.body
       )}
     </>
   );
 }
+
+
+function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose: () => void }) {
+  const [name, setName] = useState("");
+  const [entries, setEntries] = useState<LBItem[]>(() => readLB(lbKey));
+  const [saved, setSaved] = useState<LBItem | null>(null);
+
+  const top5 = useMemo(() => entries.slice(0, 5), [entries]);
+  const savedRank = saved
+    ? top5.findIndex(e => e.name === saved.name && e.ms === saved.ms)
+    : -1;
+
+  function handleSave() {
+    const cleaned = (name || "").trim();
+    const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
+    const list = pushLB(lbKey, { name: safeName, ms });
+    setEntries(list);
+    setSaved({ name: safeName, ms });
+    setName("");
+  }
+
+  return (
+    <div className="fixed inset-0 z-[2147483600] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+      <div className="w-[min(92vw,520px)] rounded-2xl bg-white text-slate-900 shadow-xl p-5 anim-pop">
+        <div className="text-center">
+          <div className="text-2xl font-semibold">Hoàn thành Level 2!</div>
+          <div className="mt-1 text-sm text-slate-600">Thời gian: <b>{(ms / 1000).toFixed(1)}s</b></div>
+        </div>
+
+        <div className="mt-4">
+          <div className="mb-2 text-sm font-semibold text-slate-700">Bảng xếp hạng Top 5</div>
+          <div className="overflow-hidden rounded-lg border border-slate-200">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-slate-600">
+                <tr>
+                  <th className="w-12 px-3 py-2 text-left">#</th>
+                  <th className="px-3 py-2 text-left">Tên</th>
+                  <th className="w-28 px-3 py-2 text-right">Thời gian</th>
+                </tr>
+              </thead>
+              <tbody>
+                {top5.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="px-3 py-3 text-center text-slate-500">Chưa có dữ liệu</td>
+                  </tr>
+                )}
+                {top5.map((entry, idx) => (
+                  <tr
+                    key={`${entry.name}-${entry.ms}-${idx}`}
+                    className={`border-t ${idx === savedRank ? "bg-emerald-50" : ""}`}
+                  >
+                    <td className="px-3 py-1.5">{idx + 1}</td>
+                    <td className="px-3 py-1.5">{entry.name}</td>
+                    <td className="px-3 py-1.5 text-right">{(entry.ms / 1000).toFixed(1)}s</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {saved && (
+            <div className="mt-3 text-sm">
+              {savedRank >= 0 ? (
+                <span className="text-emerald-700">
+                  Bạn đang ở hạng #{savedRank + 1} với {(saved.ms / 1000).toFixed(1)}s.
+                </span>
+              ) : (
+                <span className="text-slate-600">
+                  Thời gian hiện chưa vào Top 5, thử lại nhanh hơn nhé!
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-5">
+          <label className="text-sm text-slate-700">Nhập tên của bạn</label>
+          <div className="mt-2 flex gap-2">
+            <input
+              className="flex-1 rounded border border-slate-300 px-3 py-2 text-sm"
+              placeholder="Tên hiển thị"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <button
+              className="rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+              onClick={handleSave}
+            >
+              Lưu
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-5 flex items-center justify-end">
+          <button
+            className="rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+            onClick={onClose}
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 
 
@@ -448,6 +641,22 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
       </div>
     </div>
   );
+}
+
+type ProvinceColor = { fill: string; stroke: string; iconFill: string; iconStroke: string };
+type ProvinceColorMap = Record<string, ProvinceColor>;
+
+function randomColorMap(list: Province[]): ProvinceColorMap {
+  return Object.fromEntries(list.map((p) => {
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = 55 + Math.random() * 25; // 55-80
+    const light = 52 + Math.random() * 12; // 52-64
+    const fill = `hsl(${hue} ${saturation}% ${light}%)`;
+    const stroke = `hsl(${hue} ${Math.max(30, saturation - 25)}% ${Math.max(18, light - 28)}%)`;
+    const iconFill = `hsl(${hue} ${Math.min(95, saturation + 12)}% ${Math.min(88, light + 18)}%)`;
+    const iconStroke = stroke;
+    return [p.id, { fill, stroke, iconFill, iconStroke }];
+  }));
 }
 
 // ---- utils ----

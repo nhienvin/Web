@@ -31,7 +31,16 @@ function useStageScale(stageW:number, stageH:number, pad=24){
   },[stageW,stageH,pad]);
   return scale;
 }
-
+function getDevFlag(): boolean {
+  try {
+    const qs = new URLSearchParams(window.location.search || "");
+    if (qs.get("dev") === "1") return true;
+    const hash = String(window.location.hash || "");
+    const hs = new URLSearchParams(hash.includes("?") ? hash.split("?")[1] : "");
+    if (hs.get("dev") === "1") return true;
+    return localStorage.getItem("dev") === "1";
+  } catch { return false; }
+}
 /* ========= fallback: SVG tỉnh rời ========= */
 type SvgMeta = { d: string; vb: {minX:number; minY:number; width:number; height:number} | null };
 const svgCache = new Map<string, SvgMeta>();
@@ -83,7 +92,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
   const boardRef = useRef<HTMLDivElement>(null);
   const doneOnceRef = useRef(false);
   const [vx, vy, vw, vh] = bundle.viewBox;
-
+  const [dev, setDev] = useState(getDevFlag());
   const provinces = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
 
   const stageW = vw + 16 + PANEL_W;
@@ -190,6 +199,13 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
               background:'#334155', color:'#fff', cursor:'pointer' }}
             title="Làm lại (random thứ tự mới)"
           >↻</button>
+          <button
+            className="text-[11px] px-2 py-1 rounded border border-slate-600 bg-slate-700"
+            onClick={() => { const next = !dev; setDev(next); localStorage.setItem("dev", next ? "1":"0"); }}
+            title="Bật/tắt bảng DEV"
+          >
+            DEV {dev ? "ON" : "OFF"}
+          </button>
         </div>,
         document.body
       )}
@@ -321,6 +337,8 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
         </div>,
         document.body
       )}
+      {/* AnchorTuner giữ nguyên, overlay phía ngoài stage */}
+      {dev && <AnchorTuner bundle={bundle} vw={vw} vh={vh} />}
 
       {/* POPUP thắng cuộc (có Top 5, nút Đóng là tắt hẳn) */}
       {showWin && (
@@ -383,7 +401,63 @@ function FloatingChip({
     </div>
   );
 }
+// ---- Dev: chỉnh anchor nhanh ----
+function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: number }) {
+  const [pid, setPid] = useState(bundle.provinces[0]?.id || "");
+  const [anchors, setAnchors] = useState<Record<string, [number, number]>>(
+    Object.fromEntries(bundle.provinces.map(p => [p.id, [...p.anchor_px] as [number, number]]))
+  );
+  const cur = bundle.provinces.find(p => p.id === pid);
 
+  function onClickBoard(e: React.MouseEvent<HTMLDivElement>) {
+    const host = e.currentTarget as HTMLElement;
+    const r = host.getBoundingClientRect();
+    const scaleX = vw / r.width;
+    const scaleY = vh / r.height;
+    const rawX = (e.clientX - r.left) * scaleX;
+    const rawY = (e.clientY - r.top) * scaleY;
+    const x = Math.min(Math.max(rawX, 0), vw);
+    const y = Math.min(Math.max(rawY, 0), vh);
+    setAnchors(a => ({ ...a, [pid]: [x, y] }));
+  }
+
+  function download() {
+    const rows = bundle.provinces.map(p => {
+      const [x, y] = anchors[p.id];
+      return { province_id: p.id, anchor_x: +x.toFixed(1), anchor_y: +y.toFixed(1) };
+    });
+    const blob = new Blob([JSON.stringify(rows, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "slots.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  return (
+    <div className="fixed bottom-4 left-4 z-50 bg-white/90 backdrop-blur rounded-lg border shadow p-3 w-[360px]">
+      <div className="font-semibold mb-2 text-black">AnchorTuner (DEV)</div>
+      <div className="flex items-center gap-2">
+        <label className="text-sm text-black">Tỉnh:</label>
+        <select className="border rounded px-2 py-1 text-sm flex-1 text-black" value={pid} onChange={e => setPid(e.target.value)}>
+          {bundle.provinces.map(p => <option key={p.id} value={p.id}>{p.id} – {p.name_vi}</option>)}
+        </select>
+        <button className="px-2 py-1 text-sm rounded bg-slate-800 text-white" onClick={download}>Export slots.json</button>
+      </div>
+      <div className="text-xs text-slate-600 mt-1">Click lên ảnh dưới để đặt anchor cho tỉnh đang chọn.</div>
+
+      <div className="mt-2 relative border rounded bg-slate-300" style={{ width: vw/2, height: vh/2 }}>
+        <img src="/assets/board_blank_outline.svg" width={vw/2} height={vh/2} className="opacity-30" />
+        <div className="absolute inset-0" onClick={onClickBoard} />
+        {Object.entries(anchors).map(([id, [x, y]]) => (
+          <div key={id} className="absolute" style={{ left: x/2 - 3, top: y/2 - 3 }}>
+            <div className={`w-[6px] h-[6px] rounded-full ${id === pid ? "bg-emerald-600" : "bg-slate-400"}`} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 function WinDialog({ lbKey, ms, onClose }:{
   lbKey: string; ms:number; onClose:()=>void;
 }){

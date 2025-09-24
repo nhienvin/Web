@@ -105,6 +105,29 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
   const { ms } = useTimer(solved < total);
 
   const { playCorrect, playWrong, playWin } = useSfx();
+  const truongSaMarkers = [
+    [0.84, 0.80],
+    [0.87, 0.83],
+    [0.90, 0.86],
+    [0.93, 0.89],
+    [0.88, 0.91],
+    [0.95, 0.93],
+    [0.90, 0.95],
+    [0.97, 0.98],
+  ];
+  const truongSaRadius = Math.max(3, Math.min(9, Math.max(vw, vh) * 0.006));
+  const truongSaStroke = Math.max(0.7, Math.min(3, Math.max(vw, vh) * 0.0012));
+  const truongSaFontSize = Math.max(12, Math.min(32, vw * 0.02));
+  const hoangSaMarkers = [
+    [0.72, 0.18],
+    [0.76, 0.20],
+    [0.74, 0.23],
+    [0.79, 0.24],
+    [0.81, 0.19],
+  ];
+  const hoangSaRadius = Math.max(2.5, Math.min(7, Math.max(vw, vh) * 0.004));
+  const hoangSaStroke = Math.max(0.6, Math.min(2.4, Math.max(vw, vh) * 0.001));
+  const hoangSaFontSize = Math.max(10, Math.min(26, vw * 0.016));
 
   // preload SVG rời
   const [extraMeta, setExtraMeta] = useState<Record<string, SvgMeta>>({});
@@ -232,6 +255,36 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
 
             {/* Fill tỉnh đã đúng */}
             <svg className="absolute inset-0 pointer-events-none" viewBox={`0 0 ${vw} ${vh}`} style={{ zIndex: 5 }}>
+              <g stroke="#38bdf8" fill="#38bdf8" fillOpacity={0.75} strokeWidth={truongSaStroke}>
+                {truongSaMarkers.map(([fx, fy], idx) => (
+                  <circle key={`ts-${idx}`} cx={vw * fx} cy={vh * fy} r={truongSaRadius} />
+                ))}
+              </g>
+              <g stroke="#fbbf24" fill="#fbbf24" fillOpacity={0.75} strokeWidth={hoangSaStroke}>
+                {hoangSaMarkers.map(([fx, fy], idx) => (
+                  <circle key={`hs-${idx}`} cx={vw * fx} cy={vh * fy} r={hoangSaRadius} />
+                ))}
+              </g>
+              <text
+                x={vw * 0.88}
+                y={vh * 0.74}
+                fill="#38bdf8"
+                fontSize={truongSaFontSize}
+                fontWeight={600}
+                opacity={0.8}
+              >
+                Trường Sa
+              </text>
+              <text
+                x={vw * 0.76}
+                y={vh * 0.14}
+                fill="#fbbf24"
+                fontSize={hoangSaFontSize}
+                fontWeight={600}
+                opacity={0.85}
+              >
+                Hoàng Sa
+              </text>
               {/* layer path fill */}
               {bundle.provinces.map(p=>{
                 if (!placed[p.id]) return null;

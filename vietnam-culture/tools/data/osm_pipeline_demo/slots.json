@@ -1,172 +1,172 @@
 [
   {
     "province_id": "1",
-    "anchor_x": 180,
-    "anchor_y": 143.2
-  },
-  {
-    "province_id": "2",
-    "anchor_x": 275,
-    "anchor_y": 157.9
-  },
-  {
-    "province_id": "4",
-    "anchor_x": 429,
-    "anchor_y": 99.2
-  },
-  {
-    "province_id": "5",
-    "anchor_x": 252.8,
-    "anchor_y": 228.2
-  },
-  {
-    "province_id": "7",
-    "anchor_x": 324.8,
-    "anchor_y": 125.6
-  },
-  {
-    "province_id": "9",
-    "anchor_x": 456.7,
-    "anchor_y": 175.2
+    "anchor_x": 98.5,
+    "anchor_y": 200.6
   },
   {
     "province_id": "13",
-    "anchor_x": 519,
-    "anchor_y": 249.3
+    "anchor_x": 325.6,
+    "anchor_y": 274.8
   },
   {
     "province_id": "18",
-    "anchor_x": 449.6,
-    "anchor_y": 338.8
+    "anchor_x": 261.3,
+    "anchor_y": 330.9
+  },
+  {
+    "province_id": "2",
+    "anchor_x": 162.8,
+    "anchor_y": 216.6
   },
   {
     "province_id": "21",
-    "anchor_x": 372.2,
-    "anchor_y": 350.2
+    "anchor_x": 225.1,
+    "anchor_y": 349
   },
   {
     "province_id": "22",
-    "anchor_x": 315.2,
-    "anchor_y": 407.8
+    "anchor_x": 191,
+    "anchor_y": 393.1
   },
   {
     "province_id": "23",
-    "anchor_x": 398.2,
-    "anchor_y": 490.3
+    "anchor_x": 239.2,
+    "anchor_y": 457.3
   },
   {
     "province_id": "25",
-    "anchor_x": 487.2,
-    "anchor_y": 588.3
+    "anchor_x": 289.4,
+    "anchor_y": 519.5
   },
   {
     "province_id": "26",
-    "anchor_x": 548.3,
-    "anchor_y": 646
+    "anchor_x": 349.7,
+    "anchor_y": 579.7
   },
   {
     "province_id": "29",
-    "anchor_x": 616.2,
-    "anchor_y": 792.4
+    "anchor_x": 381.9,
+    "anchor_y": 673.9
   },
   {
     "province_id": "30",
-    "anchor_x": 617.1,
-    "anchor_y": 879.1
+    "anchor_x": 400,
+    "anchor_y": 726.1
   },
   {
     "province_id": "33",
-    "anchor_x": 621.9,
-    "anchor_y": 957.9
+    "anchor_x": 398,
+    "anchor_y": 788.3
   },
   {
     "province_id": "34",
-    "anchor_x": 666.7,
-    "anchor_y": 1118.3
+    "anchor_x": 432.2,
+    "anchor_y": 830.4
   },
   {
     "province_id": "35",
-    "anchor_x": 593.9,
-    "anchor_y": 1113.8
+    "anchor_x": 369.8,
+    "anchor_y": 856.4
   },
   {
     "province_id": "37",
-    "anchor_x": 432.3,
-    "anchor_y": 1114.4
+    "anchor_x": 271.4,
+    "anchor_y": 908.6
   },
   {
     "province_id": "39",
-    "anchor_x": 500.2,
-    "anchor_y": 1084.7
+    "anchor_x": 319.6,
+    "anchor_y": 868.5
+  },
+  {
+    "province_id": "4",
+    "anchor_x": 259.3,
+    "anchor_y": 170.5
   },
   {
     "province_id": "44",
-    "anchor_x": 295.3,
-    "anchor_y": 1208.4
+    "anchor_x": 207,
+    "anchor_y": 938.7
   },
   {
     "province_id": "45",
-    "anchor_x": 378.9,
-    "anchor_y": 1159.7
+    "anchor_x": 245.2,
+    "anchor_y": 930.7
   },
   {
     "province_id": "49",
-    "anchor_x": 452.2,
-    "anchor_y": 1231
+    "anchor_x": 275.4,
+    "anchor_y": 952.7
+  },
+  {
+    "province_id": "5",
+    "anchor_x": 148.7,
+    "anchor_y": 268.8
   },
   {
     "province_id": "56",
-    "anchor_x": 446.4,
-    "anchor_y": 228.5
+    "anchor_x": 275.4,
+    "anchor_y": 264.8
   },
   {
     "province_id": "59",
-    "anchor_x": 310.6,
-    "anchor_y": 1303.7
+    "anchor_x": 207,
+    "anchor_y": 1004.9
   },
   {
     "province_id": "66",
-    "anchor_x": 445.8,
-    "anchor_y": 295.9
+    "anchor_x": 277.4,
+    "anchor_y": 316.9
   },
   {
     "province_id": "68",
-    "anchor_x": 333.4,
-    "anchor_y": 253.9
+    "anchor_x": 213.1,
+    "anchor_y": 288.8
   },
   {
     "province_id": "69",
-    "anchor_x": 390.5,
-    "anchor_y": 162.5
+    "anchor_x": 247.2,
+    "anchor_y": 218.6
+  },
+  {
+    "province_id": "7",
+    "anchor_x": 203,
+    "anchor_y": 200.6
   },
   {
     "province_id": "71",
-    "anchor_x": 181.7,
-    "anchor_y": 190.7
+    "anchor_x": 98.5,
+    "anchor_y": 246.7
+  },
+  {
+    "province_id": "9",
+    "anchor_x": 287.4,
+    "anchor_y": 226.6
   },
   {
     "province_id": "CT",
-    "anchor_x": 403.4,
-    "anchor_y": 1247.7
+    "anchor_x": 245.2,
+    "anchor_y": 972.8
   },
   {
     "province_id": "DN",
-    "anchor_x": 582,
-    "anchor_y": 724.8
+    "anchor_x": 379.9,
+    "anchor_y": 623.8
   },
   {
     "province_id": "HN",
-    "anchor_x": 380.5,
-    "anchor_y": 257.3
+    "anchor_x": 245.2,
+    "anchor_y": 288.8
   },
   {
     "province_id": "HP",
-    "anchor_x": 463.2,
-    "anchor_y": 278.4
+    "anchor_x": 285.4,
+    "anchor_y": 294.8
   },
   {
     "province_id": "SG",
-    "anchor_x": 535.8,
-    "anchor_y": 1224.8
+    "anchor_x": 325.6,
+    "anchor_y": 922.6
   }
 ]

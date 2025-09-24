@@ -95,8 +95,11 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
   const [dev, setDev] = useState(getDevFlag());
   const provinces = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
 
-  const stageW = vw + 16 + PANEL_W;
-  const stageH = vh;
+  const boardPadding = dev ? Math.max(vw * 0.12, 120) : Math.max(vw * 0.05, 10);
+  const boardCanvasWidth = vw + boardPadding * 2;
+  const boardCanvasHeight = vh + boardPadding * 2;
+  const stageW = boardCanvasWidth + 16 + PANEL_W;
+  const stageH = boardCanvasHeight;
   const stageScale = useStageScale(stageW, stageH, 24);
 
   const solved = Object.keys(placed).length;
@@ -106,24 +109,20 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
 
   const { playCorrect, playWrong, playWin } = useSfx();
   const truongSaMarkers = [
-    [0.84, 0.80],
-    [0.87, 0.83],
-    [0.90, 0.86],
-    [0.93, 0.89],
-    [0.88, 0.91],
-    [0.95, 0.93],
-    [0.90, 0.95],
-    [0.97, 0.98],
+    [0.96, 0.73],
+    [0.97, 0.74],
+    [0.95, 0.75],
+    [0.93, 0.78],
+    [0.98, 0.76],
+  
   ];
   const truongSaRadius = Math.max(3, Math.min(9, Math.max(vw, vh) * 0.006));
   const truongSaStroke = Math.max(0.7, Math.min(3, Math.max(vw, vh) * 0.0012));
   const truongSaFontSize = Math.max(12, Math.min(32, vw * 0.02));
   const hoangSaMarkers = [
-    [0.72, 0.18],
-    [0.76, 0.20],
-    [0.74, 0.23],
-    [0.79, 0.24],
-    [0.81, 0.19],
+    [0.92, 0.48],
+    [0.90, 0.45],
+    [0.95, 0.43],
   ];
   const hoangSaRadius = Math.max(2.5, Math.min(7, Math.max(vw, vh) * 0.004));
   const hoangSaStroke = Math.max(0.6, Math.min(2.4, Math.max(vw, vh) * 0.001));
@@ -267,7 +266,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
               </g>
               <text
                 x={vw * 0.88}
-                y={vh * 0.74}
+                y={vh * 0.80}
                 fill="#38bdf8"
                 fontSize={truongSaFontSize}
                 fontWeight={600}
@@ -276,8 +275,8 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
                 Trường Sa
               </text>
               <text
-                x={vw * 0.76}
-                y={vh * 0.14}
+                x={vw * 0.86}
+                y={vh * 0.44}
                 fill="#fbbf24"
                 fontSize={hoangSaFontSize}
                 fontWeight={600}

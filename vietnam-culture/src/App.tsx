@@ -1,69 +1,118 @@
-import { useEffect, useMemo, useState } from 'react';
-import { loadBundle } from './core/bundle';
-import type { Bundle, Province } from './types';
-import Level1 from './levels/Level1';
-import Level2 from './levels/Level2';
-import Level3 from './levels/Level3';
-import Level4 from './levels/Level4';
-type Screen = 'menu'|'level1'|'level2'|'level3'|'level4';
+import { useEffect, useState } from "react";
+import { loadBundle } from "./core/bundle";
+import type { Bundle } from "./types";
+import Level1 from "./levels/Level1";
+import Level2 from "./levels/Level2";
+import Level3 from "./levels/Level3";
+import Level4 from "./levels/Level4";
 
-export default function App(){
-  const [bundle, setBundle] = useState<Bundle|null>(null);
-  const [screen, setScreen] = useState<Screen>('menu');
+type GameScreen = "level1" | "level2" | "level3" | "level4";
+type Screen = "menu" | GameScreen;
 
-  useEffect(()=>{ loadBundle().then(setBundle).catch(console.error); }, []);
-  if (!bundle) return <div className="p-6">Đang tải dữ liệu…</div>;
+type LevelMeta = {
+  id: GameScreen;
+  label: string;
+  colorClass: string;
+  icons: number;
+};
+
+const LEVELS: LevelMeta[] = [
+  { id: "level1", label: "Cấp 1", colorClass: "text-emerald-500", icons: 1 },
+  { id: "level2", label: "Cấp 2", colorClass: "text-amber-500", icons: 2 },
+  { id: "level3", label: "Cấp 3", colorClass: "text-rose-500", icons: 3 },
+  { id: "level4", label: "Cấp 4", colorClass: "text-sky-500", icons: 4 },
+];
+
+const LEVEL_ICON_SRC = "/imgs/puzzle.png";
+const MENU_BACKGROUND = "/imgs/VN_puzzle.jpg";
+
+export default function App() {
+  const [bundle, setBundle] = useState<Bundle | null>(null);
+  const [screen, setScreen] = useState<Screen>("menu");
+
+  useEffect(() => {
+    loadBundle().then(setBundle).catch(console.error);
+  }, []);
+
+  if (!bundle) {
+    return (
+      <div className="flex h-full items-center justify-center bg-slate-900 text-white">
+        Đang tải dữ liệu...
+      </div>
+    );
+  }
+
+  const handleStartLevel = (next: GameScreen) => setScreen(next);
+  const handleBackToMenu = () => setScreen("menu");
+  const isMenu = screen === "menu";
 
   return (
-    <div className="h-full flex flex-col">
-      <header className="p-3 border-b bg-white sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto flex items-center gap-3">
-          <h1 className="font-bold text-lg">Xuyên Việt – Địa lí căn bản</h1>
-          <nav className="ml-auto flex gap-2">
-            <button onClick={()=>setScreen('menu')} className="px-3 py-1 rounded bg-slate-200 hover:bg-slate-300">Menu</button>
-            <button onClick={()=>setScreen('level1')} className="px-3 py-1 rounded bg-emerald-600 text-white">Cấp 1</button>
-            <button onClick={()=>setScreen('level2')} className="px-3 py-1 rounded bg-yellow-600 text-white">Cấp 2</button>
-            <button onClick={()=>setScreen('level3')} className="px-3 py-1 rounded bg-red-600 text-white">Cấp 3</button>
-            <button onClick={()=>setScreen('level4')} className="px-3 py-1 rounded bg-blue-600 text-white">Cấp 4</button>
-          </nav>
-        </div>
-      </header>
+    <div
+      className="h-full w-full"
+      style={
+        isMenu
+          ? {
+              backgroundImage: `url('${MENU_BACKGROUND}')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }
+          : undefined
+      }
+    >
+      <div className={`flex h-full flex-col ${isMenu ? "bg-transparent" : "bg-white"}`}>
+        {/* {isMenu && (
+          <header className="border-b bg-white/90 backdrop-blur">
+            <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-4">
+              <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+                Vietnam Puzzle Levels
+              </h1>
+            </div>
+          </header>
+        )} */}
 
-      <main className="flex-1">
-        {screen==='menu'  && <Menu onStartL1={()=>setScreen('level1')} 
-        onStartL2={()=>setScreen('level2')}
-        onStartL3={()=>setScreen('level3')}
-        onStartL4={()=>setScreen('level4')} />}
-        {screen==='level1'&& <Level1 bundle={bundle} />}
-        {screen==='level2'&& <Level2 bundle={bundle} />}
-        {screen==='level3'&& <Level3 bundle={bundle} />}
-        {screen==='level4'&& <Level4 bundle={bundle} />}
-      </main>
+        <main className="flex-1 overflow-y-auto">
+          {isMenu && <Menu onSelect={handleStartLevel} />}
+          {screen === "level1" && <Level1 bundle={bundle} onBack={handleBackToMenu} />}
+          {screen === "level2" && <Level2 bundle={bundle} onBack={handleBackToMenu} />}
+          {screen === "level3" && <Level3 bundle={bundle} onBack={handleBackToMenu} />}
+          {screen === "level4" && <Level4 bundle={bundle} onBack={handleBackToMenu} />}
+        </main>
+      </div>
     </div>
   );
 }
 
-function Menu({onStartL1,onStartL2, onStartL3, onStartL4}:
-  {onStartL1:()=>void; onStartL2:()=>void;onStartL3:()=>void;onStartL4:()=>void;}){
+function Menu({ onSelect }: { onSelect: (screen: GameScreen) => void }) {
   return (
-    <div className="max-w-6xl mx-auto p-6 grid md:grid-cols-2 gap-6">
-      <Card title="Cấp 1" onStart={onStartL1}
-        desc=""/>
-      <Card title="Cấp 2" onStart={onStartL2}
-        desc=""/>
-      <Card title="Cấp 3" onStart={onStartL3}
-        desc=""/>
-        <Card title="Cấp 4" onStart={onStartL4}
-        desc=""/>  
-    </div>
-  );
-}
-function Card({title,desc,onStart}:{title:string;desc:string;onStart:()=>void}){
-  return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
-      <h3 className="font-semibold">{title}</h3>
-      <p className="text-sm text-slate-600 mt-2">{desc}</p>
-      <button onClick={onStart} className="mt-4 px-4 py-2 rounded bg-slate-900 text-white">Bắt đầu</button>
+    <div className="flex h-full items-center justify-start px-8 py-12">
+      <div className="w-full max-w-xl rounded-3xl bg-transparent p-2">
+        <ul className="flex flex-col">
+          {LEVELS.map((level) => (
+            <li key={level.id}>
+              <button
+                type="button"
+                onClick={() => onSelect(level.id)}
+                className={`group flex w-full items-center justify-between gap-6 border-b-4 border-current bg-transparent px-6 py-8 text-left transition-colors duration-200 hover:bg-white/10 backdrop-blur-sm ${level.colorClass}`}
+              >
+                <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: level.icons }).map((_, index) => (
+                      <img key={index} src={LEVEL_ICON_SRC} alt="" className="h-10 w-10 drop-shadow-sm" />
+                    ))}
+                  </div>
+                  <span className="text-2xl font-semibold tracking-tight">
+                    {level.label}
+                  </span>
+                </div>
+                <span className="text-sm font-medium uppercase tracking-[0.35em] opacity-0 transition-opacity duration-200 group-hover:opacity-80">
+                  Play
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

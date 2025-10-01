@@ -46,7 +46,7 @@ function readLB(key: string): LBItem[] {
 }
 
 // ---- main ----
-export default function Level3({ bundle }: { bundle: Bundle }) {
+export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () => void }) {
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
   const [activePid, setActivePid] = useState<string | null>(null);
   const done = Object.keys(placed).length === bundle.provinces.length;
@@ -65,6 +65,27 @@ export default function Level3({ bundle }: { bundle: Bundle }) {
   const uniqueId = useId().replace(/:/g, "");
   const gradientId = `${uniqueId}-gradient`;
   const shadowId = `${uniqueId}-shadow`;
+
+  const truongSaMarkers = [
+    [0.96, 0.73],
+    [0.97, 0.74],
+    [0.95, 0.75],
+    [0.93, 0.78],
+    [0.98, 0.76],
+  
+  ];
+  const truongSaRadius = Math.max(3, Math.min(9, Math.max(vw, vh) * 0.006));
+  const truongSaStroke = Math.max(0.7, Math.min(3, Math.max(vw, vh) * 0.0012));
+  const truongSaFontSize = Math.max(12, Math.min(32, vw * 0.02));
+  const hoangSaMarkers = [
+    [0.92, 0.48],
+    [0.90, 0.45],
+    [0.95, 0.43],
+  ];
+  const hoangSaRadius = Math.max(2.5, Math.min(7, Math.max(vw, vh) * 0.004));
+  const hoangSaStroke = Math.max(0.6, Math.min(2.4, Math.max(vw, vh) * 0.001));
+  const hoangSaFontSize = Math.max(10, Math.min(26, vw * 0.016));
+
 // === HUD portal setup (không bị scale) ===
   const portalElRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -154,6 +175,13 @@ export default function Level3({ bundle }: { bundle: Bundle }) {
                     bg-slate-800/90 text-white border border-slate-700 rounded-lg
                     px-3 py-2 shadow-lg pointer-events-auto"
         >
+          <button
+            type="button"
+            onClick={onBack}
+            className="rounded-md border border-slate-600 bg-slate-700/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-100 hover:bg-slate-600"
+          >
+            ← Menu
+          </button>
           <span className="text-sm">
             Thời gian: <b>{(ms / 1000).toFixed(1)}s</b>
           </span>
@@ -191,6 +219,7 @@ export default function Level3({ bundle }: { bundle: Bundle }) {
           className="grid gap-4"
           style={{ display: "grid", gridTemplateColumns: `${vw}px ${PANEL_W}px` }}
         >
+          
           {/* BOARD (giữ nguyên, chỉ thêm border/shadow phù hợp nền tối) */}
           <div className={`relative ${shake ? "anim-shake" : ""}`} style={{ width: vw, height: vh }}>
             <div
@@ -223,6 +252,36 @@ export default function Level3({ bundle }: { bundle: Bundle }) {
               </svg>
             </div>
             <svg className="absolute inset-0 pointer-events-none" viewBox={`0 0 ${vw} ${vh}`}>
+              <g stroke="#38bdf8" fill="#38bdf8" fillOpacity={0.75} strokeWidth={truongSaStroke}>
+                {truongSaMarkers.map(([fx, fy], idx) => (
+                  <circle key={`ts-${idx}`} cx={vw * fx} cy={vh * fy} r={truongSaRadius} />
+                ))}
+              </g>
+              <g stroke="#fbbf24" fill="#fbbf24" fillOpacity={0.75} strokeWidth={hoangSaStroke}>
+                {hoangSaMarkers.map(([fx, fy], idx) => (
+                  <circle key={`hs-${idx}`} cx={vw * fx} cy={vh * fy} r={hoangSaRadius} />
+                ))}
+              </g>
+              <text
+                x={vw * 0.88}
+                y={vh * 0.80}
+                fill="#38bdf8"
+                fontSize={truongSaFontSize}
+                fontWeight={600}
+                opacity={0.8}
+              >
+                Trường Sa
+              </text>
+              <text
+                x={vw * 0.86}
+                y={vh * 0.44}
+                fill="#fbbf24"
+                fontSize={hoangSaFontSize}
+                fontWeight={600}
+                opacity={0.85}
+              >
+                Hoàng Sa
+              </text>
               {bundle.provinces.map(p => {
                 if (!placed[p.id]) return null;
                 const d = atlasPaths[p.id];

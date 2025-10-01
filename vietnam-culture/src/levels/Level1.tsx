@@ -78,7 +78,7 @@ function readLB(lbKey: string): LBItem[] { try { return JSON.parse(localStorage.
 const LB_KEY = 'lb:pack1:level1';
 const PANEL_W = 360; // tăng chút để đủ 2–3 cột dễ nhìn
 
-export default function Level1({ bundle }: { bundle: Bundle }) {
+export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () => void }) {
   const atlasPaths = useAtlasPaths("/assets/atlas.svg"); // nếu không có atlas => rỗng
 
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
@@ -200,7 +200,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
   return (
     <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
       {/* HUD via portal: luôn nổi trên tất cả */}
-      {createPortal(
+      {/* {createPortal(
         <div
           style={{
             position: 'fixed', top: 12, left: 12, zIndex: 2147483647,
@@ -210,6 +210,13 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
             display:'flex', alignItems:'center', gap:10
           }}
         >
+          <button
+            onClick={onBack}
+            style={{ pointerEvents:'auto', fontSize:12, padding:'4px 10px', borderRadius:6, border:'1px solid #475569', background:'#0f172a', color:'#f8fafc', cursor:'pointer' }}
+            title="Quay lại menu"
+          >
+            ← Menu
+          </button>
           <span style={{ fontSize: 14 }}>
             Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
             {' • '}Đã đặt: <b>{solved}/{total}</b>
@@ -230,7 +237,7 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
           </button>
         </div>,
         document.body
-      )}
+      )} */}
 
       {/* Stage */}
       <div
@@ -333,13 +340,30 @@ export default function Level1({ bundle }: { bundle: Bundle }) {
           {/* PANEL phải */}
           <aside className="relative w-[360px]">
             {/* Header sticky có nút “Làm lại” (dự phòng) */}
-            <div className="sticky top-0 z-20 flex items-center justify-between px-2 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
-              <div className="text-sm text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
+            <div className="sticky top-0 z-20 flex items-center justify-between px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
+              <div className="text-m text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
+                {' • '}<b>{solved}/{total}</b>
+              </div>
               <button
-                className="text-xs px-2 py-1 rounded border border-slate-600 bg-slate-700 text-slate-100 hover:bg-slate-600"
-                onClick={resetGame}
-              >
-                Làm lại
+                onClick={onBack}
+                style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+                borderRadius:6, border:'1px solid #475569',
+                background:'#334155', color:'#fff', cursor:'pointer' }}
+                title="Quay lại menu">
+                ← 
+              </button>
+              <button
+              onClick={resetGame}
+              style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+                borderRadius:6, border:'1px solid #475569',
+                background:'#334155', color:'#fff', cursor:'pointer' }}
+              title="Làm lại (random thứ tự mới)"
+              >↻</button>
+              <button
+                className="text-sm px-2 py-1 rounded border border-slate-600 bg-slate-700"
+                onClick={() => { const next = !dev; setDev(next); localStorage.setItem("dev", next ? "1":"0"); }}
+                title="Bật/tắt bảng DEV">
+                DEV {dev ? "ON" : "OFF"}
               </button>
             </div>
 

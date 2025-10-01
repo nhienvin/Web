@@ -91,8 +91,8 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
   const boardRef = useRef<HTMLDivElement>(null);
   const doneOnceRef = useRef(false);
-  const [vx, vy, vw, vh] = bundle.viewBox;
-  const [dev, setDev] = useState(getDevFlag());
+  const [, , vw, vh] = bundle.viewBox;
+  const [dev] = useState(getDevFlag());
   const provinces = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
 
   const boardPadding = dev ? Math.max(vw * 0.12, 120) : Math.max(vw * 0.05, 10);
@@ -389,7 +389,6 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
       {/* CHIP đang kéo */}
       {drag?.fixed && (
         <FloatingChip
-          pid={drag.pid}
           color={colorForId(drag.pid)}
           name={provinces.find(q=>q.id===drag.pid)?.name_vi || drag.pid}
           x={drag.fixed.x} y={drag.fixed.y}
@@ -452,9 +451,9 @@ function NameChip({ province, disabled, onStart }:{
 }
 
 function FloatingChip({
-  pid, name, color, x, y, onMove, onUp, onCancel
+   name, color, x, y, onMove, onUp, onCancel
 }:{
-  pid: string; name: string; color: ReturnType<typeof colorForId>;
+  name: string; color: ReturnType<typeof colorForId>;
   x:number; y:number; onMove:(cx:number,cy:number)=>void; onUp:(cx:number,cy:number)=>void; onCancel:()=>void;
 }){
   useEffect(()=>{
@@ -483,8 +482,6 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
   const [anchors, setAnchors] = useState<Record<string, [number, number]>>(
     Object.fromEntries(bundle.provinces.map(p => [p.id, [...p.anchor_px] as [number, number]]))
   );
-  const cur = bundle.provinces.find(p => p.id === pid);
-
   function onClickBoard(e: React.MouseEvent<HTMLDivElement>) {
     const host = e.currentTarget as HTMLElement;
     const r = host.getBoundingClientRect();

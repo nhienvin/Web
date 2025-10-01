@@ -48,7 +48,7 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const { ms, reset: resetTimer } = useTimer(!done);
   const { playCorrect, playWrong, playWin } = useSfx();
   const [shake, setShake] = useState(false);
-  const [dev, setDev] = useState(getDevFlag());
+  const [dev] = useState(getDevFlag());
   const [showWin, setShowWin] = useState(false);
   const doneRef = useRef<boolean>(false);
   const solved = Object.keys(placed).length;
@@ -56,7 +56,7 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
   
   const atlasPaths = useAtlasPaths("/assets/atlas.svg");
   const boardRef = useRef<HTMLDivElement>(null);
-  const [vx, vy, vw, vh] = bundle.viewBox;
+  const [, , vw, vh] = bundle.viewBox;
   const [startPositions, setStartPositions] = useState(() => randomStartPositions(bundle.provinces));
   const [colorMap, setColorMap] = useState<ProvinceColorMap>(() => randomColorMap(bundle.provinces));
 
@@ -95,7 +95,6 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
       portalElRef.current = null;
     };
   }, []);
-  const portalRoot = portalElRef.current || document.body;
 
   useEffect(() => {
     setStartPositions(randomStartPositions(bundle.provinces));
@@ -643,8 +642,6 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
   const [anchors, setAnchors] = useState<Record<string, [number, number]>>(
     Object.fromEntries(bundle.provinces.map(p => [p.id, [...p.anchor_px] as [number, number]]))
   );
-  const cur = bundle.provinces.find(p => p.id === pid);
-
   function onClickBoard(e: React.MouseEvent<HTMLDivElement>) {
     const host = e.currentTarget as HTMLElement;
     const r = host.getBoundingClientRect();

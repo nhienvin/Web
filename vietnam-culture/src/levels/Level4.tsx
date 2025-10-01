@@ -29,11 +29,6 @@ function useStageScale(stageW: number, stageH: number, pad = 24) {
 
 function getDevFlag(): boolean {
   try {
-    const qs = new URLSearchParams(window.location.search || "");
-    if (qs.get("dev") === "1") return true;
-    const hash = String(window.location.hash || "");
-    const hs = new URLSearchParams(hash.includes("?") ? hash.split("?")[1] : "");
-    if (hs.get("dev") === "1") return true;
     return localStorage.getItem("dev") === "1";
   } catch { return false; }
 }
@@ -53,14 +48,14 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const { ms, reset: resetTimer } = useTimer(!done);
   const { playCorrect, playWrong, playWin } = useSfx();
   const [shake, setShake] = useState(false);
-  const [dev, setDev] = useState(getDevFlag());
+  const [dev] = useState(getDevFlag());
   const [showWin, setShowWin] = useState(false);
   const doneRef = useRef<boolean>(false);
   const solved = Object.keys(placed).length;
   const total = bundle?.provinces?.length ?? 0;
   const atlasPaths = useAtlasPaths("/assets/atlas.svg");
   const boardRef = useRef<HTMLDivElement>(null);
-  const [vx, vy, vw, vh] = bundle.viewBox;
+  const [, , vw, vh] = bundle.viewBox;
   const [startPositions, setStartPositions] = useState(() => randomStartPositions(bundle.provinces));
   const [colorMap, setColorMap] = useState<ProvinceColorMap>(() => randomColorMap(bundle.provinces));
   const uniqueId = useId().replace(/:/g, "");
@@ -97,7 +92,6 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
       portalElRef.current = null;
     };
   }, []);
-  const portalRoot = portalElRef.current || document.body;
 
   useEffect(() => {
     setStartPositions(randomStartPositions(bundle.provinces));
@@ -167,40 +161,6 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const stageScale = useStageScale(stageW, stageH, 24);
 
   return (<>
-    {/* === HUD overlay: luôn rõ, không bị thu nhỏ === */}
-      {createPortal(
-        <div
-          className="fixed top-2 left-3 z-[2147483647] flex items-center gap-2
-                    bg-slate-800/90 text-white border border-slate-700 rounded-lg
-                    px-3 py-2 shadow-lg pointer-events-auto"
-        >
-          <button
-            type="button"
-            onClick={onBack}
-            className="rounded-md border border-slate-600 bg-slate-700/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-100 hover:bg-slate-600"
-          >
-            ← Menu
-          </button>
-          <span className="text-sm">
-            Thời gian: <b>{(ms / 1000).toFixed(1)}s</b>
-          </span>
-          <button
-            className="text-xs px-2 py-1 rounded border border-slate-600 bg-slate-700 hover:bg-slate-600"
-            onClick={resetGame}
-            title="Làm lại"
-          >
-            ↻
-          </button>
-          <button
-            className="text-[11px] px-2 py-1 rounded border border-slate-600 bg-slate-700"
-            onClick={() => { const next = !dev; setDev(next); localStorage.setItem("dev", next ? "1":"0"); }}
-            title="Bật/tắt bảng DEV"
-          >
-            DEV {dev ? "ON" : "OFF"}
-          </button>
-        </div>,
-        portalRoot
-      )}
     <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
       {/* Stage center + scale để vừa màn hình */}
       <div
@@ -657,8 +617,6 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
   const [anchors, setAnchors] = useState<Record<string, [number, number]>>(
     Object.fromEntries(bundle.provinces.map(p => [p.id, [...p.anchor_px] as [number, number]]))
   );
-  const cur = bundle.provinces.find(p => p.id === pid);
-
   function onClickBoard(e: React.MouseEvent<HTMLDivElement>) {
     const host = e.currentTarget as HTMLElement;
     const r = host.getBoundingClientRect();

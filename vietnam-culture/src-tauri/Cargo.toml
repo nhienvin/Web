@@ -1,8 +1,8 @@
 [package]
-name = "app"
+name = "enterVN"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Một sản phẩm của enterVN"
+authors = ["enterVN"]
 license = ""
 repository = ""
 edition = "2021"

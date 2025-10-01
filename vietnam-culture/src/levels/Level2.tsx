@@ -29,11 +29,6 @@ function useStageScale(stageW: number, stageH: number, pad = 24) {
 
 function getDevFlag(): boolean {
   try {
-    const qs = new URLSearchParams(window.location.search || "");
-    if (qs.get("dev") === "1") return true;
-    const hash = String(window.location.hash || "");
-    const hs = new URLSearchParams(hash.includes("?") ? hash.split("?")[1] : "");
-    if (hs.get("dev") === "1") return true;
     return localStorage.getItem("dev") === "1";
   } catch { return false; }
 }
@@ -56,7 +51,9 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const [dev, setDev] = useState(getDevFlag());
   const [showWin, setShowWin] = useState(false);
   const doneRef = useRef<boolean>(false);
-
+  const solved = Object.keys(placed).length;
+  const total = bundle?.provinces?.length ?? 0;
+  
   const atlasPaths = useAtlasPaths("/assets/atlas.svg");
   const boardRef = useRef<HTMLDivElement>(null);
   const [vx, vy, vw, vh] = bundle.viewBox;
@@ -168,40 +165,7 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const stageScale = useStageScale(stageW, stageH, 24);
 
   return (<>
-    {/* === HUD overlay: luôn rõ, không bị thu nhỏ === */}
-      {createPortal(
-        <div
-          className="fixed top-2 left-3 z-[2147483647] flex items-center gap-2
-                    bg-slate-800/90 text-white border border-slate-700 rounded-lg
-                    px-3 py-2 shadow-lg pointer-events-auto"
-        >
-          <button
-            type="button"
-            onClick={onBack}
-            className="rounded-md border border-slate-600 bg-slate-700/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-100 hover:bg-slate-600"
-          >
-            ← Menu
-          </button>
-          <span className="text-sm">
-            Thời gian: <b>{(ms / 1000).toFixed(1)}s</b>
-          </span>
-          <button
-            className="text-xs px-2 py-1 rounded border border-slate-600 bg-slate-700 hover:bg-slate-600"
-            onClick={resetGame}
-            title="Làm lại"
-          >
-            ↻
-          </button>
-          <button
-            className="text-[11px] px-2 py-1 rounded border border-slate-600 bg-slate-700"
-            onClick={() => { const next = !dev; setDev(next); localStorage.setItem("dev", next ? "1":"0"); }}
-            title="Bật/tắt bảng DEV"
-          >
-            DEV {dev ? "ON" : "OFF"}
-          </button>
-        </div>,
-        portalRoot
-      )}
+
     <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
       {/* Stage center + scale để vừa màn hình */}
       <div
@@ -331,10 +295,37 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
           {/* PANEL MẢNH – giữ header (thời gian/nút), container tối, KHÔNG tạo scroll toàn trang */}
           <aside className="relative w-[340px]">
+            <div className="sticky top-0 z-20 flex items-center justify-evenly px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
+              <div className="text-m text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
+                {' • '}<b>{solved}/{total}</b>
+              </div>
+              <button
+                onClick={onBack}
+                style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+                borderRadius:6, border:'1px solid #475569',
+                background:'#334155', color:'#fff', cursor:'pointer' }}
+                title="Quay lại menu">
+                ← 
+              </button>
+              <button
+              onClick={resetGame}
+              style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+                borderRadius:6, border:'1px solid #475569',
+                background:'#334155', color:'#fff', cursor:'pointer' }}
+              title="Làm lại (random thứ tự mới)"
+              >↻</button>
+              {/* <button
+                className="text-sm px-2 py-1 rounded border border-slate-600 bg-slate-700"
+                onClick={() => { const next = !dev; setDev(next); localStorage.setItem("dev", next ? "1":"0"); }}
+                title="Bật/tắt bảng DEV">
+                DEV {dev ? "ON" : "OFF"}
+              </button> */}
+            </div>
             <div
               className="mt-3 relative rounded-lg border bg-slate-800/70 border-slate-700"
               style={{ height: vh }}
             >
+              
               <div className="h-full overflow-y-auto p-3 scroll-stable touch-none">
                 {bundle.provinces.map((p, i) => (
                   <Piece
@@ -380,7 +371,6 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
     </>
   );
 }
-// ---- Piece: icon kéo (dính chuột; ẩn sau khi đặt đúng) ----
 // ---- Piece: icon kéo (dính đúng điểm click; vẽ qua portal để khỏi lệch) ----
 function Piece({
   p, defaultPos, locked, onDrop, onDragState, d, color

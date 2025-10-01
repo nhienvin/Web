@@ -33,11 +33,11 @@ function useStageScale(stageW:number, stageH:number, pad=24){
 }
 function getDevFlag(): boolean {
   try {
-    const qs = new URLSearchParams(window.location.search || "");
-    if (qs.get("dev") === "1") return true;
-    const hash = String(window.location.hash || "");
-    const hs = new URLSearchParams(hash.includes("?") ? hash.split("?")[1] : "");
-    if (hs.get("dev") === "1") return true;
+    // const qs = new URLSearchParams(window.location.search || "");
+    // if (qs.get("dev") === "1") return true;
+    // const hash = String(window.location.hash || "");
+    // const hs = new URLSearchParams(hash.includes("?") ? hash.split("?")[1] : "");
+    // if (hs.get("dev") === "1") return true;
     return localStorage.getItem("dev") === "1";
   } catch { return false; }
 }
@@ -340,7 +340,7 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
           {/* PANEL phải */}
           <aside className="relative w-[360px]">
             {/* Header sticky có nút “Làm lại” (dự phòng) */}
-            <div className="sticky top-0 z-20 flex items-center justify-between px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
+            <div className="sticky top-0 z-20 flex items-center justify-evenly px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
               <div className="text-m text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
                 {' • '}<b>{solved}/{total}</b>
               </div>
@@ -359,12 +359,12 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
                 background:'#334155', color:'#fff', cursor:'pointer' }}
               title="Làm lại (random thứ tự mới)"
               >↻</button>
-              <button
+              {/* <button
                 className="text-sm px-2 py-1 rounded border border-slate-600 bg-slate-700"
                 onClick={() => { const next = !dev; setDev(next); localStorage.setItem("dev", next ? "1":"0"); }}
                 title="Bật/tắt bảng DEV">
                 DEV {dev ? "ON" : "OFF"}
-              </button>
+              </button> */}
             </div>
 
             {/* Danh sách tên tỉnh: GRID 2–3 cột, chữ to */}

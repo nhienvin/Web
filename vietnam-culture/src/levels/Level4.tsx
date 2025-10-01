@@ -56,7 +56,8 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const [dev, setDev] = useState(getDevFlag());
   const [showWin, setShowWin] = useState(false);
   const doneRef = useRef<boolean>(false);
-
+  const solved = Object.keys(placed).length;
+  const total = bundle?.provinces?.length ?? 0;
   const atlasPaths = useAtlasPaths("/assets/atlas.svg");
   const boardRef = useRef<HTMLDivElement>(null);
   const [vx, vy, vw, vh] = bundle.viewBox;
@@ -330,6 +331,32 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
           {/* PANEL MẢNH – giữ header (thời gian/nút), container tối, KHÔNG tạo scroll toàn trang */}
           <aside className="relative w-[340px]">
+            <div className="sticky top-0 z-20 flex items-center justify-evenly px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
+              <div className="text-m text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
+                {' • '}<b>{solved}/{total}</b>
+              </div>
+              <button
+                onClick={onBack}
+                style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+                borderRadius:6, border:'1px solid #475569',
+                background:'#334155', color:'#fff', cursor:'pointer' }}
+                title="Quay lại menu">
+                ← 
+              </button>
+              <button
+              onClick={resetGame}
+              style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+                borderRadius:6, border:'1px solid #475569',
+                background:'#334155', color:'#fff', cursor:'pointer' }}
+              title="Làm lại (random thứ tự mới)"
+              >↻</button>
+              {/* <button
+                className="text-sm px-2 py-1 rounded border border-slate-600 bg-slate-700"
+                onClick={() => { const next = !dev; setDev(next); localStorage.setItem("dev", next ? "1":"0"); }}
+                title="Bật/tắt bảng DEV">
+                DEV {dev ? "ON" : "OFF"}
+              </button> */}
+            </div>
             <div
               className="mt-3 relative rounded-lg border bg-slate-800/70 border-slate-700"
               style={{ height: vh }}

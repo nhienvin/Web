@@ -172,7 +172,7 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
     const p = bundle.provinces.find(q=>q.id===pid)!;
     const ax = Math.min(Math.max(p.anchor_px[0], 0), vw);
     const ay = Math.min(Math.max(p.anchor_px[1], 0), vh);
-    const tol = Math.max(p.snap_tolerance_px || 18, 28);
+    const tol = Math.max(p.snap_tolerance_px || 18, 56);
     const ok = within(dist(x,y, ax,ay), tol);
 
     if (ok) {
@@ -331,22 +331,22 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
               {/* aim circle */}
               {drag?.pid && (() => {
                 const p = provinces.find(q=>q.id===drag.pid)!;
-                const tol = Math.max(p.snap_tolerance_px || 18, 28);
+                const tol = Math.max(p.snap_tolerance_px || 18, 56);
                 return <div className="aim" style={{ left: p.anchor_px[0]-tol, top: p.anchor_px[1]-tol, width: tol*2, height: tol*2 }}/>;
               })()}
             </div>
           </div>
 
           {/* PANEL phải */}
-          <aside className="relative w-[360px]">
+          <aside className="relative w-[460px]">
             {/* Header sticky có nút “Làm lại” (dự phòng) */}
             <div className="sticky top-0 z-20 flex items-center justify-evenly px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
-              <div className="text-m text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
+              <div className="text-2xl text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
                 {' • '}<b>{solved}/{total}</b>
               </div>
               <button
                 onClick={onBack}
-                style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+                style={{ pointerEvents:'auto', fontSize:32, padding:'4px 8px',
                 borderRadius:6, border:'1px solid #475569',
                 background:'#334155', color:'#fff', cursor:'pointer' }}
                 title="Quay lại menu">
@@ -354,7 +354,7 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
               </button>
               <button
               onClick={resetGame}
-              style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+              style={{ pointerEvents:'auto', fontSize:32, padding:'4px 8px',
                 borderRadius:6, border:'1px solid #475569',
                 background:'#334155', color:'#fff', cursor:'pointer' }}
               title="Làm lại (random thứ tự mới)"
@@ -370,7 +370,7 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
             {/* Danh sách tên tỉnh: GRID 2–3 cột, chữ to */}
             <div className="mt-3 border border-slate-700 rounded-lg bg-slate-800/60" style={{ height: vh }}>
               <div className="h-full p-3 no-scrollbar">
-                <div className="grid grid-cols-2 xl:grid-cols-3 gap-2 auto-rows-[48px]">
+                <div className="grid grid-cols-2 xl:grid-cols-2 gap-2 auto-rows-[48px]">
                   {provinces.map(p=>(
                     <NameChip
                       key={p.id}
@@ -439,12 +439,12 @@ function NameChip({ province, disabled, onStart }:{
   return (
     <div
       onPointerDown={onPointerDown}
-      className={`h-12 w-full grid place-items-center rounded border text-base font-medium select-none cursor-grab text-slate-900
+      className={`h-12 w-full grid place-items-center rounded border text-4xl font-medium select-none cursor-grab text-slate-900
                   ${disabled ? 'opacity-35 line-through pointer-events-none' : ''}`}
       style={{ background: color.chipBg, borderColor: color.chipBd }}
       title={province.name_en}
     >
-      <span className="px-1 truncate">{province.name_vi}</span>
+      <span className="p-4 truncate">{province.name_vi}</span>
     </div>
 
   );

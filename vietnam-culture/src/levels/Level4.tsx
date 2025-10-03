@@ -35,6 +35,11 @@ function getDevFlag(): boolean {
 
 const LB_KEY = "lb:pack1:level4";
 
+const PANEL_ICON_SIZE = 96;
+const DRAG_ICON_SIZE = 56;
+const PIECE_COLUMN_STEP = PANEL_ICON_SIZE + 64;
+const PIECE_ROW_STEP = PANEL_ICON_SIZE + 28;
+
 type LBItem = { name: string; ms: number };
 function readLB(key: string): LBItem[] {
   try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
@@ -135,7 +140,7 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
     const ax = Math.min(Math.max(p.anchor_px[0], 0), vw);
     const ay = Math.min(Math.max(p.anchor_px[1], 0), vh);
 
-    const tol = Math.max(p.snap_tolerance_px || 18, 36);
+    const tol = Math.max(p.snap_tolerance_px || 18, 56);
     const ok = within(dist(x, y, ax, ay), tol);
 
     if (ok) {
@@ -151,7 +156,7 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
 
   const activeProvince = activePid ? bundle.provinces.find(p => p.id === activePid) : null;
-  const tol = activeProvince ? Math.max(activeProvince.snap_tolerance_px || 18, 36) : 0;
+  const tol = activeProvince ? Math.max(activeProvince.snap_tolerance_px || 18, 56) : 0;
 
   // kích thước stage gốc (chưa scale)
   const PANEL_W = 340;
@@ -376,19 +381,19 @@ function Piece({
   locked: boolean;
   onDrop: (clientX: number, clientY: number) => boolean;
   onDragState: (dragging: boolean) => void;
-  d: string; // path từ atlas
+  d: string;
   color?: ProvinceColor;
 }) {
-  const [pos, setPos] = useState(defaultPos);                // vị trí trong panel (khi KHÔNG kéo)
+  const [pos, setPos] = useState(defaultPos);
   const [dragging, setDragging] = useState(false);
-  const [dragXY, setDragXY] = useState<{x:number; y:number}>({x:0,y:0}); // toạ độ viewport khi kéo (fixed)
-  const offRef = useRef({ dx: 0, dy: 0 });                   // offset điểm click trong icon
+  const [dragXY, setDragXY] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const offsetRef = useRef({ dxRatio: 0.5, dyRatio: 0.5 });
+  const pointerIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     setPos(defaultPos);
   }, [defaultPos]);
-  const pointerIdRef = useRef<number | null>(null);
 
-  // nếu đã đặt đúng -> ẩn icon
   useEffect(() => {
     if (locked) {
       setDragging(false);
@@ -405,104 +410,103 @@ function Piece({
     const el = e.currentTarget as HTMLElement;
     const rect = el.getBoundingClientRect();
 
-    // *** BÁM ĐÚNG ĐIỂM CLICK ***
-    offRef.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+    offsetRef.current = {
+      dxRatio: rect.width ? (e.clientX - rect.left) / rect.width : 0.5,
+      dyRatio: rect.height ? (e.clientY - rect.top) / rect.height : 0.5,
+    };
     pointerIdRef.current = e.pointerId;
 
-    // chuyển chế độ kéo
     setDragging(true);
     onDragState(true);
-
-    // set vị trí bắt đầu cho layer kéo (viewport coords)
     setDragXY({ x: e.clientX, y: e.clientY });
 
-    // giữ capture trên CHÍNH phần tử này
     el.setPointerCapture(e.pointerId);
 
     const move = (ev: PointerEvent) => {
-      // cập nhật theo viewport, chặn scroll trên mobile
       setDragXY({ x: ev.clientX, y: ev.clientY });
       ev.preventDefault?.();
     };
 
     const up = (ev: PointerEvent) => {
       try { if (pointerIdRef.current != null) el.releasePointerCapture(pointerIdRef.current); } catch {}
-      window.removeEventListener("pointermove", move as any);
-      window.removeEventListener("pointerup", up as any);
-      window.removeEventListener("pointercancel", up as any);
+      window.removeEventListener('pointermove', move as any);
+      window.removeEventListener('pointerup', up as any);
+      window.removeEventListener('pointercancel', up as any);
 
-      // thử thả lên board (dựa vào clientX/Y thật)
-      const ok = onDrop(ev.clientX, ev.clientY);
-      if (!ok) {
-        // quay về icon trong panel
-        setDragging(false);
-        onDragState(false);
-      } else {
-        // parent chuyển locked=true -> component tự ẩn
-        setDragging(false);
-        onDragState(false);
-      }
+      onDrop(ev.clientX, ev.clientY);
+      setDragging(false);
+      onDragState(false);
       pointerIdRef.current = null;
     };
 
-    window.addEventListener("pointermove", move as any, { passive: false });
-    window.addEventListener("pointerup", up as any, { once: true });
-    window.addEventListener("pointercancel", up as any, { once: true });
+    window.addEventListener('pointermove', move as any, { passive: false });
+    window.addEventListener('pointerup', up as any, { once: true });
+    window.addEventListener('pointercancel', up as any, { once: true });
   }
 
-  // cắt icon quanh anchor để bỏ cụm đảo xa (Trường Sa…)
   const vb = d
     ? viewBoxNearAnchorSmart(d, p.anchor_px[0], p.anchor_px[1], 6, 600, 220)
     : { x: 0, y: 0, w: 100, h: 100 };
 
-  const iconFill = color?.iconFill || "#f1f5f9";
-  const iconStroke = color?.iconStroke || "#334155";
-  const icon = d
-    ? <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} width={48} height={48} preserveAspectRatio="xMidYMid meet">
+  const iconFill = color?.iconFill || '#f1f5f9';
+  const iconStroke = color?.iconStroke || '#334155';
+
+  const panelIcon = d
+    ? (
+      <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} width={PANEL_ICON_SIZE} height={PANEL_ICON_SIZE} preserveAspectRatio="xMidYMid meet">
         <path d={d} fill={iconFill} stroke={iconStroke} strokeWidth={1.2} />
       </svg>
-    : <div className="w-12 h-12 rounded bg-slate-200 animate-pulse" />;
+    )
+    : (
+      <div style={{ width: PANEL_ICON_SIZE, height: PANEL_ICON_SIZE }} className="rounded bg-slate-200 animate-pulse" />
+    );
 
-  // 1) Nút trong panel (KHÔNG kéo): absolute trong panel, nhận pointerdown
-  // 2) Khi kéo: icon bay qua portal ở body, position:fixed theo viewport → hết lệch
+  const dragIcon = d
+    ? (
+      <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} width={DRAG_ICON_SIZE} height={DRAG_ICON_SIZE} preserveAspectRatio="xMidYMid meet">
+        <path d={d} fill={iconFill} stroke={iconStroke} strokeWidth={1.2} />
+      </svg>
+    )
+    : (
+      <div style={{ width: DRAG_ICON_SIZE, height: DRAG_ICON_SIZE }} className="rounded bg-slate-200 animate-pulse" />
+    );
+
   return (
     <>
       <div
         onPointerDown={onPointerDown}
-        className={`absolute select-none ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+        className={`absolute select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{
           left: pos.x,
           top: pos.y,
-          width: 48,
-          height: 48,
-          // Khi đang kéo, ẩn nút gốc để tránh double-image
+          width: PANEL_ICON_SIZE,
+          height: PANEL_ICON_SIZE,
           opacity: dragging ? 0 : 1,
-          pointerEvents: dragging ? "none" : "auto",
+          pointerEvents: dragging ? 'none' : 'auto',
           zIndex: 1,
         }}
         title={p.name_vi}
       >
-        {icon}
+        {panelIcon}
       </div>
 
       {dragging && createPortal(
         <div
           className="fixed z-[3000] select-none pointer-events-none"
           style={{
-            left: dragXY.x - offRef.current.dx,
-            top:  dragXY.y - offRef.current.dy,
-            width: 48,
-            height: 48,
+            left: dragXY.x - offsetRef.current.dxRatio * DRAG_ICON_SIZE,
+            top: dragXY.y - offsetRef.current.dyRatio * DRAG_ICON_SIZE,
+            width: DRAG_ICON_SIZE,
+            height: DRAG_ICON_SIZE,
           }}
         >
-          {icon}
+          {dragIcon}
         </div>,
         document.body
       )}
     </>
   );
 }
-
 
 function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose: () => void }) {
   const [name, setName] = useState("");
@@ -682,8 +686,8 @@ function randomColorMap(list: Province[]): ProvinceColorMap {
 // ---- utils ----
 function randomStartPositions(list: Province[]) {
   const slots = list.map((_, i) => ({
-    x: 40 + (i % 2) * 140,
-    y: 30 + Math.floor(i / 2) * 60,
+    x: 32 + (i % 2) * PIECE_COLUMN_STEP,
+    y: 24 + Math.floor(i / 2) * PIECE_ROW_STEP,
   }));
   for (let i = slots.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -693,3 +697,8 @@ function randomStartPositions(list: Province[]) {
   }
   return slots;
 }
+
+
+
+
+

@@ -35,6 +35,20 @@ function getDevFlag(): boolean {
 
 const LB_KEY = "lb:pack1:level2";
 
+const PANEL_COLUMNS = 3;
+const PANEL_ICON_SIZE = 120;
+const PANEL_CARD_WIDTH = 150;
+const PANEL_CARD_HEIGHT = 192;
+const PANEL_CARD_GAP_X = 16;
+const PANEL_CARD_GAP_Y = 18;
+const PANEL_PADDING_X = 20;
+const PANEL_PADDING_Y = 18;
+const DRAG_ICON_SIZE = 88;
+const DRAG_CARD_WIDTH = 132;
+const DRAG_CARD_HEIGHT = 160;
+const PIECE_COLUMN_STEP = PANEL_CARD_WIDTH + PANEL_CARD_GAP_X;
+const PIECE_ROW_STEP = PANEL_CARD_HEIGHT + PANEL_CARD_GAP_Y;
+
 type LBItem = { name: string; ms: number };
 function readLB(key: string): LBItem[] {
   try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
@@ -138,7 +152,7 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
     const ax = Math.min(Math.max(p.anchor_px[0], 0), vw);
     const ay = Math.min(Math.max(p.anchor_px[1], 0), vh);
 
-    const tol = Math.max(p.snap_tolerance_px || 18, 36);
+    const tol = Math.max(p.snap_tolerance_px || 18, 56);
     const ok = within(dist(x, y, ax, ay), tol);
 
     if (ok) {
@@ -154,10 +168,10 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
 
   const activeProvince = activePid ? bundle.provinces.find(p => p.id === activePid) : null;
-  const tol = activeProvince ? Math.max(activeProvince.snap_tolerance_px || 18, 36) : 0;
+  const tol = activeProvince ? Math.max(activeProvince.snap_tolerance_px || 18, 56) : 0;
 
   // kích thước stage gốc (chưa scale)
-  const PANEL_W = 340;
+  const PANEL_W = PANEL_CARD_WIDTH * PANEL_COLUMNS + PANEL_CARD_GAP_X * (PANEL_COLUMNS - 1) + PANEL_PADDING_X * 2;
   const GAP = 16;
   const stageW = vw + GAP + PANEL_W;
   const stageH = vh;
@@ -293,14 +307,14 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
           </div>
 
           {/* PANEL MẢNH – giữ header (thời gian/nút), container tối, KHÔNG tạo scroll toàn trang */}
-          <aside className="relative w-[340px]">
+          <aside className="relative" style={{ width: PANEL_W }}>
             <div className="sticky top-0 z-20 flex items-center justify-evenly px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
-              <div className="text-m text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
+              <div className="text-2xl text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
                 {' • '}<b>{solved}/{total}</b>
               </div>
               <button
                 onClick={onBack}
-                style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+                style={{ pointerEvents:'auto', fontSize:32, padding:'4px 8px',
                 borderRadius:6, border:'1px solid #475569',
                 background:'#334155', color:'#fff', cursor:'pointer' }}
                 title="Quay lại menu">
@@ -308,7 +322,7 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
               </button>
               <button
               onClick={resetGame}
-              style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+              style={{ pointerEvents:'auto', fontSize:32, padding:'4px 8px',
                 borderRadius:6, border:'1px solid #475569',
                 background:'#334155', color:'#fff', cursor:'pointer' }}
               title="Làm lại (random thứ tự mới)"
@@ -379,19 +393,19 @@ function Piece({
   locked: boolean;
   onDrop: (clientX: number, clientY: number) => boolean;
   onDragState: (dragging: boolean) => void;
-  d: string; // path từ atlas
+  d: string;
   color?: ProvinceColor;
 }) {
-  const [pos, setPos] = useState(defaultPos);                // vị trí trong panel (khi KHÔNG kéo)
+  const [pos, setPos] = useState(defaultPos);
   const [dragging, setDragging] = useState(false);
-  const [dragXY, setDragXY] = useState<{x:number; y:number}>({x:0,y:0}); // toạ độ viewport khi kéo (fixed)
-  const offRef = useRef({ dx: 0, dy: 0 });                   // offset điểm click trong icon
+  const [dragXY, setDragXY] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const offsetRef = useRef({ dxRatio: 0.5, dyRatio: 0.5 });
+  const pointerIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     setPos(defaultPos);
   }, [defaultPos]);
-  const pointerIdRef = useRef<number | null>(null);
 
-  // nếu đã đặt đúng -> ẩn icon
   useEffect(() => {
     if (locked) {
       setDragging(false);
@@ -408,128 +422,130 @@ function Piece({
     const el = e.currentTarget as HTMLElement;
     const rect = el.getBoundingClientRect();
 
-    // *** BÁM ĐÚNG ĐIỂM CLICK ***
-    offRef.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+    offsetRef.current = {
+      dxRatio: rect.width ? (e.clientX - rect.left) / rect.width : 0.5,
+      dyRatio: rect.height ? (e.clientY - rect.top) / rect.height : 0.5,
+    };
     pointerIdRef.current = e.pointerId;
 
-    // chuyển chế độ kéo
     setDragging(true);
     onDragState(true);
-
-    // set vị trí bắt đầu cho layer kéo (viewport coords)
     setDragXY({ x: e.clientX, y: e.clientY });
 
-    // giữ capture trên CHÍNH phần tử này
     el.setPointerCapture(e.pointerId);
 
     const move = (ev: PointerEvent) => {
-      // cập nhật theo viewport, chặn scroll trên mobile
       setDragXY({ x: ev.clientX, y: ev.clientY });
       ev.preventDefault?.();
     };
 
     const up = (ev: PointerEvent) => {
       try { if (pointerIdRef.current != null) el.releasePointerCapture(pointerIdRef.current); } catch {}
-      window.removeEventListener("pointermove", move as any);
-      window.removeEventListener("pointerup", up as any);
-      window.removeEventListener("pointercancel", up as any);
+      window.removeEventListener('pointermove', move as any);
+      window.removeEventListener('pointerup', up as any);
+      window.removeEventListener('pointercancel', up as any);
 
-      // thử thả lên board (dựa vào clientX/Y thật)
-      const ok = onDrop(ev.clientX, ev.clientY);
-      if (!ok) {
-        // quay về icon trong panel
-        setDragging(false);
-        onDragState(false);
-      } else {
-        // parent chuyển locked=true -> component tự ẩn
-        setDragging(false);
-        onDragState(false);
-      }
+      onDrop(ev.clientX, ev.clientY);
+      setDragging(false);
+      onDragState(false);
       pointerIdRef.current = null;
     };
 
-    window.addEventListener("pointermove", move as any, { passive: false });
-    window.addEventListener("pointerup", up as any, { once: true });
-    window.addEventListener("pointercancel", up as any, { once: true });
+    window.addEventListener('pointermove', move as any, { passive: false });
+    window.addEventListener('pointerup', up as any, { once: true });
+    window.addEventListener('pointercancel', up as any, { once: true });
   }
 
-  // cắt icon quanh anchor để bỏ cụm đảo xa (Trường Sa…)
   const vb = d
     ? viewBoxNearAnchorSmart(d, p.anchor_px[0], p.anchor_px[1], 6, 600, 220)
     : { x: 0, y: 0, w: 100, h: 100 };
 
-  const iconFill = color?.iconFill || "#f1f5f9";
-  const iconStroke = color?.iconStroke || "#334155";
-  const icon = d
-    ? <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} width={48} height={48} preserveAspectRatio="xMidYMid meet">
-        <path d={d} fill={iconFill} stroke={iconStroke} strokeWidth={1.2} />
-      </svg>
-    : <div className="w-12 h-12 rounded bg-slate-200 animate-pulse" />;
+  const iconFill = color?.iconFill || '#f1f5f9';
+  const iconStroke = color?.iconStroke || '#334155';
 
-  const renderContent = (floating: boolean) => (
-    <div className="flex flex-col items-center text-center">
-      <div className="w-12 h-12 flex items-center justify-center">{icon}</div>
-      <div
-        className={`mt-1 text-[11px] font-semibold leading-tight px-1 ${floating ?
-          "text-white bg-slate-900/85 rounded" :
-          "text-slate-100 drop-shadow"
-        }`}
-      >
-        {p.name_vi}
-      </div>
-    </div>
+  const renderIcon = (size: number) => (
+    d
+      ? (
+        <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} width={size} height={size} preserveAspectRatio="xMidYMid meet">
+          <path d={d} fill={iconFill} stroke={iconStroke} strokeWidth={1.2} />
+        </svg>
+      )
+      : (
+        <div style={{ width: size, height: size }} className="rounded bg-slate-200 animate-pulse" />
+      )
   );
+
+  const renderContent = (mode: 'panel' | 'drag') => {
+    const iconSize = mode === 'panel' ? PANEL_ICON_SIZE : DRAG_ICON_SIZE;
+    const nameClass = mode === 'panel'
+      ? 'mt-3 text-lg font-semibold leading-tight text-slate-100 drop-shadow'
+      : 'mt-2 text-base font-semibold leading-tight text-white bg-slate-900/85 rounded px-2 py-1';
+
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-start text-center">
+        <div
+          className="flex items-center justify-center"
+          style={{ width: iconSize, height: iconSize }}
+        >
+          {renderIcon(iconSize)}
+        </div>
+        <div className={nameClass} style={{ maxWidth: '100%' }}>
+          <span className="block truncate">{p.name_vi}</span>
+        </div>
+      </div>
+    );
+  };
+
+  const panelWidth = PANEL_CARD_WIDTH;
+  const panelHeight = PANEL_CARD_HEIGHT;
+  const dragWidth = DRAG_CARD_WIDTH;
+  const dragHeight = DRAG_CARD_HEIGHT;
 
   return (
     <>
       <div
         onPointerDown={onPointerDown}
-        className={`select-none ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+        className={`select-none rounded-2xl border border-slate-600/40 bg-slate-900/60 shadow-sm backdrop-blur ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{
-          position: dragging ? "fixed" : "absolute",
+          position: dragging ? 'fixed' : 'absolute',
           left: pos.x,
           top: pos.y,
-          width: 76,
-          minHeight: 74,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          gap: 4,
+          width: panelWidth,
+          height: panelHeight,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '12px 10px',
           opacity: dragging ? 0 : 1,
-          pointerEvents: dragging ? "none" : "auto",
+          pointerEvents: dragging ? 'none' : 'auto',
           zIndex: dragging ? 50 : 1,
         }}
         title={p.name_vi}
       >
-        {renderContent(false)}
+        {renderContent('panel')}
       </div>
 
       {dragging && createPortal(
         <div
-          className="fixed z-[3000] select-none pointer-events-none"
+          className="fixed z-[3000] select-none pointer-events-none rounded-2xl border border-slate-500/50 bg-slate-900/80 backdrop-blur-sm"
           style={{
-            left: dragXY.x - offRef.current.dx,
-            top:  dragXY.y - offRef.current.dy,
-            width: 76,
-            minHeight: 74,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            gap: 4,
+            left: dragXY.x - offsetRef.current.dxRatio * dragWidth,
+            top: dragXY.y - offsetRef.current.dyRatio * dragHeight,
+            width: dragWidth,
+            height: dragHeight,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '10px 8px',
           }}
         >
-          {renderContent(true)}
+          {renderContent('drag')}
         </div>,
         document.body
       )}
     </>
   );
-}
-
-
-function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose: () => void }) {
+}\r\n\r\nfunction WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose: () => void }) {
   const [name, setName] = useState("");
   const [entries, setEntries] = useState<LBItem[]>(() => readLB(lbKey));
   const [saved, setSaved] = useState<LBItem | null>(null);
@@ -706,10 +722,14 @@ function randomColorMap(list: Province[]): ProvinceColorMap {
 
 // ---- utils ----
 function randomStartPositions(list: Province[]) {
-  const slots = list.map((_, i) => ({
-    x: 40 + (i % 2) * 140,
-    y: 30 + Math.floor(i / 2) * 60,
-  }));
+  const slots = list.map((_, i) => {
+    const col = i % PANEL_COLUMNS;
+    const row = Math.floor(i / PANEL_COLUMNS);
+    return {
+      x: PANEL_PADDING_X + col * PIECE_COLUMN_STEP,
+      y: PANEL_PADDING_Y + row * PIECE_ROW_STEP,
+    };
+  });
   for (let i = slots.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     const tmp = slots[i];
@@ -718,3 +738,6 @@ function randomStartPositions(list: Province[]) {
   }
   return slots;
 }
+
+
+

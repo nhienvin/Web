@@ -1,4 +1,4 @@
-// src/levels/Level2.tsx
+// src/levels/Level4.tsx
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Bundle, Province } from "../types";
 import { dist, within } from "../core/math";
@@ -7,6 +7,7 @@ import { pushLB } from "../core/leaderboard";
 import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
 import { viewBoxNearAnchorSmart } from "../core/svg";
+import { PANEL_COLUMNS, PANEL_ICON_SIZE, PANEL_CARD_WIDTH, PANEL_CARD_HEIGHT, PANEL_CARD_GAP_X, PANEL_PADDING_X, PANEL_PADDING_Y, DRAG_ICON_SIZE, DRAG_CARD_WIDTH, DRAG_CARD_HEIGHT, PIECE_COLUMN_STEP, PIECE_ROW_STEP } from "./panelLayout";
 import { createPortal } from "react-dom";
 // ---- helpers ----
 
@@ -34,11 +35,6 @@ function getDevFlag(): boolean {
 }
 
 const LB_KEY = "lb:pack1:level4";
-
-const PANEL_ICON_SIZE = 96;
-const DRAG_ICON_SIZE = 56;
-const PIECE_COLUMN_STEP = PANEL_ICON_SIZE + 64;
-const PIECE_ROW_STEP = PANEL_ICON_SIZE + 28;
 
 type LBItem = { name: string; ms: number };
 function readLB(key: string): LBItem[] {
@@ -159,7 +155,7 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const tol = activeProvince ? Math.max(activeProvince.snap_tolerance_px || 18, 56) : 0;
 
   // kích thước stage gốc (chưa scale)
-  const PANEL_W = 340;
+  const PANEL_W = PANEL_CARD_WIDTH * PANEL_COLUMNS + PANEL_CARD_GAP_X * (PANEL_COLUMNS - 1) + PANEL_PADDING_X * 2;
   const GAP = 16;
   const stageW = vw + GAP + PANEL_W;
   const stageH = vh;
@@ -451,56 +447,83 @@ function Piece({
   const iconFill = color?.iconFill || '#f1f5f9';
   const iconStroke = color?.iconStroke || '#334155';
 
-  const panelIcon = d
-    ? (
-      <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} width={PANEL_ICON_SIZE} height={PANEL_ICON_SIZE} preserveAspectRatio="xMidYMid meet">
-        <path d={d} fill={iconFill} stroke={iconStroke} strokeWidth={1.2} />
-      </svg>
-    )
-    : (
-      <div style={{ width: PANEL_ICON_SIZE, height: PANEL_ICON_SIZE }} className="rounded bg-slate-200 animate-pulse" />
-    );
+  const renderIcon = (size: number) => (
+    d
+      ? (
+        <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} width={size} height={size} preserveAspectRatio="xMidYMid meet">
+          <path d={d} fill={iconFill} stroke={iconStroke} strokeWidth={1.2} />
+        </svg>
+      )
+      : (
+        <div style={{ width: size, height: size }} className="rounded bg-slate-200 animate-pulse" />
+      )
+  );
 
-  const dragIcon = d
-    ? (
-      <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} width={DRAG_ICON_SIZE} height={DRAG_ICON_SIZE} preserveAspectRatio="xMidYMid meet">
-        <path d={d} fill={iconFill} stroke={iconStroke} strokeWidth={1.2} />
-      </svg>
-    )
-    : (
-      <div style={{ width: DRAG_ICON_SIZE, height: DRAG_ICON_SIZE }} className="rounded bg-slate-200 animate-pulse" />
+  const renderContent = (mode: 'panel' | 'drag') => {
+    const iconSize = mode === 'panel' ? PANEL_ICON_SIZE : DRAG_ICON_SIZE;
+    const nameClass = mode === 'panel'
+      ? 'mt-4 text-xl font-semibold leading-tight text-slate-100 drop-shadow'
+      : 'mt-3 text-lg font-semibold leading-tight text-white bg-slate-900/85 rounded px-2.5 py-1';
+
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-start text-center">
+        <div
+          className="flex items-center justify-center"
+          style={{ width: iconSize, height: iconSize }}
+        >
+          {renderIcon(iconSize)}
+        </div>
+        <div className={nameClass} style={{ maxWidth: '100%' }}>
+          <span className="block truncate">{p.name_vi}</span>
+        </div>
+      </div>
     );
+  };
+
+  const panelWidth = PANEL_CARD_WIDTH;
+  const panelHeight = PANEL_CARD_HEIGHT;
+  const dragWidth = DRAG_CARD_WIDTH;
+  const dragHeight = DRAG_CARD_HEIGHT;
 
   return (
     <>
       <div
         onPointerDown={onPointerDown}
-        className={`absolute select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`select-none rounded-2xl border border-slate-600/40 bg-slate-900/60 shadow-sm backdrop-blur ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{
+          position: dragging ? 'fixed' : 'absolute',
           left: pos.x,
           top: pos.y,
-          width: PANEL_ICON_SIZE,
-          height: PANEL_ICON_SIZE,
+          width: panelWidth,
+          height: panelHeight,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px 14px',
           opacity: dragging ? 0 : 1,
           pointerEvents: dragging ? 'none' : 'auto',
-          zIndex: 1,
+          zIndex: dragging ? 50 : 1,
         }}
         title={p.name_vi}
       >
-        {panelIcon}
+        {renderContent('panel')}
       </div>
 
       {dragging && createPortal(
         <div
-          className="fixed z-[3000] select-none pointer-events-none"
+          className="fixed z-[3000] select-none pointer-events-none rounded-2xl border border-slate-500/50 bg-slate-900/80 backdrop-blur-sm"
           style={{
-            left: dragXY.x - offsetRef.current.dxRatio * DRAG_ICON_SIZE,
-            top: dragXY.y - offsetRef.current.dyRatio * DRAG_ICON_SIZE,
-            width: DRAG_ICON_SIZE,
-            height: DRAG_ICON_SIZE,
+            left: dragXY.x - offsetRef.current.dxRatio * dragWidth,
+            top: dragXY.y - offsetRef.current.dyRatio * dragHeight,
+            width: dragWidth,
+            height: dragHeight,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '10px 8px',
           }}
         >
-          {dragIcon}
+          {renderContent('drag')}
         </div>,
         document.body
       )}
@@ -685,10 +708,14 @@ function randomColorMap(list: Province[]): ProvinceColorMap {
 
 // ---- utils ----
 function randomStartPositions(list: Province[]) {
-  const slots = list.map((_, i) => ({
-    x: 32 + (i % 2) * PIECE_COLUMN_STEP,
-    y: 24 + Math.floor(i / 2) * PIECE_ROW_STEP,
-  }));
+  const slots = list.map((_, i) => {
+    const col = i % PANEL_COLUMNS;
+    const row = Math.floor(i / PANEL_COLUMNS);
+    return {
+      x: PANEL_PADDING_X + col * PIECE_COLUMN_STEP,
+      y: PANEL_PADDING_Y + row * PIECE_ROW_STEP,
+    };
+  });
   for (let i = slots.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     const tmp = slots[i];
@@ -697,6 +724,8 @@ function randomStartPositions(list: Province[]) {
   }
   return slots;
 }
+
+
 
 
 

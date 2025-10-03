@@ -7,6 +7,7 @@ import { pushLB } from "../core/leaderboard";
 import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
 import { viewBoxNearAnchorSmart } from "../core/svg";
+import { PANEL_COLUMNS, PANEL_ICON_SIZE, PANEL_CARD_WIDTH, PANEL_CARD_HEIGHT, PANEL_CARD_GAP_X, PANEL_PADDING_X, PANEL_PADDING_Y, DRAG_ICON_SIZE, DRAG_CARD_WIDTH, DRAG_CARD_HEIGHT, PIECE_COLUMN_STEP, PIECE_ROW_STEP } from "./panelLayout";
 import { createPortal } from "react-dom";
 // ---- helpers ----
 
@@ -35,19 +36,6 @@ function getDevFlag(): boolean {
 
 const LB_KEY = "lb:pack1:level2";
 
-const PANEL_COLUMNS = 3;
-const PANEL_ICON_SIZE = 120;
-const PANEL_CARD_WIDTH = 150;
-const PANEL_CARD_HEIGHT = 192;
-const PANEL_CARD_GAP_X = 16;
-const PANEL_CARD_GAP_Y = 18;
-const PANEL_PADDING_X = 20;
-const PANEL_PADDING_Y = 18;
-const DRAG_ICON_SIZE = 88;
-const DRAG_CARD_WIDTH = 132;
-const DRAG_CARD_HEIGHT = 160;
-const PIECE_COLUMN_STEP = PANEL_CARD_WIDTH + PANEL_CARD_GAP_X;
-const PIECE_ROW_STEP = PANEL_CARD_HEIGHT + PANEL_CARD_GAP_Y;
 
 type LBItem = { name: string; ms: number };
 function readLB(key: string): LBItem[] {
@@ -478,8 +466,8 @@ function Piece({
   const renderContent = (mode: 'panel' | 'drag') => {
     const iconSize = mode === 'panel' ? PANEL_ICON_SIZE : DRAG_ICON_SIZE;
     const nameClass = mode === 'panel'
-      ? 'mt-3 text-lg font-semibold leading-tight text-slate-100 drop-shadow'
-      : 'mt-2 text-base font-semibold leading-tight text-white bg-slate-900/85 rounded px-2 py-1';
+      ? 'mt-4 text-xl font-semibold leading-tight text-slate-100 drop-shadow'
+      : 'mt-3 text-lg font-semibold leading-tight text-white bg-slate-900/85 rounded px-2.5 py-1';
 
     return (
       <div className="flex h-full w-full flex-col items-center justify-start text-center">
@@ -515,7 +503,7 @@ function Piece({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '12px 10px',
+          padding: '16px 14px',
           opacity: dragging ? 0 : 1,
           pointerEvents: dragging ? 'none' : 'auto',
           zIndex: dragging ? 50 : 1,
@@ -545,7 +533,9 @@ function Piece({
       )}
     </>
   );
-}\r\n\r\nfunction WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose: () => void }) {
+}
+
+function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose: () => void }) {
   const [name, setName] = useState("");
   const [entries, setEntries] = useState<LBItem[]>(() => readLB(lbKey));
   const [saved, setSaved] = useState<LBItem | null>(null);
@@ -738,6 +728,7 @@ function randomStartPositions(list: Province[]) {
   }
   return slots;
 }
+
 
 
 

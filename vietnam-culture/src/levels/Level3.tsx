@@ -84,19 +84,6 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const hoangSaStroke = Math.max(0.6, Math.min(2.4, Math.max(vw, vh) * 0.001));
   const hoangSaFontSize = Math.max(10, Math.min(26, vw * 0.016));
 
-// === HUD portal setup (không bị scale) ===
-  const portalElRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = document.createElement("div");
-    el.setAttribute("data-level2-portal", "");
-    document.body.appendChild(el);
-    portalElRef.current = el;
-    return () => {
-      if (el.parentNode) el.parentNode.removeChild(el);
-      portalElRef.current = null;
-    };
-  }, []);
-
   useEffect(() => {
     setStartPositions(randomStartPositions(bundle.provinces));
     setColorMap(randomColorMap(bundle.provinces));
@@ -300,14 +287,14 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
           </div>
 
           {/* PANEL MẢNH – giữ header (thời gian/nút), container tối, KHÔNG tạo scroll toàn trang */}
-          <aside className="relative w-[340px]">
+          <aside className="relative">
             <div className="sticky top-0 z-20 flex items-center justify-evenly px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
-              <div className="text-m text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
+              <div className="text-3xl text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
                 {' • '}<b>{solved}/{total}</b>
               </div>
               <button
                 onClick={onBack}
-                style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+                style={{ pointerEvents:'auto', fontSize:48, padding:'4px 8px',
                 borderRadius:6, border:'1px solid #475569',
                 background:'#334155', color:'#fff', cursor:'pointer' }}
                 title="Quay lại menu">
@@ -315,7 +302,7 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
               </button>
               <button
               onClick={resetGame}
-              style={{ pointerEvents:'auto', fontSize:16, padding:'4px 8px',
+              style={{ pointerEvents:'auto', fontSize:48, padding:'4px 8px',
                 borderRadius:6, border:'1px solid #475569',
                 background:'#334155', color:'#fff', cursor:'pointer' }}
               title="Làm lại (random thứ tự mới)"
@@ -470,10 +457,6 @@ function Piece({
 
   const renderContent = (mode: 'panel' | 'drag') => {
     const iconSize = mode === 'panel' ? PANEL_ICON_SIZE : DRAG_ICON_SIZE;
-    const nameClass = mode === 'panel'
-      ? 'mt-4 text-xl font-semibold leading-tight text-slate-100 drop-shadow'
-      : 'mt-3 text-lg font-semibold leading-tight text-white bg-slate-900/85 rounded px-2.5 py-1';
-
     return (
       <div className="flex h-full w-full flex-col items-center justify-start text-center">
         <div
@@ -482,9 +465,7 @@ function Piece({
         >
           {renderIcon(iconSize)}
         </div>
-        <div className={nameClass} style={{ maxWidth: '100%' }}>
-          <span className="block truncate">{p.name_vi}</span>
-        </div>
+      
       </div>
     );
   };

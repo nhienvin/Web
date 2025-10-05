@@ -297,12 +297,12 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
           {/* PANEL MẢNH – giữ header (thời gian/nút), container tối, KHÔNG tạo scroll toàn trang */}
           <aside className="relative" style={{ width: PANEL_W }}>
             <div className="sticky top-0 z-20 flex items-center justify-evenly px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
-              <div className="text-2xl text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
+              <div className="text-3xl text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
                 {' • '}<b>{solved}/{total}</b>
               </div>
               <button
                 onClick={onBack}
-                style={{ pointerEvents:'auto', fontSize:32, padding:'4px 8px',
+                style={{ pointerEvents:'auto', fontSize:48, padding:'4px 8px',
                 borderRadius:6, border:'1px solid #475569',
                 background:'#334155', color:'#fff', cursor:'pointer' }}
                 title="Quay lại menu">
@@ -310,7 +310,7 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
               </button>
               <button
               onClick={resetGame}
-              style={{ pointerEvents:'auto', fontSize:32, padding:'4px 8px',
+              style={{ pointerEvents:'auto', fontSize:48, padding:'4px 8px',
                 borderRadius:6, border:'1px solid #475569',
                 background:'#334155', color:'#fff', cursor:'pointer' }}
               title="Làm lại (random thứ tự mới)"

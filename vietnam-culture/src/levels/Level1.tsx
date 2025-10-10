@@ -8,6 +8,22 @@ import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
 
 /* ========= helpers ========= */
+function useBoardViewBox(src: string, fallback: [number, number, number, number]) {
+  const [vb, setVb] = React.useState(fallback);
+  React.useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(src);
+        const txt = await res.text();
+        const m = txt.match(/viewBox\s*=\s*["']\s*([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s*["']/i);
+        if (m && alive) setVb([+m[1], +m[2], +m[3], +m[4]] as any);
+      } catch {}
+    })();
+    return () => { alive = false; };
+  }, [src]);
+  return vb as [number, number, number, number];
+}
 function hash32(s: string) { let h = 2166136261>>>0; for (let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
 function colorForId(id: string) {
   const h = hash32(id) % 360;
@@ -91,8 +107,10 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
   const boardRef = useRef<HTMLDivElement>(null);
   const doneOnceRef = useRef(false);
-  const [, , vw, vh] = bundle.viewBox;
+  // const [, , vw, vh] = bundle.viewBox;
+  const [, , vw, vh] = useBoardViewBox("/assets/board_blank_outline.svg", bundle.viewBox);
   const [dev] = useState(getDevFlag());
+  // const [dev, setDev] = useState(getDevFlag());
   const provinces = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
 
   const boardPadding = dev ? Math.max(vw * 0.12, 120) : Math.max(vw * 0.05, 10);
@@ -108,26 +126,7 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const { ms } = useTimer(solved < total);
 
   const { playCorrect, playWrong, playWin } = useSfx();
-  const truongSaMarkers = [
-    [0.96, 0.73],
-    [0.97, 0.74],
-    [0.95, 0.75],
-    [0.93, 0.78],
-    [0.98, 0.76],
-  
-  ];
-  const truongSaRadius = Math.max(3, Math.min(9, Math.max(vw, vh) * 0.006));
-  const truongSaStroke = Math.max(0.7, Math.min(3, Math.max(vw, vh) * 0.0012));
-  const truongSaFontSize = Math.max(12, Math.min(32, vw * 0.02));
-  const hoangSaMarkers = [
-    [0.92, 0.48],
-    [0.90, 0.45],
-    [0.95, 0.43],
-  ];
-  const hoangSaRadius = Math.max(2.5, Math.min(7, Math.max(vw, vh) * 0.004));
-  const hoangSaStroke = Math.max(0.6, Math.min(2.4, Math.max(vw, vh) * 0.001));
-  const hoangSaFontSize = Math.max(10, Math.min(26, vw * 0.016));
-
+ 
   // preload SVG rời
   const [extraMeta, setExtraMeta] = useState<Record<string, SvgMeta>>({});
   useEffect(()=>{
@@ -199,46 +198,6 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
-      {/* HUD via portal: luôn nổi trên tất cả */}
-      {/* {createPortal(
-        <div
-          style={{
-            position: 'fixed', top: 12, left: 12, zIndex: 2147483647,
-            background: 'rgba(30,41,59,.88)', color: '#fff',
-            border: '1px solid rgba(51,65,85,.9)', borderRadius: 8,
-            padding: '6px 10px', boxShadow: '0 2px 8px rgba(0,0,0,.35)',
-            display:'flex', alignItems:'center', gap:10
-          }}
-        >
-          <button
-            onClick={onBack}
-            style={{ pointerEvents:'auto', fontSize:12, padding:'4px 10px', borderRadius:6, border:'1px solid #475569', background:'#0f172a', color:'#f8fafc', cursor:'pointer' }}
-            title="Quay lại menu"
-          >
-            ← Menu
-          </button>
-          <span style={{ fontSize: 14 }}>
-            Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
-            {' • '}Đã đặt: <b>{solved}/{total}</b>
-          </span>
-          <button
-            onClick={resetGame}
-            style={{ pointerEvents:'auto', fontSize:12, padding:'4px 8px',
-              borderRadius:6, border:'1px solid #475569',
-              background:'#334155', color:'#fff', cursor:'pointer' }}
-            title="Làm lại (random thứ tự mới)"
-          >↻</button>
-          <button
-            className="text-[11px] px-2 py-1 rounded border border-slate-600 bg-slate-700"
-            onClick={() => { const next = !dev; setDev(next); localStorage.setItem("dev", next ? "1":"0"); }}
-            title="Bật/tắt bảng DEV"
-          >
-            DEV {dev ? "ON" : "OFF"}
-          </button>
-        </div>,
-        document.body
-      )} */}
-
       {/* Stage */}
       <div
         className="absolute"
@@ -253,7 +212,7 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
           {/* BOARD */}
           <div className={`relative ${shake ? 'anim-shake' : ''}`} style={{ width: vw, height: vh }}>
             <img
-              src="/assets/board_with_borders.svg"
+              src="/assets/board_blank_outline.svg"
               width={vw} height={vh}
               className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-sm"
               alt="Vietnam board"
@@ -261,36 +220,6 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
             {/* Fill tỉnh đã đúng */}
             <svg className="absolute inset-0 pointer-events-none" viewBox={`0 0 ${vw} ${vh}`} style={{ zIndex: 5 }}>
-              <g stroke="#38bdf8" fill="#38bdf8" fillOpacity={0.75} strokeWidth={truongSaStroke}>
-                {truongSaMarkers.map(([fx, fy], idx) => (
-                  <circle key={`ts-${idx}`} cx={vw * fx} cy={vh * fy} r={truongSaRadius} />
-                ))}
-              </g>
-              <g stroke="#fbbf24" fill="#fbbf24" fillOpacity={0.75} strokeWidth={hoangSaStroke}>
-                {hoangSaMarkers.map(([fx, fy], idx) => (
-                  <circle key={`hs-${idx}`} cx={vw * fx} cy={vh * fy} r={hoangSaRadius} />
-                ))}
-              </g>
-              <text
-                x={vw * 0.88}
-                y={vh * 0.80}
-                fill="#38bdf8"
-                fontSize={truongSaFontSize}
-                fontWeight={600}
-                opacity={0.8}
-              >
-                Trường Sa
-              </text>
-              <text
-                x={vw * 0.86}
-                y={vh * 0.44}
-                fill="#fbbf24"
-                fontSize={hoangSaFontSize}
-                fontWeight={600}
-                opacity={0.85}
-              >
-                Hoàng Sa
-              </text>
               {/* layer path fill */}
               {bundle.provinces.map(p=>{
                 if (!placed[p.id]) return null;

@@ -8,16 +8,66 @@
   "provinces": [
     {
       "id": "1",
+      "name_vi": "Hà Nội",
+      "name_en": "Hà Nội",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/01.svg",
+      "anchor_px": [
+        278.0,
+        205.4
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 24,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "11",
+      "name_vi": "Điện Biên",
+      "name_en": "Điện Biên",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/11.svg",
+      "anchor_px": [
+        89.7,
+        142.6
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 24,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "12",
       "name_vi": "Lai Châu",
-      "name_en": "Lai Châu Province",
-      "region_code": "TBB",
-      "region_name": "Tây Bắc Bộ",
-      "lat": 22.316914,
-      "lon": 103.186972,
-      "svg_path_file": "map/svg/1.svg",
+      "name_en": "Lai Châu",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/12.svg",
       "anchor_px": [
-        180.0,
-        143.2
+        88.1,
+        97.6
       ],
       "bbox_px": [
         0.0,
@@ -25,28 +75,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "2",
-        "5",
-        "71"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "13",
-      "name_vi": "Quảng Ninh",
-      "name_en": "Quảng Ninh Province",
-      "region_code": "DBB",
-      "region_name": "Đông Bắc Bộ",
-      "lat": 21.10097,
-      "lon": 107.480653,
-      "svg_path_file": "map/svg/13.svg",
+      "id": "14",
+      "name_vi": "Sơn La",
+      "name_en": "Sơn La",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/14.svg",
       "anchor_px": [
-        519.0,
-        249.3
+        156.9,
+        177.7
       ],
       "bbox_px": [
         0.0,
@@ -54,58 +100,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "56",
-        "9",
-        "HP"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "18",
-      "name_vi": "Ninh Bình",
-      "name_en": "Ninh Bình Province",
-      "region_code": "DBSH",
-      "region_name": "Đồng bằng sông Hồng",
-      "lat": 20.08848,
-      "lon": 106.257823,
-      "svg_path_file": "map/svg/18.svg",
-      "anchor_px": [
-        449.6,
-        338.8
-      ],
-      "bbox_px": [
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "neighbors": [
-        "21",
-        "66",
-        "68",
-        "HN"
-      ],
-      "facts": [],
-      "media": [],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "2",
+      "id": "15",
       "name_vi": "Lào Cai",
-      "name_en": "Lào Cai Province",
-      "region_code": "TBB",
-      "region_name": "Tây Bắc Bộ",
-      "lat": 22.059777,
-      "lon": 104.34923,
-      "svg_path_file": "map/svg/2.svg",
+      "name_en": "Lào Cai",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/15.svg",
       "anchor_px": [
-        275.0,
-        157.9
+        177.9,
+        111.4
       ],
       "bbox_px": [
         0.0,
@@ -113,29 +125,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "1",
-        "5",
-        "68",
-        "7"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "21",
-      "name_vi": "Thanh Hóa",
-      "name_en": "Thanh Hóa Province",
-      "region_code": "BTB",
-      "region_name": "Bắc Trung Bộ",
-      "lat": 19.950023,
-      "lon": 105.44338,
-      "svg_path_file": "map/svg/21.svg",
+      "id": "19",
+      "name_vi": "Thái Nguyên",
+      "name_en": "Thái Nguyên",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/19.svg",
       "anchor_px": [
-        372.2,
-        350.2
+        287.2,
+        115.8
       ],
       "bbox_px": [
         0.0,
@@ -143,29 +150,49 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "18",
-        "22",
-        "5",
-        "68"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "20",
+      "name_vi": "Lạng Sơn",
+      "name_en": "Lạng Sơn",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/20.svg",
+      "anchor_px": [
+        349.8,
+        127.7
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
       "id": "22",
-      "name_vi": "Nghệ An",
-      "name_en": "Nghệ An Province",
-      "region_code": "BTB",
-      "region_name": "Bắc Trung Bộ",
-      "lat": 19.202158,
-      "lon": 105.087104,
-      "svg_path_file": "map/svg/22.svg",
+      "name_vi": "Quảng Ninh",
+      "name_en": "Quảng Ninh",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/22.svg",
       "anchor_px": [
-        315.2,
-        407.8
+        398.8,
+        183.2
       ],
       "bbox_px": [
         0.0,
@@ -173,27 +200,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "21",
-        "23"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "23",
-      "name_vi": "Hà Tĩnh",
-      "name_en": "Hà Tĩnh Province",
-      "region_code": "BTB",
-      "region_name": "Bắc Trung Bộ",
-      "lat": 18.347054,
-      "lon": 105.953508,
-      "svg_path_file": "map/svg/23.svg",
+      "id": "24",
+      "name_vi": "Bắc Ninh",
+      "name_en": "Bắc Ninh",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/24.svg",
       "anchor_px": [
-        398.2,
-        490.3
+        340.1,
+        178.2
       ],
       "bbox_px": [
         0.0,
@@ -201,27 +225,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "22",
-        "25"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
       "id": "25",
-      "name_vi": "Quảng Trị",
-      "name_en": "Quảng Trị Province",
-      "region_code": "BTB",
-      "region_name": "Bắc Trung Bộ",
-      "lat": 17.321566,
-      "lon": 106.730804,
-      "svg_path_file": "map/svg/25.svg",
+      "name_vi": "Phú Thọ",
+      "name_en": "Phú Thọ",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/25.svg",
       "anchor_px": [
-        487.2,
-        588.3
+        232.7,
+        202.2
       ],
       "bbox_px": [
         0.0,
@@ -229,27 +250,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "23",
-        "26"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "26",
-      "name_vi": "Huế",
-      "name_en": "Huế",
-      "region_code": "BTB",
-      "region_name": "Bắc Trung Bộ",
-      "lat": 16.475017,
-      "lon": 107.709558,
-      "svg_path_file": "map/svg/26.svg",
+      "id": "31",
+      "name_vi": "Hải Phòng",
+      "name_en": "Hải Phòng",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/31.svg",
       "anchor_px": [
-        548.3,
-        646.0
+        339.9,
+        210.3
       ],
       "bbox_px": [
         0.0,
@@ -257,83 +275,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "25",
-        "DN"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "29",
-      "name_vi": "Quảng Ngãi",
-      "name_en": "Quảng Ngãi Province",
-      "region_code": "NTB",
-      "region_name": "Nam Trung Bộ",
-      "lat": 14.878872,
-      "lon": 108.433426,
-      "svg_path_file": "map/svg/29.svg",
-      "anchor_px": [
-        616.2,
-        792.4
-      ],
-      "bbox_px": [
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "neighbors": [
-        "30",
-        "DN"
-      ],
-      "facts": [],
-      "media": [],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "30",
-      "name_vi": "Gia Lai",
-      "name_en": "Gia Lai Province",
-      "region_code": "TN",
-      "region_name": "Tây Nguyên",
-      "lat": 13.924421,
-      "lon": 108.580792,
-      "svg_path_file": "map/svg/30.svg",
-      "anchor_px": [
-        617.1,
-        879.1
-      ],
-      "bbox_px": [
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "neighbors": [
-        "29",
-        "33"
-      ],
-      "facts": [],
-      "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
       "id": "33",
-      "name_vi": "Đắk Lắk",
-      "name_en": "Đắk Lắk Province",
-      "region_code": "TN",
-      "region_name": "Tây Nguyên",
-      "lat": 12.963662,
-      "lon": 108.593029,
-      "svg_path_file": "map/svg/33.svg",
+      "name_vi": "Hưng Yên",
+      "name_en": "Hưng Yên",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/33.svg",
       "anchor_px": [
-        621.9,
-        957.9
+        322.8,
+        234.6
       ],
       "bbox_px": [
         0.0,
@@ -341,86 +300,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "30",
-        "34",
-        "35"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "34",
-      "name_vi": "Khánh Hòa",
-      "name_en": "Khánh Hòa Province",
-      "region_code": "NTB",
-      "region_name": "Nam Trung Bộ",
-      "lat": 10.320892,
-      "lon": 111.599409,
-      "svg_path_file": "map/svg/34.svg",
-      "anchor_px": [
-        673.4,
-        1045
-      ],
-      "bbox_px": [
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "neighbors": [
-        "33",
-        "35"
-      ],
-      "facts": [],
-      "media": [],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "35",
-      "name_vi": "Lâm Đồng",
-      "name_en": "Lâm Đồng Province",
-      "region_code": "TN",
-      "region_name": "Tây Nguyên",
-      "lat": 11.01126,
-      "lon": 108.292101,
-      "svg_path_file": "map/svg/35.svg",
-      "anchor_px": [
-        593.9,
-        1113.8
-      ],
-      "bbox_px": [
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "neighbors": [
-        "33",
-        "34",
-        "39",
-        "SG"
-      ],
-      "facts": [],
-      "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
       "id": "37",
-      "name_vi": "Tây Ninh",
-      "name_en": "Tây Ninh Province",
-      "region_code": "DNB",
-      "region_name": "Đông Nam Bộ",
-      "lat": 11.04923,
-      "lon": 106.166967,
-      "svg_path_file": "map/svg/37.svg",
+      "name_vi": "Ninh Bình",
+      "name_en": "Ninh Bình",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/37.svg",
       "anchor_px": [
-        432.3,
-        1114.4
+        305.5,
+        262.7
       ],
       "bbox_px": [
         0.0,
@@ -428,28 +325,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "39",
-        "45",
-        "SG"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "39",
-      "name_vi": "Đồng Nai",
-      "name_en": "Đồng Nai Province",
-      "region_code": "DNB",
-      "region_name": "Đông Nam Bộ",
-      "lat": 11.43552,
-      "lon": 107.03575,
-      "svg_path_file": "map/svg/39.svg",
+      "id": "38",
+      "name_vi": "Thanh Hóa",
+      "name_en": "Thanh Hóa",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/38.svg",
       "anchor_px": [
-        500.2,
-        1084.7
+        263.7,
+        289.1
       ],
       "bbox_px": [
         0.0,
@@ -457,28 +350,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "35",
-        "37",
-        "SG"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
       "id": "4",
       "name_vi": "Cao Bằng",
-      "name_en": "Cao Bằng Province",
-      "region_code": "DBB",
-      "region_name": "Đông Bắc Bộ",
-      "lat": 22.744492,
-      "lon": 106.085516,
-      "svg_path_file": "map/svg/4.svg",
+      "name_en": "Cao Bằng",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/04.svg",
       "anchor_px": [
-        429.0,
-        99.2
+        323.6,
+        55.9
       ],
       "bbox_px": [
         0.0,
@@ -486,28 +375,74 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "69",
-        "7",
-        "9"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "40",
+      "name_vi": "Nghệ An",
+      "name_en": "Nghệ An",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/40.svg",
+      "anchor_px": [
+        214.5,
+        347.8
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 24,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "42",
+      "name_vi": "Hà Tĩnh",
+      "name_en": "Hà Tĩnh",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/42.svg",
+      "anchor_px": [
+        272.7,
+        425.6
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
       "id": "44",
-      "name_vi": "An Giang",
-      "name_en": "An Giang Province",
-      "region_code": "DBM",
-      "region_name": "Đồng bằng sông Cửu Long",
-      "lat": 9.86737,
-      "lon": 104.432768,
-      "svg_path_file": "map/svg/44.svg",
+      "name_vi": "Quảng Trị",
+      "name_en": "Quảng Trị",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/44.svg",
       "anchor_px": [
-        295.3,
-        1208.4
+        353.5,
+        520.1
       ],
       "bbox_px": [
         0.0,
@@ -515,28 +450,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "45",
-        "59",
-        "CT"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "45",
-      "name_vi": "Đồng Tháp",
-      "name_en": "Đồng Tháp Province",
-      "region_code": "DBM",
-      "region_name": "Đồng bằng sông Cửu Long",
-      "lat": 10.482477,
-      "lon": 105.946064,
-      "svg_path_file": "map/svg/45.svg",
+      "id": "46",
+      "name_vi": "Huế",
+      "name_en": "Huế",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/46.svg",
       "anchor_px": [
-        378.9,
-        1159.7
+        418.9,
+        588.2
       ],
       "bbox_px": [
         0.0,
@@ -544,30 +475,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "37",
-        "44",
-        "49",
-        "CT",
-        "SG"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "49",
-      "name_vi": "Vĩnh Long",
-      "name_en": "Vĩnh Long Province",
-      "region_code": "DBM",
-      "region_name": "Đồng bằng sông Cửu Long",
-      "lat": 9.849046,
-      "lon": 106.453325,
-      "svg_path_file": "map/svg/49.svg",
+      "id": "48",
+      "name_vi": "Đà Nẵng",
+      "name_en": "Đà Nẵng",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/48.svg",
       "anchor_px": [
-        452.2,
-        1231.0
+        457.1,
+        652.4
       ],
       "bbox_px": [
         0.0,
@@ -575,27 +500,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "45",
-        "CT"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "5",
-      "name_vi": "Sơn La",
-      "name_en": "Sơn La Province",
-      "region_code": "TBB",
-      "region_name": "Tây Bắc Bộ",
-      "lat": 21.193021,
-      "lon": 104.070558,
-      "svg_path_file": "map/svg/5.svg",
+      "id": "51",
+      "name_vi": "Quảng Ngãi",
+      "name_en": "Quảng Ngãi",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/51.svg",
       "anchor_px": [
-        252.8,
-        228.2
+        473.3,
+        726.5
       ],
       "bbox_px": [
         0.0,
@@ -603,30 +525,49 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "1",
-        "2",
-        "21",
-        "68",
-        "71"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "52",
+      "name_vi": "Gia Lai",
+      "name_en": "Gia Lai",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/52.svg",
+      "anchor_px": [
+        490.9,
+        793.4
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
       "id": "56",
-      "name_vi": "Bắc Ninh",
-      "name_en": "Bắc Ninh Province",
-      "region_code": "DBSH",
-      "region_name": "Đồng bằng sông Hồng",
-      "lat": 21.314207,
-      "lon": 106.415553,
-      "svg_path_file": "map/svg/56.svg",
+      "name_vi": "Khánh Hòa",
+      "name_en": "Khánh Hòa",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/56.svg",
       "anchor_px": [
-        446.4,
-        228.5
+        534.7,
+        935.7
       ],
       "bbox_px": [
         0.0,
@@ -634,59 +575,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "13",
-        "66",
-        "69",
-        "9",
-        "HN",
-        "HP"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "59",
-      "name_vi": "Cà Mau",
-      "name_en": "Cà Mau Province",
-      "region_code": "DBM",
-      "region_name": "Đồng bằng sông Cửu Long",
-      "lat": 8.873245,
-      "lon": 104.963391,
-      "svg_path_file": "map/svg/59.svg",
-      "anchor_px": [
-        310.6,
-        1303.7
-      ],
-      "bbox_px": [
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "neighbors": [
-        "44",
-        "CT"
-      ],
-      "facts": [],
-      "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
       "id": "66",
-      "name_vi": "Hưng Yên",
-      "name_en": "Hưng Yên Province",
-      "region_code": "DBSH",
-      "region_name": "Đồng bằng sông Hồng",
-      "lat": 20.497617,
-      "lon": 106.487884,
-      "svg_path_file": "map/svg/66.svg",
+      "name_vi": "Đắk Lắk",
+      "name_en": "Đắk Lắk",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/66.svg",
       "anchor_px": [
-        445.8,
-        295.9
+        497.4,
+        868.0
       ],
       "bbox_px": [
         0.0,
@@ -694,29 +600,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "18",
-        "56",
-        "HN",
-        "HP"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
       "id": "68",
-      "name_vi": "Phú Thọ",
-      "name_en": "Phú Thọ Province",
-      "region_code": "DBB",
-      "region_name": "Đông Bắc Bộ",
-      "lat": 21.014341,
-      "lon": 105.285939,
-      "svg_path_file": "map/svg/68.svg",
+      "name_vi": "Lâm Đồng",
+      "name_en": "Lâm Đồng",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/68.svg",
       "anchor_px": [
-        333.4,
-        253.9
+        459.6,
+        967.6
       ],
       "bbox_px": [
         0.0,
@@ -724,32 +625,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "18",
-        "2",
-        "21",
-        "5",
-        "69",
-        "7",
-        "HN"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "69",
-      "name_vi": "Thái Nguyên",
-      "name_en": "Thái Nguyên Province",
-      "region_code": "DBB",
-      "region_name": "Đông Bắc Bộ",
-      "lat": 22.02294,
-      "lon": 105.825508,
-      "svg_path_file": "map/svg/69.svg",
+      "id": "75",
+      "name_vi": "Đồng Nai",
+      "name_en": "Đồng Nai",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/75.svg",
       "anchor_px": [
-        390.5,
-        162.5
+        391.0,
+        987.9
       ],
       "bbox_px": [
         0.0,
@@ -757,31 +650,49 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "4",
-        "56",
-        "68",
-        "7",
-        "9",
-        "HN"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "7",
+      "id": "79",
+      "name_vi": "TP. Hồ Chí Minh",
+      "name_en": "TP. Hồ Chí Minh",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/79.svg",
+      "anchor_px": [
+        355.7,
+        1030.3
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 24,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "8",
       "name_vi": "Tuyên Quang",
-      "name_en": "Tuyên Quang Province",
-      "region_code": "DBB",
-      "region_name": "Đông Bắc Bộ",
-      "lat": 22.488597,
-      "lon": 105.101107,
-      "svg_path_file": "map/svg/7.svg",
+      "name_en": "Tuyên Quang",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/08.svg",
       "anchor_px": [
-        324.8,
-        125.6
+        225.0,
+        80.7
       ],
       "bbox_px": [
         0.0,
@@ -789,29 +700,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "2",
-        "4",
-        "68",
-        "69"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "71",
-      "name_vi": "Điện Biên",
-      "name_en": "Điện Biên Province",
-      "region_code": "TBB",
-      "region_name": "Tây Bắc Bộ",
-      "lat": 21.710082,
-      "lon": 103.023072,
-      "svg_path_file": "map/svg/71.svg",
+      "id": "80",
+      "name_vi": "Tây Ninh",
+      "name_en": "Tây Ninh",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/80.svg",
       "anchor_px": [
-        181.7,
-        190.7
+        326.6,
+        1016.0
       ],
       "bbox_px": [
         0.0,
@@ -819,27 +725,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "1",
-        "5"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "9",
-      "name_vi": "Lạng Sơn",
-      "name_en": "Lạng Sơn Province",
-      "region_code": "DBB",
-      "region_name": "Đông Bắc Bộ",
-      "lat": 21.838554,
-      "lon": 106.620648,
-      "svg_path_file": "map/svg/9.svg",
+      "id": "82",
+      "name_vi": "Đồng Tháp",
+      "name_en": "Đồng Tháp",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/82.svg",
       "anchor_px": [
-        456.7,
-        175.2
+        276.1,
+        1058.9
       ],
       "bbox_px": [
         0.0,
@@ -847,29 +750,74 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "13",
-        "4",
-        "56",
-        "69"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "CT",
+      "id": "86",
+      "name_vi": "Vĩnh Long",
+      "name_en": "Vĩnh Long",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/86.svg",
+      "anchor_px": [
+        325.3,
+        1108.5
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 24,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "91",
+      "name_vi": "An Giang",
+      "name_en": "An Giang",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/91.svg",
+      "anchor_px": [
+        228.0,
+        1089.4
+      ],
+      "bbox_px": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "neighbors": [],
+      "facts": [],
+      "media": [],
+      "snap_tolerance_px": 24,
+      "difficulty_1to5": 3
+    },
+    {
+      "id": "92",
       "name_vi": "Cần Thơ",
       "name_en": "Cần Thơ",
-      "region_code": "DBM",
-      "region_name": "Đồng bằng sông Cửu Long",
-      "lat": 9.532451,
-      "lon": 105.894478,
-      "svg_path_file": "map/svg/CT.svg",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/92.svg",
       "anchor_px": [
-        403.4,
-        1247.7
+        283.4,
+        1120.4
       ],
       "bbox_px": [
         0.0,
@@ -877,29 +825,24 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "44",
-        "45",
-        "49",
-        "59"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     },
     {
-      "id": "DN",
-      "name_vi": "Đà Nẵng",
-      "name_en": "Đà Nẵng",
-      "region_code": "NTB",
-      "region_name": "Nam Trung Bộ",
-      "lat": 15.70525,
-      "lon": 108.143763,
-      "svg_path_file": "map/svg/DN.svg",
+      "id": "96",
+      "name_vi": "Cà Mau",
+      "name_en": "Cà Mau",
+      "region_code": "",
+      "region_name": "",
+      "lat": 0.0,
+      "lon": 0.0,
+      "svg_path_file": "/assets/provinces/96.svg",
       "anchor_px": [
-        582.0,
-        724.8
+        237.3,
+        1175.0
       ],
       "bbox_px": [
         0.0,
@@ -907,140 +850,47 @@
         0.0,
         0.0
       ],
-      "neighbors": [
-        "26",
-        "29"
-      ],
+      "neighbors": [],
       "facts": [],
       "media": [],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "HN",
-      "name_vi": "Hà Nội",
-      "name_en": "Hà Nội",
-      "region_code": "DBSH",
-      "region_name": "Đồng bằng sông Hồng",
-      "lat": 20.998607,
-      "lon": 105.700561,
-      "svg_path_file": "map/svg/HN.svg",
-      "anchor_px": [
-        380.5,
-        257.3
-      ],
-      "bbox_px": [
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "neighbors": [
-        "18",
-        "56",
-        "66",
-        "68",
-        "69"
-      ],
-      "facts": [],
-      "media": [],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "HP",
-      "name_vi": "Hải Phòng",
-      "name_en": "Hải Phòng",
-      "region_code": "DBSH",
-      "region_name": "Đồng bằng sông Hồng",
-      "lat": 20.586767,
-      "lon": 106.966812,
-      "svg_path_file": "map/svg/HP.svg",
-      "anchor_px": [
-        463.2,
-        278.4
-      ],
-      "bbox_px": [
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "neighbors": [
-        "13",
-        "56",
-        "66"
-      ],
-      "facts": [],
-      "media": [],
-      "snap_tolerance_px": 18,
-      "difficulty_1to5": 3
-    },
-    {
-      "id": "SG",
-      "name_vi": "Hồ Chí Minh",
-      "name_en": "Ho Chi Minh City",
-      "region_code": "DNB",
-      "region_name": "Đông Nam Bộ",
-      "lat": 9.668504,
-      "lon": 107.170893,
-      "svg_path_file": "map/svg/SG.svg",
-      "anchor_px": [
-        535.8,
-        1224.8
-      ],
-      "bbox_px": [
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "neighbors": [
-        "35",
-        "37",
-        "39",
-        "45"
-      ],
-      "facts": [],
-      "media": [],
-      "snap_tolerance_px": 18,
+      "snap_tolerance_px": 24,
       "difficulty_1to5": 3
     }
   ],
   "indexById": {
     "1": 0,
-    "13": 1,
-    "18": 2,
-    "2": 3,
-    "21": 4,
-    "22": 5,
-    "23": 6,
-    "25": 7,
-    "26": 8,
-    "29": 9,
-    "30": 10,
+    "11": 1,
+    "12": 2,
+    "14": 3,
+    "15": 4,
+    "19": 5,
+    "20": 6,
+    "22": 7,
+    "24": 8,
+    "25": 9,
+    "31": 10,
     "33": 11,
-    "34": 12,
-    "35": 13,
-    "37": 14,
-    "39": 15,
-    "4": 16,
+    "37": 12,
+    "38": 13,
+    "4": 14,
+    "40": 15,
+    "42": 16,
     "44": 17,
-    "45": 18,
-    "49": 19,
-    "5": 20,
-    "56": 21,
-    "59": 22,
+    "46": 18,
+    "48": 19,
+    "51": 20,
+    "52": 21,
+    "56": 22,
     "66": 23,
     "68": 24,
-    "69": 25,
-    "7": 26,
-    "71": 27,
-    "9": 28,
-    "CT": 29,
-    "DN": 30,
-    "HN": 31,
-    "HP": 32,
-    "SG": 33
+    "75": 25,
+    "79": 26,
+    "8": 27,
+    "80": 28,
+    "82": 29,
+    "86": 30,
+    "91": 31,
+    "92": 32,
+    "96": 33
   }
 }

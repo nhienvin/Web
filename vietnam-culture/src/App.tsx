@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { loadBundle } from "./core/bundle";
 import type { Bundle } from "./types";
 import Level1 from "./levels/Level1";
@@ -12,15 +12,15 @@ type Screen = "menu" | GameScreen;
 type LevelMeta = {
   id: GameScreen;
   label: string;
-  colorClass: string;
+  accentClass: string;
   icons: number;
 };
 
 const LEVELS: LevelMeta[] = [
-  { id: "level1", label: "Cấp 1", colorClass: "text-emerald-500", icons: 1 },
-  { id: "level2", label: "Cấp 2", colorClass: "text-amber-500", icons: 2 },
-  { id: "level3", label: "Cấp 3", colorClass: "text-rose-500", icons: 3 },
-  { id: "level4", label: "Cấp 4", colorClass: "text-sky-500", icons: 4 },
+  { id: "level1", label: "Cấp 1", accentClass: "text-emerald-500", icons: 1 },
+  { id: "level2", label: "Cấp 2", accentClass: "text-amber-500", icons: 2 },
+  { id: "level3", label: "Cấp 3", accentClass: "text-rose-500", icons: 3 },
+  { id: "level4", label: "Cấp 4", accentClass: "text-sky-500", icons: 4 },
 ];
 
 const LEVEL_ICON_SRC = "/imgs/puzzle.png";
@@ -37,7 +37,7 @@ export default function App() {
   if (!bundle) {
     return (
       <div className="flex h-full items-center justify-center bg-slate-900 text-white">
-        Đang tải dữ liệu...
+        Äang táº£i dá»¯ liá»‡u...
       </div>
     );
   }
@@ -47,37 +47,31 @@ export default function App() {
   const isMenu = screen === "menu";
 
   return (
-    <div
-      className="h-full w-full"
-      style={
-        isMenu
-          ? {
-              backgroundImage: `url('${MENU_BACKGROUND}')`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }
-          : undefined
-      }
-    >
-      <div className={`flex h-full flex-col ${isMenu ? "bg-transparent" : "bg-white"}`}>
-        {/* {isMenu && (
-          <header className="border-b bg-white/90 backdrop-blur">
-            <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-4">
-              <h1 className="text-xl font-semibold tracking-tight text-slate-900">
-                Vietnam Puzzle Levels
-              </h1>
-            </div>
-          </header>
-        )} */}
+    <div className="h-full w-full">
+      <div
+        className={`relative h-full w-full ${isMenu ? "text-white" : "bg-white text-slate-900"}`}
+        style={
+          isMenu
+            ? {
+                backgroundImage: `url('${MENU_BACKGROUND}')`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }
+            : undefined
+        }
+      >
+        {isMenu && <div className="absolute inset-0 bg-slate-950/60 sm:bg-slate-950/45" aria-hidden />}
 
-        <main className="flex-1 overflow-y-auto">
-          {isMenu && <Menu onSelect={handleStartLevel} />}
-          {screen === "level1" && <Level1 bundle={bundle} onBack={handleBackToMenu} />}
-          {screen === "level2" && <Level2 bundle={bundle} onBack={handleBackToMenu} />}
-          {screen === "level3" && <Level3 bundle={bundle} onBack={handleBackToMenu} />}
-          {screen === "level4" && <Level4 bundle={bundle} onBack={handleBackToMenu} />}
-        </main>
+        <div className="relative flex h-full flex-col">
+          <main className="flex-1 overflow-y-auto">
+            {isMenu && <Menu onSelect={handleStartLevel} />}
+            {screen === "level1" && <Level1 bundle={bundle} onBack={handleBackToMenu} />}
+            {screen === "level2" && <Level2 bundle={bundle} onBack={handleBackToMenu} />}
+            {screen === "level3" && <Level3 bundle={bundle} onBack={handleBackToMenu} />}
+            {screen === "level4" && <Level4 bundle={bundle} onBack={handleBackToMenu} />}
+          </main>
+        </div>
       </div>
     </div>
   );
@@ -85,27 +79,38 @@ export default function App() {
 
 function Menu({ onSelect }: { onSelect: (screen: GameScreen) => void }) {
   return (
-    <div className="flex h-full items-center justify-start px-8 py-12">
-      <div className="w-full max-w-xl rounded-3xl bg-transparent p-2">
-        <ul className="flex flex-col">
+    <div className="flex h-full justify-center px-4 py-8 sm:px-8 lg:py-12">
+      <div className="w-full max-w-xl space-y-4">
+        {/* <h1 className="text-center text-2xl font-semibold tracking-tight text-white drop-shadow sm:text-left">
+          Vietnam Puzzle Levels
+        </h1> */}
+        <ul className="flex flex-col gap-3">
           {LEVELS.map((level) => (
             <li key={level.id}>
               <button
                 type="button"
                 onClick={() => onSelect(level.id)}
-                className={`group flex w-full items-center justify-between gap-6 border-b-4 border-current bg-transparent px-6 py-8 text-left transition-colors duration-200 hover:bg-white/10 backdrop-blur-sm ${level.colorClass}`}
+                className="group flex w-full flex-col items-center gap-4 border-b-2 border-white/60 px-4 py-6 text-center transition duration-200 hover:border-white/80 sm:flex-row sm:items-center sm:justify-between sm:border-b-4 sm:text-left"
               >
-                <div className="flex items-center gap-5">
-                  <div className="flex items-center gap-2">
+                <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-5">
+                  <div className="flex items-center justify-center gap-2 sm:justify-start">
                     {Array.from({ length: level.icons }).map((_, index) => (
-                      <img key={index} src={LEVEL_ICON_SRC} alt="" className="h-10 w-10 drop-shadow-sm" />
+                      <img
+                        key={index}
+                        src={LEVEL_ICON_SRC}
+                        alt=""
+                        className="h-8 w-8 shrink-0 drop-shadow-sm sm:h-10 sm:w-10"
+                        loading="lazy"
+                      />
                     ))}
                   </div>
-                  <span className="text-2xl font-semibold tracking-tight">
+                  <span
+                    className={`text-lg font-semibold tracking-tight sm:text-2xl ${level.accentClass}`}
+                  >
                     {level.label}
                   </span>
                 </div>
-                <span className="text-sm font-medium uppercase tracking-[0.35em] opacity-0 transition-opacity duration-200 group-hover:opacity-80">
+                <span className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-200/80 sm:text-sm sm:opacity-0 sm:transition sm:duration-200 sm:group-hover:opacity-80">
                   Play
                 </span>
               </button>

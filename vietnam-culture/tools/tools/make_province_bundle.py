@@ -16,7 +16,7 @@ Kết quả:
 - game/provinces.bundle.json
 
 Chạy:
-  python make_province_bundle.py --csv ../data/osm_pipeline_demo/provinces_from_osm.csv --neighbors ../data/osm_pipeline_demo/province_neighbors.csv --facts ../data/osm_pipeline_demo/province_facts_template.csv --media osm_pipeline_demo/province_media_template.csv --slots ../data/osm_pipeline_demo/slots.json --out ../game/provinces.bundle.json
+  python make_province_bundle.py --csv ../data/osm_pipeline_demo/output/provinces_from_geojson.csv --neighbors ../data/osm_pipeline_demo/output/province_neighbors.csv --facts ../data/osm_pipeline_demo/province_facts_template.csv --media osm_pipeline_demo/province_media_template.csv --slots ../data/osm_pipeline_demo/slots.json --out ../game/provinces.bundle.json
 """
 import csv, json, io, re, argparse
 from pathlib import Path

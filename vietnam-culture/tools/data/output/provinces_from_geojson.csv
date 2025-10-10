@@ -1,0 +1,35 @@
+province_id,name_vi,region_code,region_name,anchor_x,anchor_y,snap_tolerance_px,svg_path_file
+91,An Giang,,,228.0,1089.4,24,/assets/provinces/91.svg
+24,Bắc Ninh,,,340.1,178.2,24,/assets/provinces/24.svg
+96,Cà Mau,,,237.3,1175.0,24,/assets/provinces/96.svg
+92,Cần Thơ,,,283.4,1120.4,24,/assets/provinces/92.svg
+04,Cao Bằng,,,323.6,55.9,24,/assets/provinces/04.svg
+48,Đà Nẵng,,,457.1,652.4,24,/assets/provinces/48.svg
+66,Đắk Lắk,,,497.4,868.0,24,/assets/provinces/66.svg
+11,Điện Biên,,,89.7,142.6,24,/assets/provinces/11.svg
+75,Đồng Nai,,,391.0,987.9,24,/assets/provinces/75.svg
+82,Đồng Tháp,,,276.1,1058.9,24,/assets/provinces/82.svg
+52,Gia Lai,,,490.9,793.4,24,/assets/provinces/52.svg
+01,Hà Nội,,,278.0,205.4,24,/assets/provinces/01.svg
+42,Hà Tĩnh,,,272.7,425.6,24,/assets/provinces/42.svg
+31,Hải Phòng,,,339.9,210.3,24,/assets/provinces/31.svg
+46,Huế,,,418.9,588.2,24,/assets/provinces/46.svg
+33,Hưng Yên,,,322.8,234.6,24,/assets/provinces/33.svg
+56,Khánh Hòa,,,534.7,935.7,24,/assets/provinces/56.svg
+12,Lai Châu,,,88.1,97.6,24,/assets/provinces/12.svg
+68,Lâm Đồng,,,459.6,967.6,24,/assets/provinces/68.svg
+20,Lạng Sơn,,,349.8,127.7,24,/assets/provinces/20.svg
+15,Lào Cai,,,177.9,111.4,24,/assets/provinces/15.svg
+40,Nghệ An,,,214.5,347.8,24,/assets/provinces/40.svg
+37,Ninh Bình,,,305.5,262.7,24,/assets/provinces/37.svg
+25,Phú Thọ,,,232.7,202.2,24,/assets/provinces/25.svg
+51,Quảng Ngãi,,,473.3,726.5,24,/assets/provinces/51.svg
+22,Quảng Ninh,,,398.8,183.2,24,/assets/provinces/22.svg
+44,Quảng Trị,,,353.5,520.1,24,/assets/provinces/44.svg
+14,Sơn La,,,156.9,177.7,24,/assets/provinces/14.svg
+80,Tây Ninh,,,326.6,1016.0,24,/assets/provinces/80.svg
+19,Thái Nguyên,,,287.2,115.8,24,/assets/provinces/19.svg
+38,Thanh Hóa,,,263.7,289.1,24,/assets/provinces/38.svg
+79,TP. Hồ Chí Minh,,,355.7,1030.3,24,/assets/provinces/79.svg
+08,Tuyên Quang,,,225.0,80.7,24,/assets/provinces/08.svg
+86,Vĩnh Long,,,325.3,1108.5,24,/assets/provinces/86.svg

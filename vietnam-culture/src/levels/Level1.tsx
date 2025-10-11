@@ -107,15 +107,21 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
   const boardRef = useRef<HTMLDivElement>(null);
   const doneOnceRef = useRef(false);
-  // const [, , vw, vh] = bundle.viewBox;
-  const [, , vw, vh] = useBoardViewBox("/assets/board_blank_outline.svg", bundle.viewBox);
+  // Keep gameplay coordinate system (atlas + anchors)
+  const [gMinX, gMinY, vw, vh] = bundle.viewBox as [number, number, number, number];
+  // Board underlay alignment only
+  const [bMinX, bMinY, bW, bH] = useBoardViewBox("/assets/board_blank_outline.svg", bundle.viewBox);
   const [dev] = useState(getDevFlag());
   // const [dev, setDev] = useState(getDevFlag());
   const provinces = useMemo(()=> shuffleSeeded([...bundle.provinces], seed), [bundle, seed]);
 
-  const boardPadding = dev ? Math.max(vw * 0.12, 120) : Math.max(vw * 0.05, 10);
-  const boardCanvasWidth = vw + boardPadding * 2;
-  const boardCanvasHeight = vh + boardPadding * 2;
+  // Compute extras so the canvas can include distant islands
+  const leftExtra = Math.max(0, gMinX - bMinX);
+  const topExtra = Math.max(0, gMinY - bMinY);
+  const rightExtra = Math.max(0, (bMinX + bW) - (gMinX + vw));
+  const bottomExtra = Math.max(0, (bMinY + bH) - (gMinY + vh));
+  const boardCanvasWidth = vw + leftExtra + rightExtra;
+  const boardCanvasHeight = vh + topExtra + bottomExtra;
   const stageW = boardCanvasWidth + 16 + PANEL_W;
   const stageH = boardCanvasHeight;
   const stageScale = useStageScale(stageW, stageH, 24);
@@ -208,18 +214,20 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
           transformOrigin: 'center center'
         }}
       >
-        <div className="grid gap-4" style={{ display:'grid', gridTemplateColumns: `${vw}px ${PANEL_W}px` }}>
+        <div className="grid gap-4" style={{ display:'grid', gridTemplateColumns: `${boardCanvasWidth}px ${PANEL_W}px` }}>
           {/* BOARD */}
-          <div className={`relative ${shake ? 'anim-shake' : ''}`} style={{ width: vw, height: vh }}>
-            <img
-              src="/assets/board_blank_outline.svg"
-              width={vw} height={vh}
-              className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-sm"
-              alt="Vietnam board"
-            />
+          <div className={`relative ${shake ? 'anim-shake' : ''}`} style={{ width: boardCanvasWidth, height: boardCanvasHeight }}>
+            <div aria-hidden className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-sm" style={{ width: '100%', height: '100%' }}>
+              <svg className="block h-full w-full" viewBox={`0 0 ${boardCanvasWidth} ${boardCanvasHeight}`} preserveAspectRatio="xMidYMid meet">
+                {/* Align board so bundle.viewBox maps to the inner region at (leftExtra, topExtra) */}
+                <g transform={`translate(${leftExtra - gMinX}, ${topExtra - gMinY})`}>
+                  <image href="/assets/board_blank_outline.svg" x={bMinX} y={bMinY} width={bW} height={bH} preserveAspectRatio="none" />
+                </g>
+              </svg>
+            </div>
 
             {/* Fill tỉnh đã đúng */}
-            <svg className="absolute inset-0 pointer-events-none" viewBox={`0 0 ${vw} ${vh}`} style={{ zIndex: 5 }}>
+            <svg className="absolute pointer-events-none" viewBox={`0 0 ${vw} ${vh}`} style={{ zIndex: 5, left: leftExtra, top: topExtra, width: vw, height: vh, position: 'absolute' }}>
               {/* layer path fill */}
               {bundle.provinces.map(p=>{
                 if (!placed[p.id]) return null;
@@ -247,7 +255,7 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
             </svg>
 
 
-            <div ref={boardRef} className="absolute inset-0">
+            <div ref={boardRef} className="absolute" style={{ left: leftExtra, top: topExtra, width: vw, height: vh }}>
               {/* chỉ chấm neo (KHÔNG hiện tên tỉnh trên bản đồ) */}
               {bundle.provinces.map(p=>{
                 const [x,y] = p.anchor_px; const ok = !!placed[p.id];
@@ -368,7 +376,7 @@ function NameChip({ province, disabled, onStart }:{
   return (
     <div
       onPointerDown={onPointerDown}
-      className={`h-12 w-full grid place-items-center rounded border text-4xl font-medium select-none cursor-grab text-slate-900
+      className={`h-12 w-full grid place-items-center rounded border text-3xl font-medium select-none cursor-grab text-slate-900
                   ${disabled ? 'opacity-35 line-through pointer-events-none' : ''}`}
       style={{ background: color.chipBg, borderColor: color.chipBd }}
       title={province.name_en}
@@ -449,7 +457,7 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
       <div className="text-xs text-slate-600 mt-1">Click lên ảnh dưới để đặt anchor cho tỉnh đang chọn.</div>
 
       <div className="mt-2 relative border rounded bg-slate-300" style={{ width: vw/2, height: vh/2 }}>
-        <img src="/assets/board_blank_outline.svg" width={vw/2} height={vh/2} className="opacity-30" />
+        <BoardPreviewSVG vw={vw} vh={vh} />
         <div className="absolute inset-0" onClick={onClickBoard} />
         {Object.entries(anchors).map(([id, [x, y]]) => (
           <div key={id} className="absolute" style={{ left: x/2 - 3, top: y/2 - 3 }}>
@@ -458,6 +466,17 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
         ))}
       </div>
     </div>
+  );
+}
+
+function BoardPreviewSVG({ vw, vh }:{ vw:number; vh:number }){
+  const [bMinX, bMinY, bW, bH] = useBoardViewBox("/assets/board_blank_outline.svg", [0,0,vw,vh] as any);
+  return (
+    <svg className="opacity-30 block" viewBox={`0 0 ${vw} ${vh}`} width={vw/2} height={vh/2}>
+      <g transform={`translate(${-bMinX},${-bMinY}) scale(${vw/Math.max(1,bW)},${vh/Math.max(1,bH)})`}>
+        <image href="/assets/board_blank_outline.svg" x={bMinX} y={bMinY} width={bW} height={bH} preserveAspectRatio="none" />
+      </g>
+    </svg>
   );
 }
 function WinDialog({ lbKey, ms, onClose }:{

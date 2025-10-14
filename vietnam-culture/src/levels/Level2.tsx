@@ -10,9 +10,28 @@ import { viewBoxNearAnchorSmart } from "../core/svg";
 import { PANEL_COLUMNS, PANEL_ICON_SIZE, PANEL_CARD_WIDTH, PANEL_CARD_HEIGHT, PANEL_CARD_GAP_X, PANEL_PADDING_X, PANEL_PADDING_Y, DRAG_ICON_SIZE, DRAG_CARD_WIDTH, DRAG_CARD_HEIGHT, PIECE_COLUMN_STEP, PIECE_ROW_STEP } from "./panelLayout";
 import { createPortal } from "react-dom";
 // ---- helpers ----
-
-
-
+function useBoardViewBox(src: string, fallback: [number, number, number, number]) {
+  const [vb, setVb] = useState(fallback);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(src);
+        const txt = await res.text();
+        const m = txt.match(/viewBox\s*=\s*["']\s*([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s*["']/i);
+        if (m && alive) {
+          setVb([+m[1], +m[2], +m[3], +m[4]] as [number, number, number, number]);
+        }
+      } catch {
+        /* ignore fetch/parse errors */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [src]);
+  return vb;
+}
 function useStageScale(stageW: number, stageH: number, pad = 24) {
   const [scale, setScale] = useState(1);
   useEffect(() => {
@@ -27,21 +46,16 @@ function useStageScale(stageW: number, stageH: number, pad = 24) {
   }, [stageW, stageH, pad]);
   return scale;
 }
-
 function getDevFlag(): boolean {
   try {
     return localStorage.getItem("dev") === "1";
   } catch { return false; }
 }
-
 const LB_KEY = "lb:pack1:level2";
-
-
 type LBItem = { name: string; ms: number };
 function readLB(key: string): LBItem[] {
   try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
 }
-
 // ---- main ----
 export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () => void }) {
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
@@ -58,30 +72,16 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
   
   const atlasPaths = useAtlasPaths("/assets/atlas.svg");
   const boardRef = useRef<HTMLDivElement>(null);
-  const [, , vw, vh] = bundle.viewBox;
+  const [gMinX, gMinY, vw, vh] = bundle.viewBox as [number, number, number, number];
+  const [boardMinX, boardMinY, boardW, boardH] = useBoardViewBox("/assets/board_blank_outline.svg", [gMinX, gMinY, vw, vh]);
+  const leftExtra = Math.max(0, gMinX - boardMinX);
+  const topExtra = Math.max(0, gMinY - boardMinY);
+  const rightExtra = Math.max(0, (boardMinX + boardW) - (gMinX + vw));
+  const bottomExtra = Math.max(0, (boardMinY + boardH) - (gMinY + vh));
+  const boardCanvasWidth = vw + leftExtra + rightExtra;
+  const boardCanvasHeight = vh + topExtra + bottomExtra;
   const [startPositions, setStartPositions] = useState(() => randomStartPositions(bundle.provinces));
   const [colorMap, setColorMap] = useState<ProvinceColorMap>(() => randomColorMap(bundle.provinces));
-
-   const truongSaMarkers = [
-    [0.96, 0.73],
-    [0.97, 0.74],
-    [0.95, 0.75],
-    [0.93, 0.78],
-    [0.98, 0.76],
-  
-  ];
-  const truongSaRadius = Math.max(3, Math.min(9, Math.max(vw, vh) * 0.006));
-  const truongSaStroke = Math.max(0.7, Math.min(3, Math.max(vw, vh) * 0.0012));
-  const truongSaFontSize = Math.max(12, Math.min(32, vw * 0.02));
-  const hoangSaMarkers = [
-    [0.92, 0.48],
-    [0.90, 0.45],
-    [0.95, 0.43],
-  ];
-  const hoangSaRadius = Math.max(2.5, Math.min(7, Math.max(vw, vh) * 0.004));
-  const hoangSaStroke = Math.max(0.6, Math.min(2.4, Math.max(vw, vh) * 0.001));
-  const hoangSaFontSize = Math.max(10, Math.min(26, vw * 0.016));
-
   const uniqueId = useId().replace(/:/g, "");
   const gradientId = `${uniqueId}-gradient`;
   const shadowId = `${uniqueId}-shadow`;
@@ -97,12 +97,10 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
       portalElRef.current = null;
     };
   }, []);
-
   useEffect(() => {
     setStartPositions(randomStartPositions(bundle.provinces));
     setColorMap(randomColorMap(bundle.provinces));
   }, [bundle]);
-
   useEffect(() => {
     if (!done) {
       doneRef.current = false;
@@ -113,7 +111,6 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
     setShowWin(true);
     playWin();
   }, [done, playWin]);
-
   function resetGame() {
     setPlaced({});
     setActivePid(null);
@@ -124,25 +121,19 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
     setColorMap(randomColorMap(bundle.provinces));
     resetTimer();
   }
-
   function tryDrop(pid: string, cx: number, cy: number) {
     const el = boardRef.current!;
     const r = el.getBoundingClientRect();
-
     // thêm scale-safe:
     const sx = r.width / vw;
     const sy = r.height / vh;
     const x = (cx - r.left) / sx;
     const y = (cy - r.top) / sy;
-
     const p = bundle.provinces.find(q => q.id === pid)!;
-
     const ax = Math.min(Math.max(p.anchor_px[0], 0), vw);
     const ay = Math.min(Math.max(p.anchor_px[1], 0), vh);
-
     const tol = Math.max(p.snap_tolerance_px || 18, 56);
     const ok = within(dist(x, y, ax, ay), tol);
-
     if (ok) {
       setPlaced(s => ({ ...s, [pid]: true }));
       playCorrect();
@@ -153,20 +144,15 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
     }
     return ok;
   }
-
-
   const activeProvince = activePid ? bundle.provinces.find(p => p.id === activePid) : null;
   const tol = activeProvince ? Math.max(activeProvince.snap_tolerance_px || 18, 56) : 0;
-
   // kích thước stage gốc (chưa scale)
   const PANEL_W = PANEL_CARD_WIDTH * PANEL_COLUMNS + PANEL_CARD_GAP_X * (PANEL_COLUMNS - 1) + PANEL_PADDING_X * 2;
   const GAP = 16;
-  const stageW = vw + GAP + PANEL_W;
-  const stageH = vh;
+  const stageW = boardCanvasWidth + GAP + PANEL_W;
+  const stageH = boardCanvasHeight;
   const stageScale = useStageScale(stageW, stageH, 24);
-
   return (<>
-
     <div className="fixed inset-0 overflow-hidden bg-slate-900 text-slate-100">
       {/* Stage center + scale để vừa màn hình */}
       <div
@@ -182,18 +168,22 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
       >
         <div
           className="grid gap-4"
-          style={{ display: "grid", gridTemplateColumns: `${vw}px ${PANEL_W}px` }}
+          style={{ display: "grid", gridTemplateColumns: `${boardCanvasWidth}px ${PANEL_W}px` }}
         >
-          {/* BOARD (giữ nguyên, chỉ thêm border/shadow phù hợp nền tối) */}
-          <div className={`relative ${shake ? "anim-shake" : ""}`} style={{ width: vw, height: vh }}>
+          {/* BOARD (expanded padding so Truong Sa & Hoang Sa stay visible) */}
+          <div className={`relative ${shake ? "anim-shake" : ""}`} style={{ width: boardCanvasWidth, height: boardCanvasHeight }}>
             <div
               aria-hidden
-              className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-lg overflow-hidden"
-              style={{ width: '100%', height: '100%' }}
+              className="absolute inset-0 rounded-2xl border border-slate-800/70 bg-slate-950/70"
+            />
+            <div
+              aria-hidden
+              className="absolute overflow-hidden rounded-lg border border-slate-700 shadow-lg"
+              style={{ width: "100%", height: "100%" }}
             >
               <svg
                 className="block h-full w-full"
-                viewBox={`0 0 ${vw} ${vh}`}
+                viewBox={`0 0 ${boardCanvasWidth} ${boardCanvasHeight}`}
                 preserveAspectRatio="xMidYMid meet"
               >
                 <defs>
@@ -201,51 +191,26 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
                     <stop offset="0%" stopColor="rgba(15,23,42,0.95)" />
                     <stop offset="100%" stopColor="rgba(30,41,59,0.85)" />
                   </linearGradient>
-                  <filter id={shadowId} x="-4%" y="-4%" width="108%" height="108%" colorInterpolationFilters="sRGB">
-                    <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#020617" floodOpacity="0.8" />
-                  </filter>
                 </defs>
-                <rect width={vw} height={vh} fill={`url(#${gradientId})`} />
-                <g fill="rgba(4, 34, 104, 0.92)" filter={`url(#${shadowId})`}>
-                  {bundle.provinces.map(p => {
-                    const d = atlasPaths[p.id];
-                    if (!d) return null;
-                    return <path key={`bg-${p.id}`} d={d} />;
-                  })}
+                <rect width={boardCanvasWidth} height={boardCanvasHeight} fill={`url(#${gradientId})`} />
+                <g transform={`translate(${leftExtra - gMinX}, ${topExtra - gMinY})`}>
+                  <image
+                    href="/assets/board_blank_outline.svg"
+                    x={boardMinX}
+                    y={boardMinY}
+                    width={boardW}
+                    height={boardH}
+                    preserveAspectRatio="none"
+                  />
                 </g>
               </svg>
             </div>
-            <svg className="absolute inset-0 pointer-events-none" viewBox={`0 0 ${vw} ${vh}`}>
-              <g stroke="#38bdf8" fill="#38bdf8" fillOpacity={0.75} strokeWidth={truongSaStroke}>
-                {truongSaMarkers.map(([fx, fy], idx) => (
-                  <circle key={`ts-${idx}`} cx={vw * fx} cy={vh * fy} r={truongSaRadius} />
-                ))}
-              </g>
-              <g stroke="#fbbf24" fill="#fbbf24" fillOpacity={0.75} strokeWidth={hoangSaStroke}>
-                {hoangSaMarkers.map(([fx, fy], idx) => (
-                  <circle key={`hs-${idx}`} cx={vw * fx} cy={vh * fy} r={hoangSaRadius} />
-                ))}
-              </g>
-              <text
-                x={vw * 0.88}
-                y={vh * 0.80}
-                fill="#38bdf8"
-                fontSize={truongSaFontSize}
-                fontWeight={600}
-                opacity={0.8}
-              >
-                Trường Sa
-              </text>
-              <text
-                x={vw * 0.86}
-                y={vh * 0.44}
-                fill="#fbbf24"
-                fontSize={hoangSaFontSize}
-                fontWeight={600}
-                opacity={0.85}
-              >
-                Hoàng Sa
-              </text>
+            <svg
+              className="absolute pointer-events-none"
+              style={{ left: leftExtra, top: topExtra, width: vw, height: vh }}
+              viewBox={`0 0 ${vw} ${vh}`}
+            >
+              
               {bundle.provinces.map(p => {
                 if (!placed[p.id]) return null;
                 const d = atlasPaths[p.id];
@@ -279,7 +244,11 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
                 })}
               </g>
             </svg>
-            <div ref={boardRef} className="absolute inset-0">
+            <div
+              ref={boardRef}
+              className="absolute"
+              style={{ left: leftExtra, top: topExtra, width: vw, height: vh }}
+            >
               {activeProvince && (
                 <div
                   className="aim"
@@ -293,7 +262,6 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
               )}
             </div>
           </div>
-
           {/* PANEL MẢNH – giữ header (thời gian/nút), container tối, KHÔNG tạo scroll toàn trang */}
           <aside className="relative" style={{ width: PANEL_W }}>
             <div className="sticky top-0 z-20 flex items-center justify-evenly px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
@@ -324,7 +292,7 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
             </div>
             <div
               className="mt-3 relative rounded-lg border bg-slate-800/70 border-slate-700"
-              style={{ height: vh }}
+              style={{ height: boardCanvasHeight }}
             >
               
               <div className="h-full overflow-y-auto p-3 scroll-stable touch-none">
@@ -342,7 +310,6 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
                 ))}
               </div>
             </div>
-
             {done && !showWin && (
               <div className="mt-4 rounded-lg border border-slate-700 bg-slate-800/80 p-3 text-slate-100">
                 <div className="font-semibold">Hoàn thành! {(ms / 1000).toFixed(1)}s</div>
@@ -357,11 +324,9 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
           </aside>
         </div>
       </div>
-
       {/* AnchorTuner giữ nguyên, overlay phía ngoài stage */}
       {dev && <AnchorTuner bundle={bundle} vw={vw} vh={vh} />}
     </div>
-
     {showWin && (
       <WinDialog
         lbKey={LB_KEY}
@@ -389,68 +354,53 @@ function Piece({
   const [dragXY, setDragXY] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const offsetRef = useRef({ dxRatio: 0.5, dyRatio: 0.5 });
   const pointerIdRef = useRef<number | null>(null);
-
   useEffect(() => {
     setPos(defaultPos);
   }, [defaultPos]);
-
   useEffect(() => {
     if (locked) {
       setDragging(false);
       onDragState(false);
     }
   }, [locked, onDragState]);
-
   if (locked) return null;
-
   function onPointerDown(e: React.PointerEvent) {
     e.preventDefault();
     e.stopPropagation();
-
     const el = e.currentTarget as HTMLElement;
     const rect = el.getBoundingClientRect();
-
     offsetRef.current = {
       dxRatio: rect.width ? (e.clientX - rect.left) / rect.width : 0.5,
       dyRatio: rect.height ? (e.clientY - rect.top) / rect.height : 0.5,
     };
     pointerIdRef.current = e.pointerId;
-
     setDragging(true);
     onDragState(true);
     setDragXY({ x: e.clientX, y: e.clientY });
-
     el.setPointerCapture(e.pointerId);
-
     const move = (ev: PointerEvent) => {
       setDragXY({ x: ev.clientX, y: ev.clientY });
       ev.preventDefault?.();
     };
-
     const up = (ev: PointerEvent) => {
       try { if (pointerIdRef.current != null) el.releasePointerCapture(pointerIdRef.current); } catch {}
       window.removeEventListener('pointermove', move as any);
       window.removeEventListener('pointerup', up as any);
       window.removeEventListener('pointercancel', up as any);
-
       onDrop(ev.clientX, ev.clientY);
       setDragging(false);
       onDragState(false);
       pointerIdRef.current = null;
     };
-
     window.addEventListener('pointermove', move as any, { passive: false });
     window.addEventListener('pointerup', up as any, { once: true });
     window.addEventListener('pointercancel', up as any, { once: true });
   }
-
   const vb = d
     ? viewBoxNearAnchorSmart(d, p.anchor_px[0], p.anchor_px[1], 6, 600, 220)
     : { x: 0, y: 0, w: 100, h: 100 };
-
   const iconFill = color?.iconFill || '#f1f5f9';
   const iconStroke = color?.iconStroke || '#334155';
-
   const renderIcon = (size: number) => (
     d
       ? (
@@ -462,13 +412,11 @@ function Piece({
         <div style={{ width: size, height: size }} className="rounded bg-slate-200 animate-pulse" />
       )
   );
-
   const renderContent = (mode: 'panel' | 'drag') => {
     const iconSize = mode === 'panel' ? PANEL_ICON_SIZE : DRAG_ICON_SIZE;
     const nameClass = mode === 'panel'
       ? 'mt-4 text-xl font-semibold leading-tight text-slate-100 drop-shadow'
       : 'mt-3 text-lg font-semibold leading-tight text-white bg-slate-900/85 rounded px-2.5 py-1';
-
     return (
       <div className="flex h-full w-full flex-col items-center justify-start text-center">
         <div
@@ -483,12 +431,10 @@ function Piece({
       </div>
     );
   };
-
   const panelWidth = PANEL_CARD_WIDTH;
   const panelHeight = PANEL_CARD_HEIGHT;
   const dragWidth = DRAG_CARD_WIDTH;
   const dragHeight = DRAG_CARD_HEIGHT;
-
   return (
     <>
       <div
@@ -512,7 +458,6 @@ function Piece({
       >
         {renderContent('panel')}
       </div>
-
       {dragging && createPortal(
         <div
           className="fixed z-[3000] select-none pointer-events-none rounded-2xl border border-slate-500/50 bg-slate-900/80 backdrop-blur-sm"
@@ -534,17 +479,14 @@ function Piece({
     </>
   );
 }
-
 function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose: () => void }) {
   const [name, setName] = useState("");
   const [entries, setEntries] = useState<LBItem[]>(() => readLB(lbKey));
   const [saved, setSaved] = useState<LBItem | null>(null);
-
   const top5 = useMemo(() => entries.slice(0, 5), [entries]);
   const savedRank = saved
     ? top5.findIndex(e => e.name === saved.name && e.ms === saved.ms)
     : -1;
-
   function handleSave() {
     const cleaned = (name || "").trim();
     const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
@@ -553,7 +495,6 @@ function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose:
     setSaved({ name: safeName, ms });
     setName("");
   }
-
   return (
     <div className="fixed inset-0 z-[2147483600] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
       <div className="w-[min(92vw,520px)] rounded-2xl bg-white text-slate-900 shadow-xl p-5 anim-pop">
@@ -561,7 +502,6 @@ function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose:
           <div className="text-2xl font-semibold">Hoàn thành Level 2!</div>
           <div className="mt-1 text-sm text-slate-600">Thời gian: <b>{(ms / 1000).toFixed(1)}s</b></div>
         </div>
-
         <div className="mt-4">
           <div className="mb-2 text-sm font-semibold text-slate-700">Bảng xếp hạng Top 5</div>
           <div className="overflow-hidden rounded-lg border border-slate-200">
@@ -592,7 +532,6 @@ function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose:
               </tbody>
             </table>
           </div>
-
           {saved && (
             <div className="mt-3 text-sm">
               {savedRank >= 0 ? (
@@ -607,7 +546,6 @@ function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose:
             </div>
           )}
         </div>
-
         <div className="mt-5">
           <label className="text-sm text-slate-700">Nhập tên của bạn</label>
           <div className="mt-2 flex gap-2">
@@ -625,7 +563,6 @@ function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose:
             </button>
           </div>
         </div>
-
         <div className="mt-5 flex items-center justify-end">
           <button
             className="rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
@@ -638,10 +575,6 @@ function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose:
     </div>
   );
 }
-
-
-
-
 // ---- Dev: chỉnh anchor nhanh ----
 function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: number }) {
   const [pid, setPid] = useState(bundle.provinces[0]?.id || "");
@@ -655,7 +588,6 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
     const y = Math.min(Math.max(e.clientY - r.top, 0), vh);
     setAnchors(a => ({ ...a, [pid]: [x, y] }));
   }
-
   function download() {
     const rows = bundle.provinces.map(p => {
       const [x, y] = anchors[p.id];
@@ -668,7 +600,6 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
     a.click();
     URL.revokeObjectURL(a.href);
   }
-
   return (
     <div className="fixed bottom-4 left-4 z-50 bg-white/90 backdrop-blur rounded-lg border shadow p-3 w-[360px]">
       <div className="font-semibold mb-2">AnchorTuner (DEV)</div>
@@ -680,7 +611,6 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
         <button className="px-2 py-1 text-sm rounded bg-slate-800 text-white" onClick={download}>Export slots.json</button>
       </div>
       <div className="text-xs text-slate-600 mt-1">Click lên ảnh dưới để đặt anchor cho tỉnh đang chọn.</div>
-
       <div className="mt-2 relative border rounded bg-white" style={{ width: vw/2, height: vh/2 }}>
         <img src="/assets/board_blank_outline.svg" width={vw/2} height={vh/2} className="opacity-30" />
         <div className="absolute inset-0" onClick={onClickBoard} />
@@ -693,10 +623,8 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
     </div>
   );
 }
-
 type ProvinceColor = { fill: string; stroke: string; iconFill: string; iconStroke: string };
 type ProvinceColorMap = Record<string, ProvinceColor>;
-
 function randomColorMap(list: Province[]): ProvinceColorMap {
   return Object.fromEntries(list.map((p) => {
     const hue = Math.floor(Math.random() * 360);
@@ -709,7 +637,6 @@ function randomColorMap(list: Province[]): ProvinceColorMap {
     return [p.id, { fill, stroke, iconFill, iconStroke }];
   }));
 }
-
 // ---- utils ----
 function randomStartPositions(list: Province[]) {
   const slots = list.map((_, i) => {
@@ -728,7 +655,3 @@ function randomStartPositions(list: Province[]) {
   }
   return slots;
 }
-
-
-
-

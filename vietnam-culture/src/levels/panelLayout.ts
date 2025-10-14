@@ -1,4 +1,4 @@
-﻿export const PANEL_COLUMNS = 5;
+export const PANEL_COLUMNS = 5;
 export const PANEL_ICON_SIZE = 90;
 export const PANEL_CARD_WIDTH = 120;
 export const PANEL_CARD_HEIGHT = 160;

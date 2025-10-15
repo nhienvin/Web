@@ -1,4 +1,4 @@
-// src/levels/Level2.tsx
+﻿// src/levels/Level2.tsx
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Bundle, Province } from "../types";
 import { dist, within } from "../core/math";
@@ -84,7 +84,6 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const [colorMap, setColorMap] = useState<ProvinceColorMap>(() => randomColorMap(bundle.provinces));
   const uniqueId = useId().replace(/:/g, "");
   const gradientId = `${uniqueId}-gradient`;
-  const shadowId = `${uniqueId}-shadow`;
 // === HUD portal setup (không bị scale) ===
   const portalElRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -187,11 +186,13 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
                 preserveAspectRatio="xMidYMid meet"
               >
                 <defs>
-                  <linearGradient id={gradientId} x1="4%" y1="0%" x2="96%" y2="100%">
-                    <stop offset="0%" stopColor="rgba(15,23,42,0.95)" />
-                    <stop offset="100%" stopColor="rgba(30,41,59,0.85)" />
+                  <linearGradient id={gradientId} x1="6%" y1="4%" x2="94%" y2="96%">
+                    <stop offset="0%" stopColor="rgba(12,22,38,0.96)" />
+                    <stop offset="45%" stopColor="rgba(18,30,52,0.9)" />
+                    <stop offset="100%" stopColor="rgba(32,58,110,0.86)" />
                   </linearGradient>
                 </defs>
+                <rect width={boardCanvasWidth} height={boardCanvasHeight} fill="#050d1d" />
                 <rect width={boardCanvasWidth} height={boardCanvasHeight} fill={`url(#${gradientId})`} />
                 <g transform={`translate(${leftExtra - gMinX}, ${topExtra - gMinY})`}>
                   <image
@@ -201,7 +202,15 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
                     width={boardW}
                     height={boardH}
                     preserveAspectRatio="none"
+                    style={{ opacity: 0.55 }}
                   />
+                  <g fill="rgba(56, 189, 248, 0.28)" stroke="rgba(13, 72, 116, 0.6)" strokeWidth={0.75}>
+                    {bundle.provinces.map(p => {
+                      const d = atlasPaths[p.id];
+                      if (!d) return null;
+                      return <path key={`map-${p.id}`} d={d} />;
+                    })}
+                  </g>
                 </g>
               </svg>
             </div>

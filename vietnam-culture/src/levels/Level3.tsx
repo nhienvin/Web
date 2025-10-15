@@ -10,7 +10,28 @@ import { viewBoxNearAnchorSmart } from "../core/svg";
 import { PANEL_COLUMNS, PANEL_ICON_SIZE, PANEL_CARD_WIDTH, PANEL_CARD_HEIGHT, PANEL_CARD_GAP_X, PANEL_PADDING_X, PANEL_PADDING_Y, DRAG_ICON_SIZE, DRAG_CARD_WIDTH, DRAG_CARD_HEIGHT, PIECE_COLUMN_STEP, PIECE_ROW_STEP } from "./panelLayout";
 import { createPortal } from "react-dom";
 // ---- helpers ----
-
+function useBoardViewBox(src: string, fallback: [number, number, number, number]) {
+  const [vb, setVb] = useState(fallback);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(src);
+        const txt = await res.text();
+        const m = txt.match(/viewBox\s*=\s*["']\s*([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s*["']/i);
+        if (m && alive) {
+          setVb([+m[1], +m[2], +m[3], +m[4]] as [number, number, number, number]);
+        }
+      } catch {
+        /* ignore fetch/parse errors */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [src]);
+  return vb;
+}
 
 
 function useStageScale(stageW: number, stageH: number, pad = 24) {
@@ -57,7 +78,14 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
   const atlasPaths = useAtlasPaths("/assets/atlas.svg");
   const boardRef = useRef<HTMLDivElement>(null);
-  const [, , vw, vh] = bundle.viewBox;
+  const [gMinX, gMinY, vw, vh] = bundle.viewBox as [number, number, number, number];
+  const [boardMinX, boardMinY, boardW, boardH] = useBoardViewBox("/assets/board_blank_outline.svg", [gMinX, gMinY, vw, vh]);
+  const leftExtra = Math.max(0, gMinX - boardMinX);
+  const topExtra = Math.max(0, gMinY - boardMinY);
+  const rightExtra = Math.max(0, (boardMinX + boardW) - (gMinX + vw));
+  const bottomExtra = Math.max(0, (boardMinY + boardH) - (gMinY + vh));
+  const boardCanvasWidth = vw + leftExtra + rightExtra;
+  const boardCanvasHeight = vh + topExtra + bottomExtra;
   const [startPositions, setStartPositions] = useState(() => randomStartPositions(bundle.provinces));
   const [colorMap, setColorMap] = useState<ProvinceColorMap>(() => randomColorMap(bundle.provinces));
   const uniqueId = useId().replace(/:/g, "");
@@ -160,29 +188,41 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
             >
               <svg
                 className="block h-full w-full"
-                viewBox={`0 0 ${vw} ${vh}`}
+                viewBox={`0 0 ${boardCanvasWidth} ${boardCanvasHeight}`}
                 preserveAspectRatio="xMidYMid meet"
               >
                 <defs>
-                  <linearGradient id={gradientId} x1="4%" y1="0%" x2="96%" y2="100%">
-                    <stop offset="0%" stopColor="rgba(15,23,42,0.95)" />
-                    <stop offset="100%" stopColor="rgba(30,41,59,0.85)" />
+                  <linearGradient id={gradientId} x1="6%" y1="4%" x2="94%" y2="96%">
+                    <stop offset="0%" stopColor="rgba(12,22,38,0.96)" />
+                    <stop offset="45%" stopColor="rgba(18,30,52,0.9)" />
+                    <stop offset="100%" stopColor="rgba(32,58,110,0.86)" />
                   </linearGradient>
-                  <filter id={shadowId} x="-4%" y="-4%" width="108%" height="108%" colorInterpolationFilters="sRGB">
-                    <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#020617" floodOpacity="0.8" />
-                  </filter>
                 </defs>
-                <rect width={vw} height={vh} fill={`url(#${gradientId})`} />
-                <g fill="rgba(4, 34, 104, 0.92)" filter={`url(#${shadowId})`}>
-                  {bundle.provinces.map(p => {
-                    const d = atlasPaths[p.id];
-                    if (!d) return null;
-                    return <path key={`bg-${p.id}`} d={d} />;
-                  })}
+                <rect width={boardCanvasWidth} height={boardCanvasHeight} fill="#050d1d" />
+                <rect width={boardCanvasWidth} height={boardCanvasHeight} fill={`url(#${gradientId})`} />
+                <g transform={`translate(${leftExtra - gMinX}, ${topExtra - gMinY})`}>
+                  <image
+                    href="/assets/board_blank_outline.svg"
+                    x={boardMinX}
+                    y={boardMinY}
+                    width={boardW}
+                    height={boardH}
+                    preserveAspectRatio="none"
+                    style={{ opacity: 0.55 }}
+                  />
+                  <g fill="rgba(0, 0, 0, 1)" stroke="rgba(13, 72, 116, 0.6)" strokeWidth={0.75}>
+                    {bundle.provinces.map(p => {
+                      const d = atlasPaths[p.id];
+                      if (!d) return null;
+                      return <path key={`map-${p.id}`} d={d} />;
+                    })}
+                  </g>
                 </g>
               </svg>
             </div>
-            <svg className="absolute inset-0 pointer-events-none" viewBox={`0 0 ${vw} ${vh}`}>
+            <svg className="absolute pointer-events-none"
+              style={{ left: leftExtra, top: topExtra, width: vw, height: vh }}
+              viewBox={`0 0 ${vw} ${vh}`}>
               
               {bundle.provinces.map(p => {
                 if (!placed[p.id]) return null;
@@ -204,7 +244,7 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
               <g
                 fontSize={12}
                 textAnchor="middle"
-                style={{ pointerEvents: "none", paintOrder: "stroke", stroke: "#fff", strokeWidth: 3 }}
+                style={{ pointerEvents: "none", paintOrder: "stroke", stroke: "#fff", strokeWidth: 0.6 }}
               >
                 {bundle.provinces.map(p => {
                   const [ax, ay] = p.anchor_px;
@@ -223,7 +263,7 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
                 })}
               </g>
             </svg>
-            <div ref={boardRef} className="absolute inset-0">
+            <div ref={boardRef} className="absolute inset-0" style={{ left: leftExtra, top: topExtra, width: vw, height: vh }}>
               {activeProvince && (
                 <div
                   className="aim"

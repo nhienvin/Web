@@ -84,18 +84,6 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const [colorMap, setColorMap] = useState<ProvinceColorMap>(() => randomColorMap(bundle.provinces));
   const uniqueId = useId().replace(/:/g, "");
   const gradientId = `${uniqueId}-gradient`;
-// === HUD portal setup (không bị scale) ===
-  const portalElRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = document.createElement("div");
-    el.setAttribute("data-level2-portal", "");
-    document.body.appendChild(el);
-    portalElRef.current = el;
-    return () => {
-      if (el.parentNode) el.parentNode.removeChild(el);
-      portalElRef.current = null;
-    };
-  }, []);
   useEffect(() => {
     setStartPositions(randomStartPositions(bundle.provinces));
     setColorMap(randomColorMap(bundle.provinces));
@@ -204,7 +192,7 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
                     preserveAspectRatio="none"
                     style={{ opacity: 0.55 }}
                   />
-                  <g fill="rgba(56, 189, 248, 0.28)" stroke="rgba(13, 72, 116, 0.6)" strokeWidth={0.75}>
+                  <g fill="rgba(0, 0, 0, 1)" stroke="rgba(13, 72, 116, 0.6)" strokeWidth={0.75}>
                     {bundle.provinces.map(p => {
                       const d = atlasPaths[p.id];
                       if (!d) return null;

@@ -220,12 +220,12 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
             <div aria-hidden className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-sm" style={{ width: '100%', height: '100%' }}>
               <svg className="block h-full w-full" viewBox={`0 0 ${boardCanvasWidth} ${boardCanvasHeight}`} preserveAspectRatio="xMidYMid meet">
                 {/* Align board so bundle.viewBox maps to the inner region at (leftExtra, topExtra) */}
+                <rect width={boardCanvasWidth} height={boardCanvasHeight} fill="#fff" />
                 <g transform={`translate(${leftExtra - gMinX}, ${topExtra - gMinY})`}>
                   <image href="/assets/board_blank_outline.svg" x={bMinX} y={bMinY} width={bW} height={bH} preserveAspectRatio="none" />
                 </g>
               </svg>
             </div>
-
             {/* Fill tỉnh đã đúng */}
             <svg className="absolute pointer-events-none" viewBox={`0 0 ${vw} ${vh}`} style={{ zIndex: 5, left: leftExtra, top: topExtra, width: vw, height: vh, position: 'absolute' }}>
               {/* layer path fill */}

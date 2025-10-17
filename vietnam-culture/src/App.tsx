@@ -4,9 +4,10 @@ import type { Bundle } from "./types";
 import Level1 from "./levels/Level1";
 import Level2 from "./levels/Level2";
 import Level3 from "./levels/Level3";
-import Level4 from "./levels/Level4";
+// import Level4 from "./levels/Level4";
 
-type GameScreen = "level1" | "level2" | "level3" | "level4";
+// type GameScreen = "level1" | "level2" | "level3" | "level4";
+type GameScreen = "level1" | "level2" | "level3";
 type Screen = "menu" | GameScreen;
 
 type LevelMeta = {
@@ -20,7 +21,7 @@ const LEVELS: LevelMeta[] = [
   { id: "level1", label: "Cấp 1", accentClass: "text-emerald-500", icons: 1 },
   { id: "level2", label: "Cấp 2", accentClass: "text-amber-500", icons: 2 },
   { id: "level3", label: "Cấp 3", accentClass: "text-rose-500", icons: 3 },
-  { id: "level4", label: "Cấp 4", accentClass: "text-sky-500", icons: 4 },
+  // { id: "level4", label: "Cấp 4", accentClass: "text-sky-500", icons: 4 },
 ];
 
 const LEVEL_ICON_SRC = "/imgs/puzzle.png";
@@ -55,21 +56,19 @@ export default function App() {
             ? {
                 backgroundImage: `url('${MENU_BACKGROUND}')`,
                 backgroundSize: "cover",
-                backgroundPosition: "center",
+                backgroundPosition: "center center",
                 backgroundRepeat: "no-repeat",
               }
             : undefined
         }
       >
-        {isMenu && <div className="absolute inset-0 bg-slate-950/60 sm:bg-slate-950/45" aria-hidden />}
-
         <div className="relative flex h-full flex-col">
           <main className="flex-1 overflow-y-auto">
             {isMenu && <Menu onSelect={handleStartLevel} />}
             {screen === "level1" && <Level1 bundle={bundle} onBack={handleBackToMenu} />}
             {screen === "level2" && <Level2 bundle={bundle} onBack={handleBackToMenu} />}
             {screen === "level3" && <Level3 bundle={bundle} onBack={handleBackToMenu} />}
-            {screen === "level4" && <Level4 bundle={bundle} onBack={handleBackToMenu} />}
+            {/* {screen === "level4" && <Level4 bundle={bundle} onBack={handleBackToMenu} />} */}
           </main>
         </div>
       </div>
@@ -79,8 +78,8 @@ export default function App() {
 
 function Menu({ onSelect }: { onSelect: (screen: GameScreen) => void }) {
   return (
-    <div className="flex h-full justify-center px-4 py-8 sm:px-8 lg:py-12">
-      <div className="w-full max-w-xl space-y-4">
+    <div className="flex h-full justify-left px-4 py-8 sm:px-8 lg:py-12">
+      <div className="w-full max-w-sm space-y-4">
         {/* <h1 className="text-center text-2xl font-semibold tracking-tight text-white drop-shadow sm:text-left">
           Vietnam Puzzle Levels
         </h1> */}

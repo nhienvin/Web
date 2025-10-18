@@ -6,32 +6,11 @@ import { useTimer } from "../core/useTimer";
 import { pushLB } from "../core/leaderboard";
 import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
+import { useBoardViewBox } from "../core/useBoardViewBox";
 import { viewBoxNearAnchorSmart } from "../core/svg";
 import { PANEL_COLUMNS, PANEL_ICON_SIZE, PANEL_CARD_WIDTH, PANEL_CARD_HEIGHT, PANEL_CARD_GAP_X, PANEL_PADDING_X, PANEL_PADDING_Y, DRAG_ICON_SIZE, PIECE_COLUMN_STEP, PIECE_ROW_STEP } from "./panelLayout";
 import { createPortal } from "react-dom";
 // ---- helpers ----
-function useBoardViewBox(src: string, fallback: [number, number, number, number]) {
-  const [vb, setVb] = useState(fallback);
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const res = await fetch(src);
-        const txt = await res.text();
-        const m = txt.match(/viewBox\s*=\s*["']\s*([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s*["']/i);
-        if (m && alive) {
-          setVb([+m[1], +m[2], +m[3], +m[4]] as [number, number, number, number]);
-        }
-      } catch {
-        /* ignore fetch/parse errors */
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [src]);
-  return vb;
-}
 function useStageScale(stageW: number, stageH: number, pad = 24) {
   const [scale, setScale] = useState(1);
   useEffect(() => {

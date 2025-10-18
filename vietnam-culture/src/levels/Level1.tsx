@@ -6,24 +6,9 @@ import { useTimer } from "../core/useTimer";
 import { pushLB } from "../core/leaderboard";
 import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
-
+import { extractViewBoxFromString, useBoardViewBox } from "../core/useBoardViewBox";
 /* ========= helpers ========= */
-function useBoardViewBox(src: string, fallback: [number, number, number, number]) {
-  const [vb, setVb] = React.useState(fallback);
-  React.useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const res = await fetch(src);
-        const txt = await res.text();
-        const m = txt.match(/viewBox\s*=\s*["']\s*([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s*["']/i);
-        if (m && alive) setVb([+m[1], +m[2], +m[3], +m[4]] as any);
-      } catch {}
-    })();
-    return () => { alive = false; };
-  }, [src]);
-  return vb as [number, number, number, number];
-}
+
 function hash32(s: string) { let h = 2166136261>>>0; for (let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
 function colorForId(id: string) {
   const h = hash32(id) % 360;
@@ -61,18 +46,16 @@ function getDevFlag(): boolean {
 type SvgMeta = { d: string; vb: {minX:number; minY:number; width:number; height:number} | null };
 const svgCache = new Map<string, SvgMeta>();
 function normalizeUrl(path: string){ return path?.startsWith('/') ? path : ('/'+path); }
-function parseViewBox(txt: string){
-  const m = txt.match(/viewBox\s*=\s*["']\s*([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s+([0-9.+-eE]+)\s*["']/i);
-  if (!m) return null;
-  return { minX: +m[1], minY: +m[2], width: +m[3], height: +m[4] };
-}
 async function fetchProvinceSvgMeta(url: string): Promise<SvgMeta>{
   const key = normalizeUrl(url);
   if (svgCache.has(key)) return svgCache.get(key)!;
   const res = await fetch(key);
   if (!res.ok) return { d:"", vb:null };
   const txt = await res.text();
-  const vb = parseViewBox(txt);
+  const vbArray = extractViewBoxFromString(txt);
+  const vb = vbArray
+    ? { minX: vbArray[0], minY: vbArray[1], width: vbArray[2], height: vbArray[3] }
+    : null;
   const d = [...txt.matchAll(/<path[^>]*\sd=(?:"([^"]+)"|'([^']+)')/gi)]
              .map(m => m[1] || m[2] || "").join(" ");
   const meta = { d, vb };
@@ -136,16 +119,30 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
   // preload SVG rời
   const [extraMeta, setExtraMeta] = useState<Record<string, SvgMeta>>({});
   useEffect(()=>{
-    (async ()=>{
-      const upd: Record<string, SvgMeta> = {};
-      for (const p of bundle.provinces){
-        if (atlasPaths[p.id]) continue;
-        if (!p.svg_path_file) continue;
+    let cancelled = false;
+    const pending = bundle.provinces.filter(p => !atlasPaths[p.id] && p.svg_path_file);
+    if (!pending.length) return;
+
+    Promise.all(pending.map(async (p) => {
+      try {
         const meta = await fetchProvinceSvgMeta(p.svg_path_file);
-        if (meta.d) upd[p.id] = meta;
+        return meta.d ? { id: p.id, meta } : null;
+      } catch {
+        return null;
       }
-      if (Object.keys(upd).length) setExtraMeta(s=>({ ...s, ...upd }));
-    })();
+    })).then(results => {
+      if (cancelled) return;
+      const upd = results.filter((r): r is { id: string; meta: SvgMeta } => !!r)
+        .reduce<Record<string, SvgMeta>>((acc, { id, meta }) => {
+          acc[id] = meta;
+          return acc;
+        }, {});
+      if (Object.keys(upd).length) setExtraMeta(s => ({ ...s, ...upd }));
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [bundle.provinces, atlasPaths]);
 
   // mở popup đúng lúc (chỉ 1 lần)

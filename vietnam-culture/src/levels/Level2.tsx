@@ -7,7 +7,7 @@ import { pushLB } from "../core/leaderboard";
 import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
 import { viewBoxNearAnchorSmart } from "../core/svg";
-import { PANEL_COLUMNS, PANEL_ICON_SIZE, PANEL_CARD_WIDTH, PANEL_CARD_HEIGHT, PANEL_CARD_GAP_X, PANEL_PADDING_X, PANEL_PADDING_Y, DRAG_ICON_SIZE, DRAG_CARD_WIDTH, DRAG_CARD_HEIGHT, PIECE_COLUMN_STEP, PIECE_ROW_STEP } from "./panelLayout";
+import { PANEL_COLUMNS, PANEL_ICON_SIZE, PANEL_CARD_WIDTH, PANEL_CARD_HEIGHT, PANEL_CARD_GAP_X, PANEL_PADDING_X, PANEL_PADDING_Y, DRAG_ICON_SIZE, PIECE_COLUMN_STEP, PIECE_ROW_STEP } from "./panelLayout";
 import { createPortal } from "react-dom";
 // ---- helpers ----
 function useBoardViewBox(src: string, fallback: [number, number, number, number]) {
@@ -82,12 +82,27 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
   const boardCanvasHeight = vh + topExtra + bottomExtra;
   const [startPositions, setStartPositions] = useState(() => randomStartPositions(bundle.provinces));
   const [colorMap, setColorMap] = useState<ProvinceColorMap>(() => randomColorMap(bundle.provinces));
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== "undefined")
+  ? window.matchMedia("(max-width: 768px)").matches
+  : false);
   const uniqueId = useId().replace(/:/g, "");
   const gradientId = `${uniqueId}-gradient`;
   useEffect(() => {
     setStartPositions(randomStartPositions(bundle.provinces));
     setColorMap(randomColorMap(bundle.provinces));
   }, [bundle]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 768px)");
+    const handle = (event: MediaQueryListEvent) => setIsMobile(event.matches);
+    setIsMobile(mq.matches);
+    if (mq.addEventListener) {
+      mq.addEventListener("change", handle);
+      return () => mq.removeEventListener("change", handle);
+    }
+    mq.addListener(handle);
+    return () => mq.removeListener(handle);
+  }, []);
   useEffect(() => {
     if (!done) {
       doneRef.current = false;
@@ -303,6 +318,7 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
                     onDragState={(s) => setActivePid(s ? p.id : null)}
                     d={atlasPaths[p.id] || ""}
                     color={colorMap[p.id]}
+                    isMobile={isMobile} 
                   />
                 ))}
               </div>
@@ -336,7 +352,7 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
 }
 // ---- Piece: icon kéo (dính đúng điểm click; vẽ qua portal để khỏi lệch) ----
 function Piece({
-  p, defaultPos, locked, onDrop, onDragState, d, color
+  p, defaultPos, locked, onDrop, onDragState, d, color, isMobile
 }:{
   p: Province;
   defaultPos: { x: number; y: number };
@@ -345,6 +361,7 @@ function Piece({
   onDragState: (dragging: boolean) => void;
   d: string;
   color?: ProvinceColor;
+  isMobile: boolean;
 }) {
   const [pos, setPos] = useState(defaultPos);
   const [dragging, setDragging] = useState(false);
@@ -409,20 +426,25 @@ function Piece({
         <div style={{ width: size, height: size }} className="rounded bg-slate-200 animate-pulse" />
       )
   );
+  const panelIconSize = isMobile ? Math.round(PANEL_ICON_SIZE * 0.75) : PANEL_ICON_SIZE;
+  const dragIconSize = isMobile ? Math.round(DRAG_ICON_SIZE * 0.75) : DRAG_ICON_SIZE;
   const renderContent = (mode: 'panel' | 'drag') => {
-    const iconSize = mode === 'panel' ? PANEL_ICON_SIZE : DRAG_ICON_SIZE;
-    const nameClass = mode === 'panel'
-      ? 'mt-4 text-xl font-semibold leading-tight text-slate-100 drop-shadow'
-      : 'mt-3 text-lg font-semibold leading-tight text-white bg-slate-900/85 rounded px-2.5 py-1';
+    if (mode === 'drag') {
+      return (
+        <div className="flex h-full w-full items-center justify-center">
+          {renderIcon(dragIconSize)}
+        </div>
+      );
+    }
     return (
       <div className="flex h-full w-full flex-col items-center justify-start text-center">
         <div
           className="flex items-center justify-center"
-          style={{ width: iconSize, height: iconSize }}
+          style={{ width: panelIconSize, height: panelIconSize }}
         >
-          {renderIcon(iconSize)}
+           {renderIcon(panelIconSize)}
         </div>
-        <div className={nameClass} style={{ maxWidth: '100%' }}>
+        <div className="mt-4 text-xl font-semibold leading-tight text-slate-100 drop-shadow" style={{ maxWidth: '100%' }}>
           <span className="block truncate">{p.name_vi}</span>
         </div>
       </div>
@@ -430,8 +452,8 @@ function Piece({
   };
   const panelWidth = PANEL_CARD_WIDTH;
   const panelHeight = PANEL_CARD_HEIGHT;
-  const dragWidth = DRAG_CARD_WIDTH;
-  const dragHeight = DRAG_CARD_HEIGHT;
+  const dragWidth = dragIconSize;
+  const dragHeight = dragIconSize;
   return (
     <>
       <div
@@ -457,7 +479,7 @@ function Piece({
       </div>
       {dragging && createPortal(
         <div
-          className="fixed z-[3000] select-none pointer-events-none rounded-2xl border border-slate-500/50 bg-slate-900/80 backdrop-blur-sm"
+          className="fixed z-[3000] select-none pointer-events-none"
           style={{
             left: dragXY.x - offsetRef.current.dxRatio * dragWidth,
             top: dragXY.y - offsetRef.current.dyRatio * dragHeight,
@@ -466,7 +488,6 @@ function Piece({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '10px 8px',
           }}
         >
           {renderContent('drag')}

@@ -63,7 +63,7 @@ export default function App() {
         }
       >
         <div className="relative flex h-full flex-col">
-          <main className="flex-1 overflow-y-auto">
+        <main className={`flex-1 ${isMenu ? "overflow-hidden" : "overflow-y-auto"}`}>
             {isMenu && <Menu onSelect={handleStartLevel} />}
             {screen === "level1" && <Level1 bundle={bundle} onBack={handleBackToMenu} />}
             {screen === "level2" && <Level2 bundle={bundle} onBack={handleBackToMenu} />}

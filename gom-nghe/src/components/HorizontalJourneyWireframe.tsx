@@ -1,4 +1,6 @@
-import { useRef } from "react";
+"use client";
+
+import { useRef, type ReactNode } from "react";
 import { motion } from "framer-motion";
 
 /**
@@ -13,7 +15,33 @@ import { motion } from "framer-motion";
  * - Sections: Source → Earth → Fire → Glaze → People → Knowledge → Rebirth → End
  */
 
-const sections = [
+type Tone = "earth" | "fire" | "glaze" | "ash" | "smoke";
+
+type SectionKey =
+  | "source"
+  | "earth"
+  | "fire"
+  | "glaze"
+  | "people"
+  | "knowledge"
+  | "rebirth"
+  | "end";
+
+interface SectionData {
+  key: SectionKey;
+  title: string;
+  emoji: string;
+  emo: {
+    h: string;
+    p: string;
+  };
+  know: {
+    h: string;
+    items: string[];
+  };
+}
+
+const sections: SectionData[] = [
   {
     key: "source",
     title: "Khởi nguồn",
@@ -152,8 +180,15 @@ const sections = [
   },
 ];
 
-function Card({ title, subtitle, children, tone = "earth" }: any) {
-  const tones: Record<string, string> = {
+interface CardProps {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+  tone?: Tone;
+}
+
+function Card({ title, subtitle, children, tone = "earth" }: CardProps) {
+  const tones: Record<Tone, string> = {
     earth: "bg-[#F4EBD0] border-[#7A5B3A]/60",
     fire: "bg-[#F9E5DE] border-[#B44B3C]/60",
     glaze: "bg-[#E4F0EC] border-[#7AAE9E]/60",
@@ -161,7 +196,9 @@ function Card({ title, subtitle, children, tone = "earth" }: any) {
     smoke: "bg-[#EEEDE8] border-[#6D6A5F]/50",
   };
   return (
-    <div className={`w-[540px] min-w-[540px] rounded-2xl border p-6 shadow-sm mr-6 backdrop-blur-sm ${tones[tone] || tones.earth}`}> 
+    <div
+      className={`w-[540px] min-w-[540px] rounded-2xl border p-6 shadow-sm mr-6 backdrop-blur-sm ${tones[tone]}`}
+    >
       <div className="text-xs uppercase tracking-wider opacity-70">{subtitle}</div>
       <h3 className="text-2xl font-semibold mt-1">{title}</h3>
       <div className="mt-3 text-sm leading-relaxed">{children}</div>
@@ -169,7 +206,12 @@ function Card({ title, subtitle, children, tone = "earth" }: any) {
   );
 }
 
-function LaneLabel({ children, side = "top" }: any) {
+interface LaneLabelProps {
+  children: ReactNode;
+  side?: "top" | "bottom";
+}
+
+function LaneLabel({ children, side = "top" }: LaneLabelProps) {
   return (
     <div className={`sticky ${side === "top" ? "top-4" : "bottom-4"} z-10 flex items-center gap-2 text-xs font-medium opacity-80`}> 
       <div className="w-2 h-2 rounded-full bg-neutral-800" />
@@ -178,9 +220,13 @@ function LaneLabel({ children, side = "top" }: any) {
   );
 }
 
-function Section({ data }: any) {
+interface SectionProps {
+  data: SectionData;
+}
+
+function Section({ data }: SectionProps) {
   // choose tone by section
-  const toneMap: Record<string, any> = {
+  const toneMap: Record<SectionKey, { emo: Tone; know: Tone }> = {
     source: { emo: "ash", know: "smoke" },
     earth: { emo: "earth", know: "ash" },
     fire: { emo: "fire", know: "smoke" },
@@ -202,7 +248,7 @@ function Section({ data }: any) {
       <div className="grid grid-rows-[1fr_12px_1fr] grid-cols-1 h-[560px]"> 
         {/* Emotion lane */}
         <div className="flex items-end">
-          <Card title={`${data.emoji} ${data.title}`} subtitle={data.emo.h} tone={toneMap[data.key]?.emo}>
+        <Card title={`${data.emoji} ${data.title}`} subtitle={data.emo.h} tone={toneMap[data.key].emo}>
             <p>{data.emo.p}</p>
             <div className="mt-4 text-[11px] italic opacity-70">Microcopy: “Đất không cần bóng để đẹp.”</div>
           </Card>
@@ -214,7 +260,7 @@ function Section({ data }: any) {
         </div>
         {/* Knowledge lane */}
         <div className="flex items-start">
-          <Card title={`Tri thức: ${data.know.h}`} subtitle="Kho bản địa — ghi chép" tone={toneMap[data.key]?.know}>
+        <Card title={`Tri thức: ${data.know.h}`} subtitle="Kho bản địa — ghi chép" tone={toneMap[data.key].know}>
             <ul className="list-disc pl-4 space-y-1">
               {data.know.items.map((t: string, i: number) => (
                 <li key={i}>{t}</li>

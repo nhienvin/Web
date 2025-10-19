@@ -1,0 +1,21 @@
+﻿@import "tailwindcss";
+
+/* 1) Nền giấy tái chế (sẽ hiển thị chuẩn khi texture tải xong) */
+:root {
+  --paper-texture: url("/textures/paper-recycle.png");
+  --brush-ink: url("/textures/brush-ink.png");
+}
+
+/* 2) Ẩn thanh cuộn cho khối ngang */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* 3) Lớp phủ handmade toàn trang (khi có asset) */
+.body-handmade {
+  background-image:
+    var(--paper-texture),
+    radial-gradient(1000px 400px at 30% 20%, rgba(0,0,0,0.05), transparent 60%),
+    radial-gradient(800px 300px at 70% 80%, rgba(0,0,0,0.04), transparent 60%);
+  background-size: 820px auto, cover, cover;
+  background-blend-mode: multiply, normal, normal;
+}

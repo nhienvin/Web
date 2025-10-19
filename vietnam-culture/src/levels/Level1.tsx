@@ -241,12 +241,12 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
               >
                 {bundle.provinces.map(p=>{
                   if (!placed[p.id]) return null;
-                  const [ax, ay] = p.anchor_px;
-                  return (
-                    <text key={`label-${p.id}`} x={ax} y={ay-6} fill="#0f172a">
-                      {p.name_vi}
-                    </text>
-                  );
+                  // const [ax, ay] = p.anchor_px;
+                  // return (
+                  //   <text key={`label-${p.id}`} x={ax} y={ay-6} fill="#0f172a">
+                  //     {p.name_vi}
+                  //   </text>
+                  // );
                 })}
               </g>
             </svg>
@@ -337,7 +337,7 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
         <div
           style={{
             position:'fixed', top: 14, left: '50%', transform: 'translateX(-50%)',
-            zIndex: 2147483000, padding: '6px 10px', borderRadius: 8, color: '#fff',
+            zIndex: 2147483000, padding: '6px 10px', borderRadius: 8, color: '#f8f8f8',
             background: feedback==='ok' ? 'rgba(5,150,105,.95)' : 'rgba(244,63,94,.95)',
             boxShadow: '0 2px 8px rgba(0,0,0,.35)'
           }}
@@ -375,7 +375,7 @@ function NameChip({ province, disabled, onStart }:{
       onPointerDown={onPointerDown}
       className={`h-12 w-full grid place-items-center rounded border text-3xl font-medium select-none cursor-grab text-slate-900
                   ${disabled ? 'opacity-35 line-through pointer-events-none' : ''}`}
-      style={{ background: color.chipBg, borderColor: color.chipBd }}
+      style={{ background: color.chipBg, borderColor: color.chipBd, touchAction: 'pan-y' }}
       title={province.name_en}
     >
       <span className="p-4 truncate">{province.name_vi}</span>
@@ -403,7 +403,7 @@ function FloatingChip({
 
   return (
     <div className="fixed z-50 select-none pointer-events-none" style={{ left:x, top:y }}>
-      <div className="px-3 py-2 rounded border text-base font-medium shadow text-slate-900"
+      <div className="px-3 py-2 rounded border text-xs/2 font-medium shadow text-slate-900"
            style={{ background: color.chipBg, borderColor: color.chipBd }}>
         {name}
       </div>

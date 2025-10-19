@@ -451,6 +451,7 @@ function Piece({
           opacity: dragging ? 0 : 1,
           pointerEvents: dragging ? 'none' : 'auto',
           zIndex: dragging ? 50 : 1,
+          touchAction: 'none',
         }}
         title={p.name_vi}
       >

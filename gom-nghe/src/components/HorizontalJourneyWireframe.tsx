@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 
 /**
@@ -197,7 +197,7 @@ function Card({ title, subtitle, children, tone = "earth" }: CardProps) {
   };
   return (
     <div
-      className={`w-[540px] min-w-[540px] rounded-2xl border p-6 shadow-sm mr-6 backdrop-blur-sm ${tones[tone]}`}
+      className={`card-ink w-[540px] min-w-[540px] rounded-2xl border p-6 shadow-sm mr-6 backdrop-blur-sm ${tones[tone]}`}
     >
       <div className="text-xs uppercase tracking-wider opacity-70">{subtitle}</div>
       <h3 className="text-2xl font-semibold mt-1">{title}</h3>
@@ -276,6 +276,49 @@ function Section({ data }: SectionProps) {
 
 export default function HorizontalJourneyWireframe() {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) {
+      return;
+    }
+
+    const updateAvailability = () => {
+      const node = scrollerRef.current;
+      if (!node) {
+        return;
+      }
+      const { scrollLeft, scrollWidth, clientWidth } = node;
+      setCanScrollPrev(scrollLeft > 8);
+      setCanScrollNext(scrollLeft + clientWidth < scrollWidth - 8);
+    };
+
+    updateAvailability();
+
+    const handleResize = () => updateAvailability();
+
+    scroller.addEventListener("scroll", updateAvailability, { passive: true });
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      scroller.removeEventListener("scroll", updateAvailability);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const scrollByStep = (direction: "left" | "right") => {
+    const scroller = scrollerRef.current;
+    if (!scroller) {
+      return;
+    }
+
+    const delta = Math.max(scroller.clientWidth * 0.8, 320);
+    const offset = direction === "left" ? -delta : delta;
+
+    scroller.scrollBy({ left: offset, behavior: "smooth" });
+  };
 
   return (
     <div className="min-h-screen w-full bg-[#F8F3E6] text-neutral-900">
@@ -306,15 +349,37 @@ export default function HorizontalJourneyWireframe() {
       </div>
 
       {/* Horizontal scroller */}
-      <div
-        ref={scrollerRef}
-        className="mt-6 overflow-x-auto snap-x snap-mandatory no-scrollbar"
-      >
-        <div className="flex items-stretch px-6 pb-10" style={{ width: "max-content" }}>
-          {sections.map((s) => (
-            <Section key={s.key} data={s} />
-          ))}
+      <div className="relative mt-6">
+        <div
+          ref={scrollerRef}
+          className="overflow-x-auto snap-x snap-mandatory no-scrollbar"
+        >
+          <div className="flex items-stretch px-6 pb-10" style={{ width: "max-content" }}>
+            {sections.map((s) => (
+              <Section key={s.key} data={s} />
+            ))}
+          </div>
         </div>
+        {canScrollPrev && (
+          <button
+            type="button"
+            className="absolute left-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-lg shadow-lg ring-1 ring-black/10 backdrop-blur transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/40"
+            onClick={() => scrollByStep("left")}
+            aria-label="Xem phần trước"
+          >
+            <span aria-hidden>←</span>
+          </button>
+        )}
+        {canScrollNext && (
+          <button
+            type="button"
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-lg shadow-lg ring-1 ring-black/10 backdrop-blur transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/40"
+            onClick={() => scrollByStep("right")}
+            aria-label="Xem phần tiếp theo"
+          >
+            <span aria-hidden>→</span>
+          </button>
+        )}
       </div>
 
       {/* Footer */}
@@ -326,3 +391,4 @@ export default function HorizontalJourneyWireframe() {
     </div>
   );
 }
+

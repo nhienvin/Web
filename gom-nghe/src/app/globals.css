@@ -2,7 +2,7 @@
 
 /* 1) Nền giấy tái chế (sẽ hiển thị chuẩn khi texture tải xong) */
 :root {
-  --paper-texture: url("/textures/paper-recycle.png");
+  --paper-texture: url("/textures/sepia-plasterboard-texture.jpg");
   --brush-ink: url("/textures/brush-ink.png");
 }
 
@@ -19,3 +19,22 @@
   background-size: 820px auto, cover, cover;
   background-blend-mode: multiply, normal, normal;
 }
+
+/* overlay vệt cọ cho card, dùng var(--brush-ink) */
+.card-ink {
+  position: relative;
+  overflow: hidden; /* để vệt cọ không tràn */
+}
+.card-ink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.15;                 /* tăng/giảm tùy thích */
+  mix-blend-mode: multiply;
+  background-image: var(--brush-ink);
+  background-repeat: no-repeat;
+  background-position: right bottom; /* đổi: left top, center, ... */
+  background-size: 600px auto;       /* đổi size nếu muốn */
+}
+

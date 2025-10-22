@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-
+import Hero from "@/components/Hero"
 /**
  * Wireframe React: Hành trình Gốm Việt của Nghê – cuộn ngang
  * - TailwindCSS for layout & styling
@@ -237,6 +237,8 @@ function Section({ data }: SectionProps) {
     end: { emo: "ash", know: "smoke" },
   };
 
+  
+
   return (
     <motion.div
       className="snap-center shrink-0 w-[1280px] px-8"
@@ -278,7 +280,10 @@ export default function HorizontalJourneyWireframe() {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
-
+  const scrollToSource = () => {
+    const el = document.querySelector("[data-section='source']");
+    el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  };
   useEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) {
@@ -347,7 +352,7 @@ export default function HorizontalJourneyWireframe() {
           <LaneLabel side="bottom">Làn TRI THỨC — kho bản địa (ghi chép, công thức, tư liệu)</LaneLabel>
         </div>
       </div>
-
+      <Hero onStartClick={scrollToSource} />
       {/* Horizontal scroller */}
       <div className="relative mt-6">
         <div

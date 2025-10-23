@@ -5,8 +5,9 @@ import Level1 from "./levels/Level1";
 import Level2 from "./levels/Level2";
 import Level3 from "./levels/Level3";
 import Level4 from "./levels/Level4";
+import Level5 from "./levels/Level5";
 
-type GameScreen = "level1" | "level2" | "level3" | "level4";
+type GameScreen = "level1" | "level2" | "level3" | "level4"| "level5";
 
 type Screen = "menu" | GameScreen;
 
@@ -21,6 +22,7 @@ const LEVELS: LevelMeta[] = [
   { id: "level2", label: "Cấp 2: Ghép hình ảnh tỉnh vào bản đồ", accentClass: "text-amber-500"},
   { id: "level3", label: "Cấp 3: Đoán tên tỉnh dựa vào hình ảnh", accentClass: "text-rose-500"},
   { id: "level4", label: "Cấp 4: Xuyên Việt lộ trình", accentClass: "text-sky-500"},
+  { id: "level5", label: "Cấp 5: Âm thanh địa phương", accentClass: "text-indigo-500" },
 ];
 const MENU_BACKGROUND = "/imgs/VN_puzzle.jpg";
 const SOCIAL_LINKS = [
@@ -86,6 +88,7 @@ export default function App() {
             {screen === "level2" && <Level2 bundle={bundle} onBack={handleBackToMenu} />}
             {screen === "level3" && <Level3 bundle={bundle} onBack={handleBackToMenu} />}
             {screen === "level4" && <Level4 bundle={bundle} onBack={handleBackToMenu} />}
+            {screen === "level5" && <Level5 bundle={bundle} onBack={handleBackToMenu} />}
           </main>
           <footer
             className={`border-t px-4 py-4 text-sm ${
@@ -116,6 +119,7 @@ export default function App() {
                       aria-hidden="true"
                       focusable="false"
                       width="22"
+
                       height="22"
                       viewBox="0 0 24 24"
                       className="h-5 w-5"

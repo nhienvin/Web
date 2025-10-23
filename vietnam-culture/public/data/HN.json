@@ -1,0 +1,18 @@
+{
+  "id":"HN","region":"Bắc Bộ",
+  "riddle_vi":"Mưa đậu trên mái cũ, hương lúa non đi ngang mùa thu.",
+  "choices":["Hà Nội","Hải Phòng","Bắc Ninh","Ninh Bình","Nam Định","Hòa Bình","Vĩnh Phúc","Thái Nguyên"],
+  "images":[
+    {"ref":"hn_1_texture.webp","role":"texture"},
+    {"ref":"hn_2_life.webp","role":"lifestyle"},
+    {"ref":"hn_3_landscape.webp","role":"landscape"},
+    {"ref":"hn_4_landmark.webp","role":"landmark"}
+  ],
+  "audio":{"ref":"hn_ambience.opus","start":24,"duration":10},
+  "lore":[
+    {"vi":"Hạt lúa non gói lá sen—mùi thu Hà Nội.","en":"Young rice flakes in lotus leaves."},
+    {"vi":"Sông Hồng và mạng hồ làm dịu nhịp sống đô thị.","en":"Red River and lakes temper city life."},
+    {"vi":"Vết rạn ngà, hơi thở cổ điển của phố cũ.","en":"Classic crackle glaze, a nostalgic tone."}
+  ],
+  "rewards":{"stamp":"HN_Stamp_Autumn.png","loop":"Hanoi_Rain_Bell_60s.opus"}
+}

@@ -4,27 +4,24 @@ import type { Bundle } from "./types";
 import Level1 from "./levels/Level1";
 import Level2 from "./levels/Level2";
 import Level3 from "./levels/Level3";
-// import Level4 from "./levels/Level4";
+import Level4 from "./levels/Level4";
 
-// type GameScreen = "level1" | "level2" | "level3" | "level4";
-type GameScreen = "level1" | "level2" | "level3";
+type GameScreen = "level1" | "level2" | "level3" | "level4";
+
 type Screen = "menu" | GameScreen;
 
 type LevelMeta = {
   id: GameScreen;
   label: string;
   accentClass: string;
-  icons: number;
 };
 
 const LEVELS: LevelMeta[] = [
-  { id: "level1", label: "Cấp 1", accentClass: "text-emerald-500", icons: 1 },
-  { id: "level2", label: "Cấp 2", accentClass: "text-amber-500", icons: 2 },
-  { id: "level3", label: "Cấp 3", accentClass: "text-rose-500", icons: 3 },
-  // { id: "level4", label: "Cấp 4", accentClass: "text-sky-500", icons: 4 },
+  { id: "level1", label: "Cấp 1: Ghép tên tỉnh vào bản đồ", accentClass: "text-emerald-500"},
+  { id: "level2", label: "Cấp 2: Ghép hình ảnh tỉnh vào bản đồ", accentClass: "text-amber-500"},
+  { id: "level3", label: "Cấp 3: Đoán tên tỉnh dựa vào hình ảnh", accentClass: "text-rose-500"},
+  { id: "level4", label: "Cấp 4: Xuyên Việt lộ trình", accentClass: "text-sky-500"},
 ];
-
-const LEVEL_ICON_SRC = "/imgs/puzzle.png";
 const MENU_BACKGROUND = "/imgs/VN_puzzle.jpg";
 const SOCIAL_LINKS = [
   {
@@ -88,7 +85,7 @@ export default function App() {
             {screen === "level1" && <Level1 bundle={bundle} onBack={handleBackToMenu} />}
             {screen === "level2" && <Level2 bundle={bundle} onBack={handleBackToMenu} />}
             {screen === "level3" && <Level3 bundle={bundle} onBack={handleBackToMenu} />}
-            {/* {screen === "level4" && <Level4 bundle={bundle} onBack={handleBackToMenu} />} */}
+            {screen === "level4" && <Level4 bundle={bundle} onBack={handleBackToMenu} />}
           </main>
           <footer
             className={`border-t px-4 py-4 text-sm ${
@@ -135,14 +132,13 @@ export default function App() {
     </div>
   );
 }
-
 function Menu({ onSelect }: { onSelect: (screen: GameScreen) => void }) {
   return (
     <div className="flex h-full justify-left px-4 py-8 sm:px-8 lg:py-12">
       <div className="w-full max-w-sm space-y-4">
-        {/* <h1 className="text-center text-2xl font-semibold tracking-tight text-white drop-shadow sm:text-left">
-          Vietnam Puzzle Levels
-        </h1> */}
+        <h1 className="text-center text-2xl font-semibold tracking-tight text-white drop-shadow sm:text-left">
+        Địa lý – Bản đồ
+        </h1>
         <ul className="flex flex-col gap-3">
           {LEVELS.map((level) => (
             <li key={level.id}>
@@ -152,19 +148,8 @@ function Menu({ onSelect }: { onSelect: (screen: GameScreen) => void }) {
                 className="group flex w-full flex-col items-center gap-4 border-b-2 border-white/60 px-4 py-6 text-center transition duration-200 hover:border-white/80 sm:flex-row sm:items-center sm:justify-between sm:border-b-4 sm:text-left"
               >
                 <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-5">
-                  <div className="flex items-center justify-center gap-2 sm:justify-start">
-                    {Array.from({ length: level.icons }).map((_, index) => (
-                      <img
-                        key={index}
-                        src={LEVEL_ICON_SRC}
-                        alt=""
-                        className="h-8 w-8 shrink-0 drop-shadow-sm sm:h-10 sm:w-10"
-                        loading="lazy"
-                      />
-                    ))}
-                  </div>
                   <span
-                    className={`text-lg font-semibold tracking-tight sm:text-2xl ${level.accentClass}`}
+                    className={`text-lg font-semibold tracking-tight sm:text-xl ${level.accentClass}`}
                   >
                     {level.label}
                   </span>

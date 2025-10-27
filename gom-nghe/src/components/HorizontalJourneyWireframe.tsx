@@ -27,158 +27,235 @@ type SectionKey =
   | "rebirth"
   | "end";
 
-interface SectionData {
-  key: SectionKey;
-  title: string;
-  emoji: string;
-  emo: {
-    h: string;
-    p: string;
+  interface TooltipItem {
+    title: string;
+    body: string;
+    media?: string; // ảnh nhỏ (tuỳ chọn)
+  }
+  
+  interface MediaLite {
+    poster: string;
+    src: string;
+    caption?: string;
+  }
+  type TouchPointConfig = {
+    label: string;              // text hover
+    title: string;              // tiêu đề panel
+    desc: string;               // mô tả 1 câu
+    primary: { text: string; onClick: () => void };
+    secondary?: { text: string; onClick: () => void };
   };
-  know: {
-    h: string;
-    items: string[];
+  const tpConfigs: Record<SectionKey, TouchPointConfig | undefined> = {
+    source: {
+      label: "tro bếp",
+      title: "Tro bếp là men",
+      desc: "Xem 8s khói/tro — và vì sao tro rơm có thể thành men.",
+      primary: { text: "▶ Xem micro-video", onClick: () => {/* play hotspot video */} },
+      secondary: { text: "ⓘ Tro rơm / Tro lá / Tro trấu", onClick: () => {/* open tooltips */} }
+    },
+    earth: {
+      label: "đất biết thở",
+      title: "Soi macro đất",
+      desc: "Phóng to hạt mịn, xem vết co ngót khi khô.",
+      primary: { text: "🔍 Mở kính lúp", onClick: () => {/* toggle macro viewer */} },
+      secondary: { text: "ⓘ Phân loại đất", onClick: () => {/* open tooltips */} }
+    },
+    fire: undefined,
+    glaze: undefined,
+    people: undefined,
+    knowledge: undefined,
+    rebirth: undefined,
+    end: undefined,
   };
-}
-
-const sections: SectionData[] = [
-  {
-    key: "source",
-    title: "Khởi nguồn",
-    emoji: "🪔",
+    
+  interface SectionData {
+    key: SectionKey;
+    title: string;
+    emoji: string;
     emo: {
-      h: "Tiếng gọi từ tro bếp",
-      p: "Tôi từng quên mùi đất. Lửa khẽ nhen trong căn nhà nhỏ.",
-    },
+      h: string;
+      p: string;
+      media?: MediaLite; // chỉ dùng cho source & earth (bây giờ)
+    };
     know: {
-      h: "Tro bếp trong văn hóa Việt",
-      items: [
-        "Tro rơm giàu silica (men ngà)",
-        "Tro lá chuối có Fe (xanh nâu)",
-        "Tro là ký ức của bếp Việt",
-      ],
+      h: string;
+      items?: string[];       // fallback dạng danh sách cũ
+      tooltips?: TooltipItem[]; // cho source & earth
+    };
+  }
+  
+  /* ===================== DATA ===================== */
+  
+  const sections: SectionData[] = [
+    {
+      key: "source",
+      title: "Khởi nguồn",
+      emoji: "🪔",
+      emo: {
+        h: "Tiếng gọi từ tro bếp",
+        p: "Tôi từng quên mùi đất. Lửa khẽ nhen trong căn nhà nhỏ.",
+        media: {
+          poster: "/media/DSC_9152[1].jpg",
+          src: "/media/Vào men Tro.mp4",
+          caption: "Tôi từng quên mùi đất.",
+        },
+      },
+      know: {
+        h: "Tro bếp trong văn hóa Việt",
+        tooltips: [
+          {
+            title: "Tro rơm",
+            body: "Giàu silica → khi nung cao tạo lớp men mỏng, trong mờ, ngà sáng.",
+          },
+          {
+            title: "Tro lá chuối",
+            body: "Chứa oxit sắt (Fe) → sắc xanh nâu trầm khi nung khử.",
+          },
+          {
+            title: "Tro trấu",
+            body: "Hạt mịn, nhiều silica tinh → thiên về men sáng & trong.",
+          },
+        ],
+      },
     },
-  },
-  {
-    key: "earth",
-    title: "Đất",
-    emoji: "🪶",
-    emo: {
-      h: "Bỏ phố – gặp đất biết thở",
-      p: "Tay chạm bùn, đất dính ngón, gió đồng thổi nhẹ.",
+    {
+      key: "earth",
+      title: "Đất",
+      emoji: "🪶",
+      emo: {
+        h: "Bỏ phố – gặp đất biết thở",
+        p: "Tay chạm bùn, đất dính ngón, gió đồng thổi nhẹ.",
+        media: {
+          poster: "/media/earth-poster.jpg",
+          src: "/media/earth-knead.mp4",
+          caption: "Học lại cách hỏi đất.",
+        },
+      },
+      know: {
+        h: "Bản đồ đất – chất liệu",
+        tooltips: [
+          {
+            title: "Đất phù sa sông Hồng",
+            body: "Giàu sắt; hạt mịn, dẻo; nung khử cho tông đỏ sẫm, ấm.",
+          },
+          {
+            title: "Đất sét non",
+            body: "Rất dẻo & giữ nước; thường làm nền cho men tro tự nhiên.",
+          },
+          {
+            title: "Đất đỏ / đá ong",
+            body: "Nhiều sắt, màu nâu đỏ ấm; hợp tông tro & lửa bếp.",
+          },
+          {
+            title: "Co ngót & nứt",
+            body: "Phơi nhanh/nung gấp dễ nứt chân chim; phơi chậm + ủ ẩm để ổn định.",
+          },
+        ],
+      },
     },
-    know: {
-      h: "Bản đồ đất – chất liệu",
-      items: [
-        "Đất đỏ, đất phù sa, đất sét non",
-        "Tính dẻo, co ngót, hạt mịn",
-        "Đất phù sa giàu sắt – nung khử ra đỏ",
-      ],
+    {
+      key: "fire",
+      title: "Lửa",
+      emoji: "🔥",
+      emo: {
+        h: "Ngọn lửa cô độc – thầy và lò",
+        p: "Vì đời chuộng bóng, thầy chọn tro. Lửa dạy cách sống.",
+      },
+      know: {
+        h: "Nung & Khử – Damper",
+        items: [
+          "Lò bầu, lò rồng, lò gas",
+          "Oxy hóa ↔ Khử – biểu đồ màu men",
+          "Damper 80% (oxy) ↔ 70% (khử)",
+        ],
+      },
     },
-  },
-  {
-    key: "fire",
-    title: "Lửa",
-    emoji: "🔥",
-    emo: {
-      h: "Ngọn lửa cô độc – thầy và lò",
-      p: "Vì đời chuộng bóng, thầy chọn tro. Lửa dạy cách sống.",
+    {
+      key: "glaze",
+      title: "Men",
+      emoji: "🧪",
+      emo: {
+        h: "Thất bại & vẻ đẹp khuyết tật",
+        p: "Ấm không khít, men không đều, sập lò – rồi thấy sần cũng đẹp.",
+      },
+      know: {
+        h: "Men tro tự nhiên",
+        items: [
+          "Celadon tro – hiệu ứng kết tinh",
+          "Men công nghiệp vs men tro",
+          "Ảnh macro – vệt kết tinh",
+        ],
+      },
     },
-    know: {
-      h: "Nung & Khử – Damper",
-      items: [
-        "Lò bầu, lò rồng, lò gas",
-        "Oxy hóa ↔ Khử – biểu đồ màu men",
-        "Damper 80% (oxy) ↔ 70% (khử)",
-      ],
+    {
+      key: "people",
+      title: "Người",
+      emoji: "👁",
+      emo: {
+        h: "Đi qua làng nghề – nghe tiếng lò cũ",
+        p: '"Giờ còn mỗi mình tôi làm." – tiếng nói nhỏ mà sâu.',
+      },
+      know: {
+        h: "Bản đồ làng gốm",
+        items: [
+          "Thổ Hà, Chu Đậu, Bát Tràng",
+          "Biên Hòa, Sa Đéc…",
+          "Ảnh/âm thanh tư liệu",
+        ],
+      },
     },
-  },
-  {
-    key: "glaze",
-    title: "Men",
-    emoji: "🧪",
-    emo: {
-      h: "Thất bại & vẻ đẹp khuyết tật",
-      p: "Ấm không khít, men không đều, sập lò – rồi thấy sần cũng đẹp.",
+    {
+      key: "knowledge",
+      title: "Tri thức",
+      emoji: "📚",
+      emo: {
+        h: "Kho bản địa sống",
+        p: "Bàn gỗ, giấy tái chế, mực tím – nơi tri thức lắng xuống.",
+      },
+      know: {
+        h: "Kho tư liệu mở",
+        items: [
+          "Công thức tro theo vùng",
+          "Kỹ nghệ nung truyền thống",
+          "Phỏng vấn nghệ nhân",
+        ],
+      },
     },
-    know: {
-      h: "Men tro tự nhiên",
-      items: [
-        "Celadon tro – hiệu ứng kết tinh",
-        "Men công nghiệp vs men tro",
-        "Ảnh macro – vệt kết tinh",
-      ],
+    {
+      key: "rebirth",
+      title: "Hồi sinh",
+      emoji: "🌸",
+      emo: {
+        h: "Gốm Tro Bếp Đồng Bằng",
+        p: "Ấm – bát – lọ thở hơi đất. Sần – nhưng thở.",
+      },
+      know: {
+        h: "Bộ sưu tập hiện tại",
+        items: [
+          "Ấm Trà Vụn – rót mượt, ấm nhỏ 120–200ml",
+          "Bát cơm mộc – giữ nhiệt",
+          "Lọ celadon tro – loang tự nhiên",
+        ],
+      },
     },
-  },
-  {
-    key: "people",
-    title: "Người",
-    emoji: "👁",
-    emo: {
-      h: "Đi qua làng nghề – nghe tiếng lò cũ",
-      p: "\"Giờ còn mỗi mình tôi làm.\" – tiếng nói nhỏ mà sâu.",
+    {
+      key: "end",
+      title: "Kết",
+      emoji: "🪔",
+      emo: {
+        h: "Lời mời từ Nghê",
+        p: "Nếu bạn còn nghe hơi đất, hãy đến và góp lửa.",
+      },
+      know: {
+        h: "Tham gia hành trình",
+        items: [
+          "Đăng ký workshop",
+          "Góp tư liệu tri thức",
+          "Gửi cảm nhận – thắp sáng bản đồ",
+        ],
+      },
     },
-    know: {
-      h: "Bản đồ làng gốm",
-      items: [
-        "Thổ Hà, Chu Đậu, Bát Tràng",
-        "Biên Hòa, Sa Đéc…",
-        "Ảnh/âm thanh tư liệu",
-      ],
-    },
-  },
-  {
-    key: "knowledge",
-    title: "Tri thức",
-    emoji: "📚",
-    emo: {
-      h: "Kho bản địa sống",
-      p: "Bàn gỗ, giấy tái chế, mực tím – nơi tri thức lắng xuống.",
-    },
-    know: {
-      h: "Kho tư liệu mở",
-      items: [
-        "Công thức tro theo vùng",
-        "Kỹ nghệ nung truyền thống",
-        "Phỏng vấn nghệ nhân",
-      ],
-    },
-  },
-  {
-    key: "rebirth",
-    title: "Hồi sinh",
-    emoji: "🌸",
-    emo: {
-      h: "Gốm Tro Bếp Đồng Bằng",
-      p: "Ấm – bát – lọ thở hơi đất. Sần – nhưng thở.",
-    },
-    know: {
-      h: "Bộ sưu tập hiện tại",
-      items: [
-        "Ấm Trà Vụn – rót mượt, ấm nhỏ 120–200ml",
-        "Bát cơm mộc – giữ nhiệt",
-        "Lọ celadon tro – loang tự nhiên",
-      ],
-    },
-  },
-  {
-    key: "end",
-    title: "Kết",
-    emoji: "🪔",
-    emo: {
-      h: "Lời mời từ Nghê",
-      p: "Nếu bạn còn nghe hơi đất, hãy đến và góp lửa.",
-    },
-    know: {
-      h: "Tham gia hành trình",
-      items: [
-        "Đăng ký workshop",
-        "Góp tư liệu tri thức",
-        "Gửi cảm nhận – thắp sáng bản đồ",
-      ],
-    },
-  },
-];
+  ];
 
 interface CardProps {
   title: string;
@@ -220,6 +297,105 @@ function LaneLabel({ children, side = "top" }: LaneLabelProps) {
   );
 }
 
+/* ===================== HOTSPOT VIDEO (LITE) ===================== */
+
+function HotspotVideoLite({ media }: { media?: MediaLite }) {
+  const [muted, setMuted] = useState(true);
+  if (!media) return null;
+  return (
+    <div className="mt-4 relative rounded-xl overflow-hidden border border-black/10">
+      <video
+        className="w-full aspect-video object-cover"
+        src={media.src}
+        poster={media.poster}
+        muted={muted}
+        autoPlay
+        loop
+        playsInline
+      />
+      {/* Controls lite */}
+      <div className="absolute bottom-2 left-2 flex items-center gap-2">
+        <button
+          onClick={() => setMuted((m) => !m)}
+          className="text-[11px] px-2 py-1 rounded bg-black/60 text-white"
+          aria-label={muted ? "Bật âm thanh" : "Tắt âm thanh"}
+        >
+          {muted ? "🔈 Bật âm" : "🔇 Tắt âm"}
+        </button>
+        <span className="text-[11px] px-2 py-1 rounded bg-white/70 backdrop-blur">
+          {media.caption || ""}
+        </span>
+      </div>
+      {/* Placeholder nút xem bản dài (để dành) */}
+      {/* <button className="absolute top-2 right-2 text-[11px] px-2 py-1 rounded bg-white/70">▶ Xem đầy đủ</button> */}
+    </div>
+  );
+}
+
+/* ===================== TOOLTIP LIST ===================== */
+
+function TooltipList({ items }: { items?: TooltipItem[] }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  if (!items || items.length === 0) return null;
+  return (
+    <div className="mt-3">
+      <div className="flex flex-wrap gap-2">
+        {items.map((it, i) => (
+          <div key={i} className="relative">
+            <button
+              className="text-xs px-3 py-1.5 rounded-full border bg-white/70 hover:bg-white transition"
+              aria-haspopup="dialog"
+              aria-expanded={openIndex === i}
+              onClick={() => setOpenIndex(openIndex === i ? null : i)}
+            >
+              ⓘ {it.title}
+            </button>
+
+            {openIndex === i && (
+              <div
+                role="dialog"
+                aria-label={it.title}
+                className="absolute z-20 mt-2 w-64 p-3 rounded-lg border bg-white shadow-lg text-[13px]"
+                style={{ transform: "translateX(-10%)" }}
+              >
+                <div className="font-medium mb-1">{it.title}</div>
+                <p className="opacity-80 leading-relaxed">{it.body}</p>
+                {it.media && (
+                  <img
+                    src={it.media}
+                    alt={it.title}
+                    className="mt-2 rounded-md border object-cover h-24 w-full"
+                  />
+                )}
+                <div className="mt-2 flex justify-end">
+                  <button
+                    className="text-xs px-2 py-1 rounded bg-neutral-900 text-white"
+                    onClick={() => setOpenIndex(null)}
+                    aria-label="Đóng tooltip"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Click ngoài để đóng (đơn giản): */}
+      {openIndex !== null && (
+        <div
+          className="fixed inset-0 z-10"
+          onClick={() => setOpenIndex(null)}
+          aria-hidden="true"
+        />
+      )}
+    </div>
+  );
+}
+
+/* ===================== SECTION ===================== */
+
 interface SectionProps {
   data: SectionData;
 }
@@ -238,37 +414,61 @@ function Section({ data }: SectionProps) {
   };
 
   
-
+  const isFirstTwo = data.key === "source" || data.key === "earth";
   return (
     <motion.div
+      data-section={data.key}
       className="snap-center shrink-0 w-[1280px] px-8"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
       transition={{ duration: 0.6 }}
     >
-      <div className="grid grid-rows-[1fr_12px_1fr] grid-cols-1 h-[560px]"> 
+      <div className="grid grid-rows-[1fr_12px_1fr] grid-cols-1 h-[620px]">
         {/* Emotion lane */}
         <div className="flex items-end">
-        <Card title={`${data.emoji} ${data.title}`} subtitle={data.emo.h} tone={toneMap[data.key].emo}>
+          <Card
+            title={`${data.emoji} ${data.title}`}
+            subtitle={data.emo.h}
+            tone={toneMap[data.key].emo}
+          >
             <p>{data.emo.p}</p>
-            <div className="mt-4 text-[11px] italic opacity-70">Microcopy: “Đất không cần bóng để đẹp.”</div>
+            {/* Hotspot video chỉ cho 2 vùng đầu */}
+            {isFirstTwo && <HotspotVideoLite media={data.emo.media} />}
+            <div className="mt-3 text-[11px] italic opacity-70">
+              Microcopy: {data.key === "source" ? "“Tôi từng quên mùi đất.”" : "“Học lại cách hỏi đất.”"}
+            </div>
           </Card>
         </div>
+
         {/* connector */}
         <div className="relative">
           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] bg-[repeating-linear-gradient(90deg,rgba(0,0,0,0.45)_0_8px,rgba(0,0,0,0)_8px_16px)]" />
-          <div className="absolute left-8 -top-2 text-[11px] opacity-60">điểm chạm</div>
+          <div className="absolute left-8 -top-2 text-[11px] opacity-60">config = tpConfigs[data.key]</div>
         </div>
+
         {/* Knowledge lane */}
         <div className="flex items-start">
-        <Card title={`Tri thức: ${data.know.h}`} subtitle="Kho bản địa — ghi chép" tone={toneMap[data.key].know}>
-            <ul className="list-disc pl-4 space-y-1">
-              {data.know.items.map((t: string, i: number) => (
-                <li key={i}>{t}</li>
-              ))}
-            </ul>
-            <div className="mt-3 text-[11px] opacity-60">Hover/click để bật tooltip – ảnh macro/âm thanh/biểu đồ.</div>
+          <Card
+            title={`Tri thức: ${data.know.h}`}
+            subtitle="Kho bản địa — ghi chép"
+            tone={toneMap[data.key].know}
+          >
+            {/* Nếu có tooltips (2 vùng đầu) → dùng TooltipList; ngược lại dùng danh sách cũ */}
+            {isFirstTwo && data.know.tooltips ? (
+              <TooltipList items={data.know.tooltips} />
+            ) : (
+              <>
+                <ul className="list-disc pl-4 space-y-1">
+                  {(data.know.items || []).map((t: string, i: number) => (
+                    <li key={i}>{t}</li>
+                  ))}
+                </ul>
+                <div className="mt-3 text-[11px] opacity-60">
+                  Hover/click để bật tooltip – ảnh macro/âm thanh/biểu đồ.
+                </div>
+              </>
+            )}
           </Card>
         </div>
       </div>
@@ -276,12 +476,19 @@ function Section({ data }: SectionProps) {
   );
 }
 
+/* ===================== PAGE WRAPPER ===================== */
+
 export default function HorizontalJourneyWireframe() {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
   const scrollToSource = () => {
-    const el = document.querySelector("[data-section='source']");
+    const scroller = scrollerRef.current;
+    if (!scroller) {
+      return;
+    }
+
+    const el = scroller.querySelector<HTMLElement>("[data-section='source']");
     el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   };
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Bundle, Province } from "../types";
 import { useTimer } from "../core/useTimer";
 import { pushLB } from "../core/leaderboard";
@@ -35,7 +35,7 @@ function readLB(key: string): LBItem[] {
     return shuffleArray(list.map((p) => p.id));
   }
 
-export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () => void }) {
+export default function Level3({ bundle, onBack, onComplete }: { bundle: Bundle; onBack: () => void; onComplete?: (summary: { levelId: "level3"; ms: number; completedAt: string }) => void }) {
     const atlasPaths = useAtlasPaths("/assets/atlas.svg");
     const { playCorrect, playWrong, playWin } = useSfx();
     const gradientId = useId().replace(/:/g, "");
@@ -86,7 +86,12 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
     doneRef.current = true;
     playWin();
     setShowWin(true);
-  }, [done, playWin]);
+    onComplete?.({
+      levelId: "level3",
+      ms,
+      completedAt: new Date().toISOString(),
+    });
+  }, [done, playWin, onComplete, ms]);
 
   const provinceMap = useMemo(() => new Map(bundle.provinces.map((p) => [p.id, p])), [bundle.provinces]);
   const currentProvince = !done ? provinceMap.get(questionIds[currentIndex]) ?? null : null;
@@ -152,7 +157,7 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
   }
 
   const answered = Math.min(currentIndex, total);
-  const progressLabel = done ? "Hoàn thành" : `Câu ${currentIndex + 1}/${total}`;
+  const progressLabel = done ? "HoÃ n thÃ nh" : `CÃ¢u ${currentIndex + 1}/${total}`;
 
   return (
     <>
@@ -171,7 +176,7 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
               onClick={onBack}
               className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium hover:bg-slate-700"
             >
-              ← Quay lại
+              Quay lại
             </button>
             <button
               onClick={resetGame}
@@ -216,7 +221,7 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
           <section className="flex w-full max-w-xl flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-900/60 p-6 shadow-xl">
             <div className="text-base text-slate-300">
-              Chọn tên tỉnh/thành ứng với hình bên trái:
+            Chọn tên tỉnh/thành ứng với hình bên trái:
             </div>
             <div className="flex flex-col gap-3">
               {options.map((option) => {
@@ -249,7 +254,7 @@ export default function Level3({ bundle, onBack }: { bundle: Bundle; onBack: () 
             </div>
 
             <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-300">
-              <div>Tiến độ: <b>{score}</b> điểm sau <b>{answered}</b> câu hỏi.</div>
+            <div>Tiến độ: <b>{score}</b> điểm sau <b>{answered}</b> câu hỏi.</div>
               <div>Hoàn thành tất cả {total} câu để lưu lại thành tích của bạn.</div>
               {done && !showWin && (
                 <div className="mt-4 flex flex-col gap-3">

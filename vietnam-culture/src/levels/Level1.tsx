@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Bundle, Province } from "../types";
 import { dist, within } from "../core/math";
@@ -77,7 +77,7 @@ function readLB(lbKey: string): LBItem[] { try { return JSON.parse(localStorage.
 const LB_KEY = 'lb:pack1:level1';
 const PANEL_W = 360; // tăng chút để đủ 2–3 cột dễ nhìn
 
-export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () => void }) {
+export default function Level1({ bundle, onBack, onComplete }: { bundle: Bundle; onBack: () => void; onComplete?: (summary: { levelId: "level1"; ms: number; completedAt: string }) => void }) {
   const atlasPaths = useAtlasPaths("/assets/atlas.svg"); // nếu không có atlas => rỗng
 
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
@@ -153,8 +153,13 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
       doneOnceRef.current = true;
       setShowWin(true);
       playWin();
+      onComplete?.({
+        levelId: "level1",
+        ms,
+        completedAt: new Date().toISOString(),
+      });
     }
-  }, [ready, solved, total, playWin]);
+  }, [ready, solved, total, playWin, onComplete, ms]);
 
   function resetGame(){
     setPlaced({});
@@ -163,7 +168,7 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
     setSeed((crypto.getRandomValues(new Uint32Array(1))[0])>>>0);
   }
 
-  // snap: quy đổi client -> viewBox
+   // snap: quy đổi client -> viewBox
   function onTryDrop(pid: string, clientX:number, clientY:number) {
     const rect = boardRef.current!.getBoundingClientRect();
     const sx = rect.width  / vw;
@@ -275,24 +280,21 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
           <aside className="relative w-[460px]">
             {/* Header sticky có nút “Làm lại” (dự phòng) */}
             <div className="sticky top-0 z-20 flex items-center justify-evenly px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
-              <div className="text-2xl text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
-                {' • '}<b>{solved}/{total}</b>
+              <div className="text-2xl text-slate-200">Thá»i gian: <b>{(ms/1000).toFixed(1)}s</b>
+                {' â€¢ '}<b>{solved}/{total}</b>
               </div>
               <button
                 onClick={onBack}
                 style={{ pointerEvents:'auto', fontSize:32, padding:'4px 8px',
                 borderRadius:6, border:'1px solid #475569',
                 background:'#334155', color:'#fff', cursor:'pointer' }}
-                title="Quay lại menu">
-                ← 
-              </button>
+                title="Quay lại menu">←</button>
               <button
               onClick={resetGame}
               style={{ pointerEvents:'auto', fontSize:32, padding:'4px 8px',
                 borderRadius:6, border:'1px solid #475569',
                 background:'#334155', color:'#fff', cursor:'pointer' }}
-              title="Làm lại (random thứ tự mới)"
-              >↻</button>
+              title="Làm lại">↻</button>
               {/* <button
                 className="text-sm px-2 py-1 rounded border border-slate-600 bg-slate-700"
                 onClick={() => { const next = !dev; setDev(next); localStorage.setItem("dev", next ? "1":"0"); }}
@@ -342,7 +344,7 @@ export default function Level1({ bundle, onBack }: { bundle: Bundle; onBack: () 
             boxShadow: '0 2px 8px rgba(0,0,0,.35)'
           }}
         >
-          {feedback==='ok' ? '✓ Đúng rồi!' : '✗ Chưa đúng, thử lại nhé!'}
+          {feedback==='ok' ? 'âœ“ ÄÃºng rá»“i!' : 'âœ— ChÆ°a Ä‘Ãºng, thá»­ láº¡i nhÃ©!'}
         </div>,
         document.body
       )}
@@ -410,7 +412,7 @@ function FloatingChip({
     </div>
   );
 }
-// ---- Dev: chỉnh anchor nhanh ----
+// ---- Dev: chá»‰nh anchor nhanh ----
 function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: number }) {
   const [pid, setPid] = useState(bundle.provinces[0]?.id || "");
   const [anchors, setAnchors] = useState<Record<string, [number, number]>>(
@@ -447,7 +449,7 @@ function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: numbe
       <div className="flex items-center gap-2">
         <label className="text-sm text-black">Tỉnh:</label>
         <select className="border rounded px-2 py-1 text-sm flex-1 text-black" value={pid} onChange={e => setPid(e.target.value)}>
-          {bundle.provinces.map(p => <option key={p.id} value={p.id}>{p.id} – {p.name_vi}</option>)}
+          {bundle.provinces.map(p => <option key={p.id} value={p.id}>{p.id} - {p.name_vi}</option>)}
         </select>
         <button className="px-2 py-1 text-sm rounded bg-slate-800 text-white" onClick={download}>Export slots.json</button>
       </div>
@@ -559,3 +561,8 @@ function WinDialog({ lbKey, ms, onClose }:{
     </div>
   );
 }
+
+
+
+
+

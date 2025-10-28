@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ReactElement } from "react";
 import { loadBundle } from "./core/bundle";
 import type { Bundle } from "./types";
 import Level1 from "./levels/Level1";
@@ -6,24 +7,16 @@ import Level2 from "./levels/Level2";
 import Level3 from "./levels/Level3";
 import Level4 from "./levels/Level4";
 import Level5 from "./levels/Level5";
+import LoginScreen from "./account/LoginScreen";
+import { useAccount } from "./account/context";
+import ClassDashboard from "./account/ClassDashboard";
+import { getAvatarPreset } from "./account/avatars";
+import type { LevelCompletionPayload, ProfileStore, ProgressByLevel } from "./account/types";
+import type { Session } from "./account/context";
+import type { GameScreen } from "./core/gameScreens";
+import { PACKS } from "./core/levelMeta";
+type Screen = "auth" | "menu" | "class-dashboard" | GameScreen;
 
-type GameScreen = "level1" | "level2" | "level3" | "level4"| "level5";
-
-type Screen = "menu" | GameScreen;
-
-type LevelMeta = {
-  id: GameScreen;
-  label: string;
-  accentClass: string;
-};
-
-const LEVELS: LevelMeta[] = [
-  { id: "level1", label: "Cấp 1: Ghép tên tỉnh vào bản đồ", accentClass: "text-emerald-500"},
-  { id: "level2", label: "Cấp 2: Ghép hình ảnh tỉnh vào bản đồ", accentClass: "text-amber-500"},
-  { id: "level3", label: "Cấp 3: Đoán tên tỉnh dựa vào hình ảnh", accentClass: "text-rose-500"},
-  { id: "level4", label: "Cấp 4: Xuyên Việt lộ trình", accentClass: "text-sky-500"},
-  { id: "level5", label: "Cấp 5: Âm thanh địa phương", accentClass: "text-indigo-500" },
-];
 const MENU_BACKGROUND = "/imgs/VN_puzzle.jpg";
 const SOCIAL_LINKS = [
   {
@@ -46,26 +39,114 @@ const SOCIAL_LINKS = [
   },
 ] as const;
 
+type LevelComponentProps = {
+  bundle: Bundle;
+  onBack: () => void;
+  onComplete?: (payload: LevelCompletionPayload) => void;
+};
+type ScreenRenderer = (props: LevelComponentProps) => ReactElement;
+
+const createComingSoonScreen = (title: string, description: string): ScreenRenderer =>
+  (props) => <ComingSoonScreen {...props} title={title} description={description} />;
+
+const SCREEN_COMPONENTS: Record<GameScreen, ScreenRenderer> = {
+  level1: (props) => <Level1 {...props} />,
+  level2: (props) => <Level2 {...props} />,
+  level3: (props) => <Level3 {...props} />,
+  level4: (props) => <Level4 {...props} />,
+  level5: (props) => <Level5 {...props} />,
+  "pack2-level1": createComingSoonScreen(
+    "Cấp 1: Văn hoá vùng miền",
+    "Màn chơi đang được hoàn thiện để mang tới cho bạn trải nghiệm tốt nhất."
+  ),
+  "pack2-level2": createComingSoonScreen(
+    "Cấp 2: Lễ hội & phong tục",
+    "Hãy quay lại sau để khám phá thêm những câu chuyện văn hoá thú vị."
+  ),
+  "pack2-level3": createComingSoonScreen(
+    "Cấp 3: Dấu ấn lịch sử",
+    "Nội dung đang trong quá trình phát triển. Cảm ơn bạn đã chờ đợi!"
+  ),
+};
+
+
 export default function App() {
+  const { session, setSession, store, recordLevelCompletion } = useAccount();
   const [bundle, setBundle] = useState<Bundle | null>(null);
-  const [screen, setScreen] = useState<Screen>("menu");
+  const [screen, setScreen] = useState<Screen>("auth");
 
   useEffect(() => {
     loadBundle().then(setBundle).catch(console.error);
   }, []);
 
+  useEffect(() => {
+    if (!session) {
+      setScreen("auth");
+      return;
+    }
+    if (session.mode === "teacher") {
+      setScreen("class-dashboard");
+      return;
+    }
+    setScreen((prev) => {
+      if (prev === "auth" || prev === "class-dashboard") {
+        return "menu";
+      }
+      return prev;
+    });
+  }, [session]);
+
+  const sessionInfo = useMemo(() => buildSessionInfo(session, store), [session, store]);
+  const handleSignOut = useCallback(() => setSession(null), [setSession]);
+  const handleLevelComplete = useCallback(
+    (payload: LevelCompletionPayload) => {
+      void recordLevelCompletion(payload);
+    },
+    [recordLevelCompletion],
+  );
+  const sessionProgress = useMemo(
+    () => getSessionProgress(session, store),
+    [session, store],
+  );
+
+  if (screen === "auth") {
+    return <LoginScreen />;
+  }
+
+  if (screen === "class-dashboard") {
+    const classRoom =
+      session && session.mode === "teacher" ? store.classes[session.classId] : null;
+    if (!classRoom) {
+      return <LoginScreen />;
+    }
+    return <ClassDashboard classRoom={classRoom} onBack={() => setSession(null)} />;
+  }
+
   if (!bundle) {
     return (
       <div className="flex h-full items-center justify-center bg-slate-900 text-white">
-        Đang tải dữ liệu.
+        Dang tai du lieu.
       </div>
     );
   }
-
   const handleStartLevel = (next: GameScreen) => setScreen(next);
   const handleBackToMenu = () => setScreen("menu");
   const isMenu = screen === "menu";
-
+  let content: ReactElement | null = null;
+  if (screen === "menu") {
+    content = <Menu onSelect={handleStartLevel} progress={sessionProgress} />;
+  } else if (isGameScreen(screen)) {
+    const ScreenComponent = SCREEN_COMPONENTS[screen];
+    content = (
+      <ScreenComponent
+        bundle={bundle}
+        onBack={handleBackToMenu}
+        onComplete={handleLevelComplete}
+      />
+    );
+  } else {
+    content = null;
+  }
   return (
     <div className="h-full w-full">
       <div
@@ -82,13 +163,46 @@ export default function App() {
         }
       >
         <div className="relative flex h-full flex-col">
+          <header
+            className={`flex items-center justify-end gap-4 px-4 py-3 ${
+              isMenu
+                ? "bg-black/40 text-white"
+                : "border-b border-slate-200 bg-white text-slate-700"
+            }`}
+          >
+            {sessionInfo && (
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold ${sessionInfo.avatarBg} ${sessionInfo.avatarFg}`}
+                >
+                  {sessionInfo.avatarText}
+                </div>
+                <div className="text-right">
+                  <p
+                    className={`text-xs uppercase tracking-[0.3em] ${
+                      isMenu ? "text-white/60" : "text-slate-500"
+                    }`}
+                  >
+                    {sessionInfo.roleLabel}
+                  </p>
+                  <p className="text-sm font-semibold">{sessionInfo.displayName}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                    isMenu
+                      ? "bg-white/10 text-white hover:bg-white/20"
+                      : "bg-slate-900 text-white hover:bg-slate-800"
+                  }`}
+                >
+                  Dang xuat
+                </button>
+              </div>
+            )}
+          </header>
           <main className={`flex-1 ${isMenu ? "overflow-hidden" : "overflow-y-auto"}`}>
-            {isMenu && <Menu onSelect={handleStartLevel} />}
-            {screen === "level1" && <Level1 bundle={bundle} onBack={handleBackToMenu} />}
-            {screen === "level2" && <Level2 bundle={bundle} onBack={handleBackToMenu} />}
-            {screen === "level3" && <Level3 bundle={bundle} onBack={handleBackToMenu} />}
-            {screen === "level4" && <Level4 bundle={bundle} onBack={handleBackToMenu} />}
-            {screen === "level5" && <Level5 bundle={bundle} onBack={handleBackToMenu} />}
+            {content}
           </main>
           <footer
             className={`border-t px-4 py-4 text-sm ${
@@ -119,7 +233,6 @@ export default function App() {
                       aria-hidden="true"
                       focusable="false"
                       width="22"
-
                       height="22"
                       viewBox="0 0 24 24"
                       className="h-5 w-5"
@@ -136,36 +249,296 @@ export default function App() {
     </div>
   );
 }
-function Menu({ onSelect }: { onSelect: (screen: GameScreen) => void }) {
+function getSessionProgress(session: Session | null, store: ProfileStore): ProgressByLevel {
+  if (!session) {
+    return {};
+  }
+  if (session.mode === "guest") {
+    return store.guests[session.profileId]?.progress ?? {};
+  }
+  if (session.mode === "student") {
+    const room = store.classes[session.classId];
+    return room?.students[session.studentId]?.progress ?? {};
+  }
+  return {};
+}
+
+type SessionInfo = {
+  displayName: string;
+  roleLabel: string;
+  avatarText: string;
+  avatarBg: string;
+  avatarFg: string;
+};
+
+function isGameScreen(screen: Screen): screen is GameScreen {
+  return screen !== "auth" && screen !== "menu" && screen !== "class-dashboard";
+}
+
+function buildSessionInfo(session: Session | null, store: ProfileStore): SessionInfo | null {
+  if (!session) {
+    return null;
+  }
+  if (session.mode === "guest") {
+    const profile = store.guests[session.profileId];
+    const preset = getAvatarPreset(profile?.avatarId ?? "jade");
+    return {
+      displayName: profile?.nickname ?? "Guest",
+      roleLabel: "CHE DO KHACH",
+      avatarText: getInitials(profile?.nickname ?? "Guest"),
+      avatarBg: preset.background,
+      avatarFg: preset.foreground,
+    };
+  }
+  if (session.mode === "student") {
+    const room = store.classes[session.classId];
+    const student = room?.students[session.studentId];
+    const preset = getAvatarPreset(student?.avatarId ?? "sunrise");
+    return {
+      displayName: student?.nickname ?? "Hoc sinh",
+      roleLabel: room ? `HOC SINH - ${room.id}` : "HOC SINH",
+      avatarText: getInitials(student?.nickname ?? "Hoc sinh"),
+      avatarBg: preset.background,
+      avatarFg: preset.foreground,
+    };
+  }
+  if (session.mode === "teacher") {
+    const room = store.classes[session.classId];
+    const preset = getAvatarPreset(room?.teacher.avatarId ?? "indigo");
+    const teacherName = room?.teacher.nickname ?? "Giao vien";
+    return {
+      displayName: teacherName,
+      roleLabel: room ? `GIAO VIEN - ${room.id}` : "GIAO VIEN",
+      avatarText: getInitials(teacherName),
+      avatarBg: preset.background,
+      avatarFg: preset.foreground,
+    };
+  }
+  return null;
+}
+
+function getInitials(input: string): string {
+  const value = input.trim();
+  if (!value) return "??";
+  const parts = value.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+function Menu({
+  onSelect,
+  progress,
+}: {
+  onSelect: (screen: GameScreen) => void;
+  progress: ProgressByLevel;
+}) {
+  const [packIndex, setPackIndex] = useState(0);
+  const levelListRef = useRef<HTMLDivElement>(null);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+
+  const activePack = useMemo(() => PACKS[packIndex], [packIndex]);
+  const hasPrevPack = packIndex > 0;
+  const hasNextPack = packIndex < PACKS.length - 1;
+
+  const updateScrollButtons = useCallback(() => {
+    const el = levelListRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    setCanScrollUp(scrollTop > 0);
+    setCanScrollDown(scrollTop + clientHeight < scrollHeight - 1);
+  }, []);
+
+  useEffect(() => {
+    updateScrollButtons();
+  }, [activePack, updateScrollButtons]);
+
+  useEffect(() => {
+    const el = levelListRef.current;
+    if (!el) return;
+    const handleScroll = () => updateScrollButtons();
+    el.addEventListener("scroll", handleScroll);
+    return () => {
+      el.removeEventListener("scroll", handleScroll);
+    };
+  }, [updateScrollButtons]);
+
+  useEffect(() => {
+    const el = levelListRef.current;
+    if (!el) return;
+    el.scrollTo({ top: 0 });
+    requestAnimationFrame(() => updateScrollButtons());
+  }, [packIndex, updateScrollButtons]);
+
+  const scrollLevels = useCallback(
+    (direction: "up" | "down") => {
+      const el = levelListRef.current;
+      if (!el) return;
+      const amount = direction === "up" ? -el.clientHeight : el.clientHeight;
+      el.scrollBy({ top: amount, behavior: "smooth" });
+      requestAnimationFrame(() => updateScrollButtons());
+    },
+    [updateScrollButtons]
+  );
+
+  const goToPrevPack = () => {
+    setPackIndex((idx) => Math.max(0, idx - 1));
+  };
+
+  const goToNextPack = () => {
+    setPackIndex((idx) => Math.min(PACKS.length - 1, idx + 1));
+  };
+
   return (
     <div className="flex h-full justify-left px-4 py-8 sm:px-8 lg:py-12">
-      <div className="w-full max-w-sm space-y-4">
-        <h1 className="text-center text-2xl font-semibold tracking-tight text-white drop-shadow sm:text-left">
-        Địa lý – Bản đồ
-        </h1>
-        <ul className="flex flex-col gap-3">
-          {LEVELS.map((level) => (
-            <li key={level.id}>
-              <button
-                type="button"
-                onClick={() => onSelect(level.id)}
-                className="group flex w-full flex-col items-center gap-4 border-b-2 border-white/60 px-4 py-6 text-center transition duration-200 hover:border-white/80 sm:flex-row sm:items-center sm:justify-between sm:border-b-4 sm:text-left"
-              >
-                <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-5">
-                  <span
-                    className={`text-lg font-semibold tracking-tight sm:text-xl ${level.accentClass}`}
-                  >
-                    {level.label}
-                  </span>
-                </div>
-                <span className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-200/80 sm:text-sm sm:opacity-0 sm:transition sm:duration-200 sm:group-hover:opacity-80">
-                  Play
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+      <div className="w-full max-w-sm space-y-6">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={goToPrevPack}
+            disabled={!hasPrevPack}
+            className="rounded-full bg-white/10 px-3 py-2 text-lg text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-30"
+            aria-label="Gói trước"
+          >
+            {"<"}
+          </button>
+          <div className="flex w-full flex-col items-center text-center sm:items-start sm:text-left">
+            <span className="text-xs font-semibold uppercase tracking-[0.35em] text-white/70">
+              Gói chơi {packIndex + 1}/{PACKS.length}
+            </span>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white drop-shadow">
+              {activePack.title}
+            </h1>
+            <p className="mt-2 text-sm text-white/80">{activePack.description}</p>
+          </div>
+          <button
+            type="button"
+            onClick={goToNextPack}
+            disabled={!hasNextPack}
+            className="rounded-full bg-white/10 px-3 py-2 text-lg text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-30"
+            aria-label="Gói tiếp theo"
+          >
+            {">"}
+          </button>
+        </div>
+
+        <div className="relative">
+          <div className="absolute right-0 top-0 flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => scrollLevels("up")}
+              disabled={!canScrollUp}
+              className="rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-30"
+              aria-label="Cuộn lên"
+            >
+              {"^"}
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollLevels("down")}
+              disabled={!canScrollDown}
+              className="rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-30"
+              aria-label="Cuộn xuống"
+            >
+              {"v"}
+            </button>
+          </div>
+          <div
+            ref={levelListRef}
+            className="max-h-[360px] overflow-y-auto pr-10 sm:pr-12"
+          >
+            <ul className="flex flex-col gap-3 pb-1 pt-1">
+              {activePack.levels.map((level) => {
+                const isComingSoon = level.status === "comingSoon";
+                const levelProgress = progress[level.id];
+                const isCompleted = Boolean(levelProgress?.completed) && !isComingSoon;
+                return (
+                  <li key={level.id}>
+                    <button
+                      type="button"
+                      onClick={() => onSelect(level.id)}
+                      className="group flex w-full flex-col items-center gap-4 border-b-2 border-white/60 px-4 py-6 text-center transition duration-200 hover:border-white/80 sm:flex-row sm:items-center sm:justify-between sm:border-b-4 sm:text-left"
+                    >
+                      <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-5">
+                        <span
+                          className={`text-lg font-semibold tracking-tight sm:text-xl ${level.accentClass}`}
+                        >
+                          {level.label}
+                          {isCompleted && (
+                            <span className="ml-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
+                              Done
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-xs font-semibold uppercase tracking-[0.35em] sm:text-sm sm:opacity-0 sm:transition sm:duration-200 sm:group-hover:opacity-80 ${
+                          isComingSoon
+                            ? "text-amber-200"
+                            : isCompleted
+                              ? "text-emerald-200"
+                              : "text-slate-200/80"
+                        }`}
+                      >
+                        {isComingSoon ? "Sap ra mat" : isCompleted ? "Hoan thanh" : "Play"}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+function ComingSoonScreen({
+  onBack,
+  title,
+  description,
+}: LevelComponentProps & { title: string; description: string }) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-6 px-6 text-center sm:px-10">
+      <div className="max-w-xl space-y-3">
+        <h2 className="text-3xl font-semibold text-slate-800 sm:text-4xl">{title}</h2>
+        <p className="text-base text-slate-600 sm:text-lg">{description}</p>
+      </div>
+      <button
+        type="button"
+        onClick={onBack}
+        className="rounded-full bg-emerald-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
+      >
+        Quay lại menu
+      </button>
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

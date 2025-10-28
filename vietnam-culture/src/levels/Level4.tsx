@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import type { Bundle, Province } from "../types";
 import { useTimer } from "../core/useTimer";
 import { useSfx } from "../core/useSfx";
@@ -11,7 +11,7 @@ const OPTION_COUNT = 4;
 const HINT_STAGE_COUNT = 4;
 const HINT_DELAY_MS = 5000;
 const HINT_SCORES = [100, 75, 50, 25];
-// Ảnh gợi ý được lấy từ thư mục public/assets/province-photos với định dạng "{id}_{1-4}.{ext}".
+// áº¢nh gá»£i Ã½ Ä‘Æ°á»£c láº¥y tá»« thÆ° má»¥c public/assets/province-photos vá»›i Ä‘á»‹nh dáº¡ng "{id}_{1-4}.{ext}".
 const HINT_IMAGE_BASE_PATH = "/assets/province-photos";
 const HINT_IMAGE_EXTENSIONS = ["webp", "jpg", "jpeg", "png"] as const;
 const HARD_MODE_BONUS = 15;
@@ -123,7 +123,7 @@ async function findHintImageSrc(id: string, stage: number): Promise<string | nul
   return null;
 }
 
-export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () => void }) {
+export default function Level4({ bundle, onBack, onComplete }: { bundle: Bundle; onBack: () => void; onComplete?: (summary: { levelId: "level4"; ms: number; completedAt: string }) => void }) {
   const atlasPaths = useAtlasPaths("/assets/atlas.svg");
   const { playCorrect, playWrong, playWin } = useSfx();
 
@@ -187,7 +187,12 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
     playWin();
     setShowWin(true);
     stopHintSequence();
-  }, [done, playWin]);
+    onComplete?.({
+      levelId: "level4",
+      ms,
+      completedAt: new Date().toISOString(),
+    });
+  }, [done, playWin, stopHintSequence, onComplete, ms]);
 
   const provinceMap = useMemo(() => new Map(bundle.provinces.map((p) => [p.id, p])), [bundle.provinces]);
   const currentProvince = !done ? provinceMap.get(questionIds[currentIndex]) ?? null : null;
@@ -366,24 +371,24 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
   }
 
   const answeredCount = Math.min(currentIndex, total);
-  const progressLabel = done ? "Hoàn thành" : `Câu ${currentIndex + 1}/${total}`;
+  const progressLabel = done ? "HoÃ n thÃ nh" : `CÃ¢u ${currentIndex + 1}/${total}`;
 
   return (
     <>
       <div className="fixed inset-0 flex flex-col bg-slate-950 text-slate-100">
         <header className="flex flex-col gap-4 border-b border-slate-800/60 bg-slate-900/70 px-6 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="text-xl font-semibold uppercase tracking-wide">Level 4: Đoán tỉnh qua ảnh</div>
-            <div className="mt-1 text-sm text-slate-400">Mỗi 5 giây mở thêm 1 gợi ý, trả lời càng sớm điểm càng cao.</div>
+            <div className="text-xl font-semibold uppercase tracking-wide">Level 4: ÄoÃ¡n tá»‰nh qua áº£nh</div>
+            <div className="mt-1 text-sm text-slate-400">Má»—i 5 giÃ¢y má»Ÿ thÃªm 1 gá»£i Ã½, tráº£ lá»i cÃ ng sá»›m Ä‘iá»ƒm cÃ ng cao.</div>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm sm:text-base">
-            <span>Thời gian: <b>{(ms / 1000).toFixed(1)}s</b></span>
+            <span>Thá»i gian: <b>{(ms / 1000).toFixed(1)}s</b></span>
             <span className="hidden sm:inline" aria-hidden>
-              •
+              â€¢
             </span>
-            <span>Điểm: <b>{score}</b></span>
+            <span>Äiá»ƒm: <b>{score}</b></span>
             <span className="hidden sm:inline" aria-hidden>
-              •
+              â€¢
             </span>
             <span>{progressLabel}</span>
           </div>
@@ -392,13 +397,13 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
               onClick={onBack}
               className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium hover:bg-slate-700"
             >
-              ← Quay lại
+              â† Quay láº¡i
             </button>
             <button
               onClick={resetGame}
               className="rounded-lg border border-slate-700 bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
             >
-              Chơi lại
+              ChÆ¡i láº¡i
             </button>
           </div>
         </header>
@@ -407,9 +412,9 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
           <section className="flex flex-1 flex-col gap-4">
             <div className="flex flex-col gap-3 rounded-3xl border border-slate-800 bg-slate-900/60 p-6 shadow-xl">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-lg font-semibold">Gợi ý bằng hình ảnh</div>
+                <div className="text-lg font-semibold">Gá»£i Ã½ báº±ng hÃ¬nh áº£nh</div>
                 <div className="text-sm text-slate-400">
-                  Điểm nếu trả lời ngay: <b className="text-emerald-400">{currentQuestionPotential}</b>
+                  Äiá»ƒm náº¿u tráº£ lá»i ngay: <b className="text-emerald-400">{currentQuestionPotential}</b>
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -424,28 +429,28 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
                       className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/60"
                     >
                       <div className="absolute left-0 top-0 rounded-br-xl bg-slate-900/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-300">
-                        Gợi ý {idx + 1} · +{stageScore}
+                        Gá»£i Ã½ {idx + 1} Â· +{stageScore}
                       </div>
                       {isRevealed ? (
                         src ? (
                           <img
                             src={src}
-                            alt={`Gợi ý ${idx + 1}`}
+                            alt={`Gá»£i Ã½ ${idx + 1}`}
                             className="h-48 w-full object-cover"
                             loading="lazy"
                           />
                         ) : (
                           <div className="flex h-48 w-full items-center justify-center px-4 text-center text-sm text-slate-400">
-                            Chưa có ảnh cho gợi ý này.
+                            ChÆ°a cÃ³ áº£nh cho gá»£i Ã½ nÃ y.
                           </div>
                         )
                       ) : isStageActive ? (
                         <div className="flex h-48 w-full items-center justify-center px-4 text-center text-sm text-slate-500">
-                          Ảnh sẽ mở sau {Math.max(1, (idx - visibleHintCount + 1) * (HINT_DELAY_MS / 1000))} giây.
+                          áº¢nh sáº½ má»Ÿ sau {Math.max(1, (idx - visibleHintCount + 1) * (HINT_DELAY_MS / 1000))} giÃ¢y.
                         </div>
                       ) : (
                         <div className="flex h-48 w-full items-center justify-center px-4 text-center text-sm text-slate-500">
-                          Đang cập nhật thêm gợi ý.
+                          Äang cáº­p nháº­t thÃªm gá»£i Ã½.
                         </div>
                       )}
                     </div>
@@ -457,7 +462,7 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
           <section className="flex w-full max-w-xl flex-col gap-5 rounded-3xl border border-slate-800 bg-slate-900/60 p-6 shadow-xl">
             <div className="flex items-start justify-between gap-3">
-              <div className="text-base text-slate-300">Chọn đáp án đúng:</div>
+              <div className="text-base text-slate-300">Chá»n Ä‘Ã¡p Ã¡n Ä‘Ãºng:</div>
               <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-300">
                 <input
                   type="checkbox"
@@ -465,7 +470,7 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
                   checked={hardMode}
                   onChange={(event) => setHardMode(event.target.checked)}
                 />
-                <span>Chế độ khó (+{HARD_MODE_BONUS} điểm, hiển thị SVG)</span>
+                <span>Cháº¿ Ä‘á»™ khÃ³ (+{HARD_MODE_BONUS} Ä‘iá»ƒm, hiá»ƒn thá»‹ SVG)</span>
               </label>
             </div>
 
@@ -508,26 +513,26 @@ export default function Level4({ bundle, onBack }: { bundle: Bundle; onBack: () 
 
             <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-300">
               <div>
-                Bạn đã trả lời đúng <b>{correctCount}</b>/<b>{answeredCount}</b> câu.
+                Báº¡n Ä‘Ã£ tráº£ lá»i Ä‘Ãºng <b>{correctCount}</b>/<b>{answeredCount}</b> cÃ¢u.
               </div>
               <div>
-                Tổng điểm hiện tại: <b>{score}</b> • Mỗi câu đúng ở chế độ khó được cộng thêm {HARD_MODE_BONUS} điểm.
+                Tá»•ng Ä‘iá»ƒm hiá»‡n táº¡i: <b>{score}</b> â€¢ Má»—i cÃ¢u Ä‘Ãºng á»Ÿ cháº¿ Ä‘á»™ khÃ³ Ä‘Æ°á»£c cá»™ng thÃªm {HARD_MODE_BONUS} Ä‘iá»ƒm.
               </div>
               {done && !showWin && (
                 <div className="mt-4 flex flex-col gap-3">
-                  <div className="text-base font-semibold text-emerald-400">Bạn đã hoàn thành tất cả câu hỏi!</div>
+                  <div className="text-base font-semibold text-emerald-400">Báº¡n Ä‘Ã£ hoÃ n thÃ nh táº¥t cáº£ cÃ¢u há»i!</div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowWin(true)}
                       className="flex-1 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
                     >
-                      Xem bảng xếp hạng
+                      Xem báº£ng xáº¿p háº¡ng
                     </button>
                     <button
                       onClick={resetGame}
                       className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800"
                     >
-                      Chơi lại
+                      ChÆ¡i láº¡i
                     </button>
                   </div>
                 </div>
@@ -575,7 +580,7 @@ function WinDialog({
 
   function handleSave() {
     const cleaned = (name || "").trim();
-    const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
+    const safeName = cleaned.length ? cleaned.slice(0, 32) : "áº¨n danh";
     const list = pushLB(lbKey, { name: safeName, ms });
     setEntries(list);
     setSaved({ name: safeName, ms });
@@ -586,34 +591,34 @@ function WinDialog({
     <div className="fixed inset-0 z-[2147483600] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
       <div className="w-[min(92vw,520px)] rounded-2xl bg-white p-5 text-slate-900 shadow-xl anim-pop">
         <div className="text-center">
-          <div className="text-2xl font-semibold">Hoàn thành Level 4!</div>
+          <div className="text-2xl font-semibold">HoÃ n thÃ nh Level 4!</div>
           <div className="mt-1 text-sm text-slate-600">
-            Thời gian: <b>{(ms / 1000).toFixed(1)}s</b>
+            Thá»i gian: <b>{(ms / 1000).toFixed(1)}s</b>
           </div>
           <div className="mt-1 text-sm text-slate-600">
-            Điểm số: <b>{score}</b>
+            Äiá»ƒm sá»‘: <b>{score}</b>
           </div>
           <div className="mt-1 text-sm text-slate-600">
-            Đúng {correctCount}/{total} câu
+            ÄÃºng {correctCount}/{total} cÃ¢u
           </div>
         </div>
 
         <div className="mt-4">
-          <div className="mb-2 text-sm font-semibold text-slate-700">Bảng xếp hạng Top 5</div>
+          <div className="mb-2 text-sm font-semibold text-slate-700">Báº£ng xáº¿p háº¡ng Top 5</div>
           <div className="overflow-hidden rounded-lg border border-slate-200">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-slate-600">
                 <tr>
                   <th className="w-12 px-3 py-2 text-left">#</th>
-                  <th className="px-3 py-2 text-left">Tên</th>
-                  <th className="w-28 px-3 py-2 text-right">Thời gian</th>
+                  <th className="px-3 py-2 text-left">TÃªn</th>
+                  <th className="w-28 px-3 py-2 text-right">Thá»i gian</th>
                 </tr>
               </thead>
               <tbody>
                 {top5.length === 0 && (
                   <tr>
                     <td colSpan={3} className="px-3 py-3 text-center text-slate-500">
-                      Chưa có dữ liệu
+                      ChÆ°a cÃ³ dá»¯ liá»‡u
                     </td>
                   </tr>
                 )}
@@ -634,11 +639,11 @@ function WinDialog({
             <div className="mt-3 text-sm">
               {savedRank >= 0 ? (
                 <span className="text-emerald-700">
-                  Bạn đang ở hạng #{savedRank + 1} với {(saved.ms / 1000).toFixed(1)}s.
+                  Báº¡n Ä‘ang á»Ÿ háº¡ng #{savedRank + 1} vá»›i {(saved.ms / 1000).toFixed(1)}s.
                 </span>
               ) : (
                 <span className="text-slate-600">
-                  Thời gian hiện chưa vào Top 5, thử lại nhanh hơn nhé!
+                  Thá»i gian hiá»‡n chÆ°a vÃ o Top 5, thá»­ láº¡i nhanh hÆ¡n nhÃ©!
                 </span>
               )}
             </div>
@@ -646,11 +651,11 @@ function WinDialog({
         </div>
 
         <div className="mt-5">
-          <label className="text-sm text-slate-700">Nhập tên của bạn</label>
+          <label className="text-sm text-slate-700">Nháº­p tÃªn cá»§a báº¡n</label>
           <div className="mt-2 flex gap-2">
             <input
               className="flex-1 rounded border border-slate-300 px-3 py-2 text-sm"
-              placeholder="Tên hiển thị"
+              placeholder="TÃªn hiá»ƒn thá»‹"
               value={name}
               onChange={(event) => setName(event.target.value)}
             />
@@ -658,7 +663,7 @@ function WinDialog({
               className="rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
               onClick={handleSave}
             >
-              Lưu
+              LÆ°u
             </button>
           </div>
         </div>
@@ -668,7 +673,7 @@ function WinDialog({
             className="rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
             onClick={onClose}
           >
-            Đóng
+            ÄÃ³ng
           </button>
         </div>
       </div>
@@ -694,7 +699,7 @@ function ProvinceShapePreview({ province, atlasPaths, className }: ProvinceShape
   if (!path || !viewBox) {
     return (
       <div className="flex h-24 w-full items-center justify-center rounded-xl border border-dashed border-slate-600/60 bg-slate-900/60 text-center text-xs text-slate-400">
-        Không có dữ liệu bản đồ
+        KhÃ´ng cÃ³ dá»¯ liá»‡u báº£n Ä‘á»“
       </div>
     );
   }
@@ -709,3 +714,6 @@ function ProvinceShapePreview({ province, atlasPaths, className }: ProvinceShape
     </svg>
   );
 }
+
+
+

@@ -36,7 +36,7 @@ function readLB(key: string): LBItem[] {
   try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
 }
 // ---- main ----
-export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () => void }) {
+export default function Level2({ bundle, onBack, onComplete }: { bundle: Bundle; onBack: () => void; onComplete?: (summary: { levelId: "level2"; ms: number; completedAt: string }) => void }) {
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
   const [activePid, setActivePid] = useState<string | null>(null);
   const done = Object.keys(placed).length === bundle.provinces.length;
@@ -91,7 +91,12 @@ export default function Level2({ bundle, onBack }: { bundle: Bundle; onBack: () 
     doneRef.current = true;
     setShowWin(true);
     playWin();
-  }, [done, playWin]);
+    onComplete?.({
+      levelId: "level2",
+      ms,
+      completedAt: new Date().toISOString(),
+    });
+  }, [done, playWin, onComplete, ms]);
   function resetGame() {
     setPlaced({});
     setActivePid(null);
@@ -653,3 +658,7 @@ function randomStartPositions(list: Province[]) {
   }
   return slots;
 }
+
+
+
+

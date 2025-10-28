@@ -21,7 +21,7 @@ export default function LoginScreen() {
   const [guestNickname, setGuestNickname] = useState("");
   const [guestAvatar, setGuestAvatar] = useState<AvatarId>("jade");
   const [guestError, setGuestError] = useState<string | null>(null);
-
+  const guestNicknameReady = guestNickname.trim().length > 0;
   const [studentCode, setStudentCode] = useState("");
   const [studentNickname, setStudentNickname] = useState("");
   const [studentAvatar, setStudentAvatar] = useState<AvatarId>("sunrise");
@@ -48,7 +48,8 @@ export default function LoginScreen() {
     setBusy(true);
     setGuestError(null);
     try {
-      await createGuestProfile({ nickname: guestNickname, avatarId: guestAvatar });
+      const profile = await createGuestProfile({ nickname: guestNickname, avatarId: guestAvatar });
+      setSession({ mode: "guest", profileId: profile.id });
       setGuestNickname("");
     } catch (error) {
       setGuestError(normalizeError(error, "Failed to create guest"));
@@ -165,12 +166,12 @@ export default function LoginScreen() {
                           <div>
                             <p className="text-sm font-semibold text-white">{profile.nickname}</p>
                             <p className="text-xs text-white/60">
-                              Cap nhat {formatRelativeTime(profile.updatedAt)}
+                            Cập nhật {formatRelativeTime(profile.updatedAt)}
                             </p>
                           </div>
                         </div>
-                        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">
-                          Choi
+                        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
+                        Bắt đầu
                         </span>
                       </button>
                     ))}
@@ -180,26 +181,35 @@ export default function LoginScreen() {
                 <form className="rounded-2xl border border-white/10 bg-white/5 p-5" onSubmit={handleCreateGuest}>
                   <h3 className="text-lg font-semibold text-white">Tạo hồ sơ khách mới</h3>
                   <div className="mt-4 space-y-4">
+                  <div className="space-y-4">
                     <div>
-                      <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">
-                        Nickname
-                      </label>
-                      <input
-                        className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white focus:border-emerald-400 focus:outline-none"
-                        value={guestNickname}
-                        onChange={(event) => setGuestNickname(event.target.value)}
-                        placeholder="Nhap nickname"
-                      />
+                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">
+                          Nickname
+                        </label>
+                        <input
+                          className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white focus:border-emerald-400 focus:outline-none"
+                          value={guestNickname}
+                          onChange={(event) => setGuestNickname(event.target.value)}
+                          placeholder="Nhập nickname"
+                        />
+                      </div>
+                      <AvatarPicker value={guestAvatar} onChange={setGuestAvatar} />
                     </div>
                     <AvatarPicker value={guestAvatar} onChange={setGuestAvatar} />
                     {guestError && <p className="text-sm text-rose-300">{guestError}</p>}
+                    <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-3 text-xs text-emerald-100">
+                      Sau khi nhấn "Bắt đầu", hồ sơ sẽ được lưu và bạn sẽ được đưa thẳng vào trò chơi.
+                    </div>
                     <button
                       type="submit"
-                      disabled={busy}
+                      disabled={busy || !guestNicknameReady}
                       className="w-full rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Bắt đầu
                     </button>
+                    {!guestNicknameReady && !busy && (
+                      <p className="text-xs text-white/60">Vui lòng nhập nickname để bắt đầu.</p>
+                    )}
                   </div>
                 </form>
               </section>

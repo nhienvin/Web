@@ -179,36 +179,41 @@ export default function LoginScreen() {
                 </div>
 
                 <form className="rounded-2xl border border-white/10 bg-white/5 p-5" onSubmit={handleCreateGuest}>
-                  <h3 className="text-lg font-semibold text-white">Tạo hồ sơ khách mới</h3>
+                  <h3 className="text-lg font-semibold text-white">Tao ho so khach moi</h3>
+                  <p className="mt-1 text-sm text-white/60">
+                    Nhap nickname, chon avatar roi keo xuong de bat dau choi.
+                  </p>
                   <div className="mt-4 space-y-4">
-                  <div className="space-y-4">
                     <div>
-                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">
-                          Nickname
-                        </label>
-                        <input
-                          className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white focus:border-emerald-400 focus:outline-none"
-                          value={guestNickname}
-                          onChange={(event) => setGuestNickname(event.target.value)}
-                          placeholder="Nhập nickname"
-                        />
-                      </div>
-                      <AvatarPicker value={guestAvatar} onChange={setGuestAvatar} />
+                      <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">
+                        Nickname
+                      </label>
+                      <input
+                        className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white focus:border-emerald-400 focus:outline-none"
+                        value={guestNickname}
+                        onChange={(event) => setGuestNickname(event.target.value)}
+                        placeholder="Nhap nickname"
+                      />
                     </div>
                     <AvatarPicker value={guestAvatar} onChange={setGuestAvatar} />
                     {guestError && <p className="text-sm text-rose-300">{guestError}</p>}
-                    <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-3 text-xs text-emerald-100">
-                      Sau khi nhấn "Bắt đầu", hồ sơ sẽ được lưu và bạn sẽ được đưa thẳng vào trò chơi.
-                    </div>
+                  </div>
+                  <div className="mt-8 space-y-3 rounded-2xl border border-white/10 bg-black/20 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">
+                      Keo xuong duoi va nhan nut de bat dau hanh trinh.
+                    </p>
                     <button
                       type="submit"
                       disabled={busy || !guestNicknameReady}
                       className="w-full rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Bắt đầu
+                      Bat dau choi
                     </button>
+                    <p className="text-xs text-white/60">
+                      Ho so se duoc luu lai va ban se vao thang tro choi ngay lap tuc.
+                    </p>
                     {!guestNicknameReady && !busy && (
-                      <p className="text-xs text-white/60">Vui lòng nhập nickname để bắt đầu.</p>
+                      <p className="text-xs text-white/80">Vui long nhap nickname truoc khi bat dau.</p>
                     )}
                   </div>
                 </form>
@@ -348,23 +353,6 @@ export default function LoginScreen() {
                 </div>
               </section>
             )}
-          </div>
-
-          <div className="hidden w-px bg-white/10 lg:block" />
-
-          <div className="w-full max-w-sm space-y-6">
-            <h2 className="text-lg font-semibold text-white">Mẹo nhanh</h2>
-            <ul className="space-y-3 text-sm text-white/70">
-              <li>Khách có thể quay trờ lại và tiếp tục.</li>
-              <li>Mỗi lớp có mã riêng, chia sẻ với học sinh để đồng bộ tiến độ.</li>
-              <li>Giáo viên có thể xem tiến độ và thành tích của từng học sinh.</li>
-            </ul>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
-              <p className="font-semibold text-white">Luu y</p>
-              <p className="mt-2">
-                Dữ liệu sẽ được lưu vào tệp JSON trong thư mục ứng dụng (hoặc localStorage khi chạy trên trình duyệt) để giữ lại lịch sử chơi.
-              </p>
-            </div>
           </div>
         </div>
       </div>

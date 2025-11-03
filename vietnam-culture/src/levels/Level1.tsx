@@ -222,7 +222,7 @@ export default function Level1({ bundle, onBack, onComplete }: { bundle: Bundle;
             <div aria-hidden className="select-none pointer-events-none rounded-lg border border-slate-700 shadow-sm" style={{ width: '100%', height: '100%' }}>
               <svg className="block h-full w-full" viewBox={`0 0 ${boardCanvasWidth} ${boardCanvasHeight}`} preserveAspectRatio="xMidYMid meet">
                 {/* Align board so bundle.viewBox maps to the inner region at (leftExtra, topExtra) */}
-                <rect width={boardCanvasWidth} height={boardCanvasHeight} fill="#fff" />
+                <rect width={boardCanvasWidth} height={boardCanvasHeight} fill="#EFECE3" />
                 <g transform={`translate(${leftExtra - gMinX}, ${topExtra - gMinY})`}>
                   <image href="/assets/board_blank_outline.svg" x={bMinX} y={bMinY} width={bW} height={bH} preserveAspectRatio="none" />
                 </g>
@@ -280,8 +280,8 @@ export default function Level1({ bundle, onBack, onComplete }: { bundle: Bundle;
           <aside className="relative w-[460px]">
             {/* Header sticky có nút “Làm lại” (dự phòng) */}
             <div className="sticky top-0 z-20 flex items-center justify-evenly px-3 py-2 rounded-t-lg bg-slate-800/90 backdrop-blur border-b border-slate-700">
-              <div className="text-2xl text-slate-200">Thá»i gian: <b>{(ms/1000).toFixed(1)}s</b>
-                {' â€¢ '}<b>{solved}/{total}</b>
+              <div className="text-2xl text-slate-200">Thời gian: <b>{(ms/1000).toFixed(1)}s</b>
+                {' • '}<b>{solved}/{total}</b>
               </div>
               <button
                 onClick={onBack}
@@ -344,7 +344,7 @@ export default function Level1({ bundle, onBack, onComplete }: { bundle: Bundle;
             boxShadow: '0 2px 8px rgba(0,0,0,.35)'
           }}
         >
-          {feedback==='ok' ? 'âœ“ ÄÃºng rá»“i!' : 'âœ— ChÆ°a Ä‘Ãºng, thá»­ láº¡i nhÃ©!'}
+          {feedback==='ok' ? '✓ Đúng rồi!' : '✗ Chưa đúng, thử lại nhé!'}
         </div>,
         document.body
       )}

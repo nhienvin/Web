@@ -125,7 +125,7 @@ export default function App() {
   if (!bundle) {
     return (
       <div className="flex h-full items-center justify-center bg-slate-900 text-white">
-        Dang tai du lieu.
+        Đang tải dữ liệu.
       </div>
     );
   }
@@ -196,7 +196,7 @@ export default function App() {
                       : "bg-slate-900 text-white hover:bg-slate-800"
                   }`}
                 >
-                  Dang xuat
+                  Đăng xuất
                 </button>
               </div>
             )}
@@ -284,7 +284,7 @@ function buildSessionInfo(session: Session | null, store: ProfileStore): Session
     const preset = getAvatarPreset(profile?.avatarId ?? "jade");
     return {
       displayName: profile?.nickname ?? "Guest",
-      roleLabel: "CHE DO KHACH",
+      roleLabel: "Khách",
       avatarText: getInitials(profile?.nickname ?? "Guest"),
       avatarBg: preset.background,
       avatarFg: preset.foreground,
@@ -295,9 +295,9 @@ function buildSessionInfo(session: Session | null, store: ProfileStore): Session
     const student = room?.students[session.studentId];
     const preset = getAvatarPreset(student?.avatarId ?? "sunrise");
     return {
-      displayName: student?.nickname ?? "Hoc sinh",
-      roleLabel: room ? `HOC SINH - ${room.id}` : "HOC SINH",
-      avatarText: getInitials(student?.nickname ?? "Hoc sinh"),
+      displayName: student?.nickname ?? "Học sinh",
+      roleLabel: room ? `HỌC SINH - ${room.id}` : "HỌC SINH",
+      avatarText: getInitials(student?.nickname ?? "Học sinh"),
       avatarBg: preset.background,
       avatarFg: preset.foreground,
     };
@@ -305,10 +305,10 @@ function buildSessionInfo(session: Session | null, store: ProfileStore): Session
   if (session.mode === "teacher") {
     const room = store.classes[session.classId];
     const preset = getAvatarPreset(room?.teacher.avatarId ?? "indigo");
-    const teacherName = room?.teacher.nickname ?? "Giao vien";
+    const teacherName = room?.teacher.nickname ?? "Giáo viên";
     return {
       displayName: teacherName,
-      roleLabel: room ? `GIAO VIEN - ${room.id}` : "GIAO VIEN",
+      roleLabel: room ? `GIÁO VIÊN - ${room.id}` : "GIÁO VIÊN",
       avatarText: getInitials(teacherName),
       avatarBg: preset.background,
       avatarFg: preset.foreground,
@@ -481,7 +481,7 @@ function Menu({
                               : "text-slate-200/80"
                         }`}
                       >
-                        {isComingSoon ? "Sap ra mat" : isCompleted ? "Hoan thanh" : "Play"}
+                        {isComingSoon ? "Sắp ra mắt" : isCompleted ? "Done" : "Play"}
                       </span>
                     </button>
                   </li>

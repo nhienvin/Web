@@ -77,14 +77,14 @@ export default function ClassDashboard({ classRoom, onBack }: ClassDashboardProp
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200/80">
-              Ma lop
+              Mã lớp
             </p>
             <h1 className="mt-1 text-3xl font-semibold leading-tight">
               {classRoom.title ?? `Lop ${classRoom.id}`}
             </h1>
-            <p className="text-sm text-white/70">Ma: {classRoom.id}</p>
+            <p className="text-sm text-white/70">Mã: {classRoom.id}</p>
             <p className="text-sm text-white/60">
-              Giao vien: {classRoom.teacher.nickname}
+              Giáo viên: {classRoom.teacher.nickname}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -93,14 +93,14 @@ export default function ClassDashboard({ classRoom, onBack }: ClassDashboardProp
               onClick={copyClassCode}
               className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
             >
-              Sao chep ma lop
+              Sao chép mã lớp
             </button>
             <button
               type="button"
               onClick={onBack}
               className="rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600"
             >
-              Quay lai
+              Quay lại
             </button>
           </div>
         </header>
@@ -108,38 +108,38 @@ export default function ClassDashboard({ classRoom, onBack }: ClassDashboardProp
         <section className="grid gap-4 sm:grid-cols-3">
           <StatCard label="Tong so hoc sinh" value={totalStudents.toString()} />
           <StatCard
-            label="Tong so cap hoan thanh"
+            label="Tổng số cấp hoàn thành"
             value={`${totalCompletions}/${totalStudents * ACTIVE_GAME_SCREENS.length}`}
           />
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
             <div className={`flex h-10 w-10 items-center justify-center rounded-full font-semibold ${teacherPreset.background} ${teacherPreset.foreground}`}>
               {getInitials(classRoom.teacher.nickname)}
             </div>
-            <p className="mt-2 text-sm font-semibold text-white">Giao vien chu nhiem</p>
+            <p className="mt-2 text-sm font-semibold text-white">Giáo viên chủ nhiệm</p>
             <p className="text-sm text-white/60">{classRoom.teacher.nickname}</p>
           </div>
         </section>
 
         <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Tien do hoc sinh</h2>
-            <p className="text-sm text-white/60">{PACKS.length} goi choi, {ACTIVE_GAME_SCREENS.length} cap hoan chinh</p>
+            <h2 className="text-lg font-semibold text-white">Tiến độ học sinh</h2>
+            <p className="text-sm text-white/60">{PACKS.length} gói chơi, {ACTIVE_GAME_SCREENS.length} cấp hoàn thành</p>
           </div>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-left text-sm text-white/80">
               <thead className="bg-white/10 text-xs uppercase tracking-[0.3em] text-white/60">
                 <tr>
-                  <th className="px-4 py-3">Hoc sinh</th>
-                  <th className="px-4 py-3">Hoan thanh</th>
-                  <th className="px-4 py-3">Cap gan nhat</th>
-                  <th className="px-4 py-3">Cap do</th>
+                  <th className="px-4 py-3">Học sinh</th>
+                  <th className="px-4 py-3">Hoàn thành</th>
+                  <th className="px-4 py-3">Cấp gần nhất</th>
+                  <th className="px-4 py-3">Cấp độ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
                 {studentStats.length === 0 && (
                   <tr>
                     <td colSpan={4} className="px-4 py-6 text-center text-white/50">
-                      Chua co hoc sinh nao tham gia lop nay.
+                      Chưa có học sinh.
                     </td>
                   </tr>
                 )}
@@ -152,7 +152,7 @@ export default function ClassDashboard({ classRoom, onBack }: ClassDashboardProp
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-white">{student.nickname}</p>
-                          <p className="text-xs text-white/60">Cap nhat {student.lastSyncLabel}</p>
+                          <p className="text-xs text-white/60">Cập nhật {student.lastSyncLabel}</p>
                         </div>
                       </div>
                     </td>
@@ -211,7 +211,7 @@ function latestCompletedLevel(entries: StudentStat["progressByLevel"]) {
     .filter((entry) => entry.progress?.completed)
     .sort((a, b) => dateValue(b.progress?.lastCompletedAt) - dateValue(a.progress?.lastCompletedAt));
   if (completed.length === 0) {
-    return <span className="text-xs text-white/50">Chua hoan thanh</span>;
+    return <span className="text-xs text-white/50">Chưa hoàn thành</span>;
   }
   const best = completed[0];
   return (

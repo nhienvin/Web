@@ -112,7 +112,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-950 via-slate-950 to-slate-900 px-4 py-10 text-white">
+    <div className="flex min-h-screen max-h-screen w-full items-start justify-center overflow-y-auto bg-gradient-to-br from-emerald-950 via-slate-950 to-slate-900 px-4 py-10 text-white">
       <div className="w-full max-w-5xl rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="flex-1 space-y-4">
@@ -179,9 +179,9 @@ export default function LoginScreen() {
                 </div>
 
                 <form className="rounded-2xl border border-white/10 bg-white/5 p-5" onSubmit={handleCreateGuest}>
-                  <h3 className="text-lg font-semibold text-white">Tao ho so khach moi</h3>
+                  <h3 className="text-lg font-semibold text-white">Tạo hồ sơ khách mới</h3>
                   <p className="mt-1 text-sm text-white/60">
-                    Nhap nickname, chon avatar roi keo xuong de bat dau choi.
+                    Nhập nickname, chọn avatar rồi kéo xuống để bắt đầu chơi.
                   </p>
                   <div className="mt-4 space-y-4">
                     <div>
@@ -192,29 +192,17 @@ export default function LoginScreen() {
                         className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white focus:border-emerald-400 focus:outline-none"
                         value={guestNickname}
                         onChange={(event) => setGuestNickname(event.target.value)}
-                        placeholder="Nhap nickname"
+                        placeholder="Nhập nickname"
                       />
                     </div>
                     <AvatarPicker value={guestAvatar} onChange={setGuestAvatar} />
                     {guestError && <p className="text-sm text-rose-300">{guestError}</p>}
                   </div>
-                  <div className="mt-8 space-y-3 rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">
-                      Keo xuong duoi va nhan nut de bat dau hanh trinh.
-                    </p>
+                  <div className="mt-8 space-y-3 flex justify-center">
                     <button
                       type="submit"
                       disabled={busy || !guestNicknameReady}
-                      className="w-full rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      Bat dau choi
-                    </button>
-                    <p className="text-xs text-white/60">
-                      Ho so se duoc luu lai va ban se vao thang tro choi ngay lap tuc.
-                    </p>
-                    {!guestNicknameReady && !busy && (
-                      <p className="text-xs text-white/80">Vui long nhap nickname truoc khi bat dau.</p>
-                    )}
+                      className="w-3xs rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50">Bắt đầu</button>
                   </div>
                 </form>
               </section>

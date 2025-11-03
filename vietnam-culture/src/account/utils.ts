@@ -21,17 +21,17 @@ export function formatRelativeTime(timestamp?: string): string {
   const value = Date.parse(timestamp);
   if (Number.isNaN(value)) return "-";
   const diff = Date.now() - value;
-  if (diff < 60_000) return "vua xong";
+  if (diff < 60_000) return "vừa xong";
   if (diff < 3_600_000) {
     const mins = Math.floor(diff / 60_000);
-    return `${mins} phut truoc`;
+    return `${mins} phút trước`;
   }
   if (diff < 86_400_000) {
     const hours = Math.floor(diff / 3_600_000);
-    return `${hours} gio truoc`;
+    return `${hours} giờ trước`;
   }
   const days = Math.floor(diff / 86_400_000);
-  return `${days} ngay truoc`;
+  return `${days} ngày trước`;
 }
 
 export function formatDuration(ms?: number): string {

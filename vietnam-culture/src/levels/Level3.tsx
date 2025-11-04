@@ -1,7 +1,7 @@
 ﻿import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Bundle, Province } from "../types";
 import { useTimer } from "../core/useTimer";
-import { pushLB } from "../core/leaderboard";
+// import { pushLB } from "../core/leaderboard";
 import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
 import { viewBoxNearAnchorSmart } from "../core/svg";
@@ -10,17 +10,17 @@ import { viewBoxNearAnchorSmart } from "../core/svg";
 const LB_KEY = "lb:pack1:level3";
 const OPTION_COUNT = 4;
 
-type LBItem = { name: string; ms: number };
+// type LBItem = { name: string; ms: number };
 
 type AnswerState = "idle" | "correct" | "wrong";
 
-function readLB(key: string): LBItem[] {
-    try {
-      return JSON.parse(localStorage.getItem(key) || "[]");
-    } catch {
-      return [];
-    }
-  }
+// function readLB(key: string): LBItem[] {
+//     try {
+//       return JSON.parse(localStorage.getItem(key) || "[]");
+//     } catch {
+//       return [];
+//     }
+//   }
   
   function shuffleArray<T>(source: T[]): T[] {
     const arr = [...source];
@@ -293,22 +293,22 @@ export default function Level3({ bundle, onBack, onComplete }: { bundle: Bundle;
   );
 }
 
-function WinDialog({ lbKey, ms, score, total, onClose }: { lbKey: string; ms: number; score: number; total: number; onClose: () => void }) {
-  const [name, setName] = useState("");
-  const [entries, setEntries] = useState<LBItem[]>(() => readLB(lbKey));
-  const [saved, setSaved] = useState<LBItem | null>(null);
+function WinDialog({ ms, score, total, onClose }: { lbKey: string; ms: number; score: number; total: number; onClose: () => void }) {
+  // const [name, setName] = useState("");
+  // const [entries, setEntries] = useState<LBItem[]>(() => readLB(lbKey));
+  // const [saved, setSaved] = useState<LBItem | null>(null);
 
-  const top5 = useMemo(() => entries.slice(0, 5), [entries]);
-  const savedRank = saved ? top5.findIndex((e) => e.name === saved.name && e.ms === saved.ms) : -1;
+  // const top5 = useMemo(() => entries.slice(0, 5), [entries]);
+  // const savedRank = saved ? top5.findIndex((e) => e.name === saved.name && e.ms === saved.ms) : -1;
 
-  function handleSave() {
-    const cleaned = (name || "").trim();
-    const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
-    const list = pushLB(lbKey, { name: safeName, ms });
-    setEntries(list);
-    setSaved({ name: safeName, ms });
-    setName("");
-  }
+  // function handleSave() {
+  //   const cleaned = (name || "").trim();
+  //   const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
+  //   const list = pushLB(lbKey, { name: safeName, ms });
+  //   setEntries(list);
+  //   setSaved({ name: safeName, ms });
+  //   setName("");
+  // }
 
   return (
     <div className="fixed inset-0 z-[2147483600] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
@@ -318,7 +318,7 @@ function WinDialog({ lbKey, ms, score, total, onClose }: { lbKey: string; ms: nu
           <div className="mt-1 text-sm text-slate-600">Thời gian: <b>{(ms / 1000).toFixed(1)}s</b></div>
           <div className="mt-1 text-sm text-slate-600">Điểm: <b>{score}/{total}</b></div>
         </div>
-        <div className="mt-4">
+        {/* <div className="mt-4">
           <div className="mb-2 text-sm font-semibold text-slate-700">Bảng xếp hạng Top 5</div>
           <div className="overflow-hidden rounded-lg border border-slate-200">
             <table className="w-full text-sm">
@@ -378,7 +378,7 @@ function WinDialog({ lbKey, ms, score, total, onClose }: { lbKey: string; ms: nu
               Lưu
             </button>
           </div>
-        </div>
+        </div> */}
         <div className="mt-5 flex items-center justify-end">
           <button
             className="rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"

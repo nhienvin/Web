@@ -1,9 +1,10 @@
 ﻿// src/levels/Level2.tsx
-import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+// import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import type { Bundle, Province } from "../types";
 import { dist, within } from "../core/math";
 import { useTimer } from "../core/useTimer";
-import { pushLB } from "../core/leaderboard";
+// import { pushLB } from "../core/leaderboard";
 import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
 import { useBoardViewBox } from "../core/useBoardViewBox";
@@ -31,10 +32,10 @@ function getDevFlag(): boolean {
   } catch { return false; }
 }
 const LB_KEY = "lb:pack1:level2";
-type LBItem = { name: string; ms: number };
-function readLB(key: string): LBItem[] {
-  try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
-}
+// type LBItem = { name: string; ms: number };
+// function readLB(key: string): LBItem[] {
+//   try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
+// }
 // ---- main ----
 export default function Level2({ bundle, onBack, onComplete }: { bundle: Bundle; onBack: () => void; onComplete?: (summary: { levelId: "level2"; ms: number; completedAt: string }) => void }) {
   const [placed, setPlaced] = useState<Record<string, boolean>>({});
@@ -482,22 +483,24 @@ function Piece({
     </>
   );
 }
-function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose: () => void }) {
-  const [name, setName] = useState("");
-  const [entries, setEntries] = useState<LBItem[]>(() => readLB(lbKey));
-  const [saved, setSaved] = useState<LBItem | null>(null);
-  const top5 = useMemo(() => entries.slice(0, 5), [entries]);
-  const savedRank = saved
-    ? top5.findIndex(e => e.name === saved.name && e.ms === saved.ms)
-    : -1;
-  function handleSave() {
-    const cleaned = (name || "").trim();
-    const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
-    const list = pushLB(lbKey, { name: safeName, ms });
-    setEntries(list);
-    setSaved({ name: safeName, ms });
-    setName("");
-  }
+function WinDialog({ms, onClose }: 
+  // function WinDialog({ lbKey, ms, onClose }: 
+  { lbKey: string; ms: number; onClose: () => void }) {
+  // const [name, setName] = useState("");
+  // const [entries, setEntries] = useState<LBItem[]>(() => readLB(lbKey));
+  // const [saved, setSaved] = useState<LBItem | null>(null);
+  // const top5 = useMemo(() => entries.slice(0, 5), [entries]);
+  // const savedRank = saved
+  //   ? top5.findIndex(e => e.name === saved.name && e.ms === saved.ms)
+  //   : -1;
+  // function handleSave() {
+  //   const cleaned = (name || "").trim();
+  //   const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
+  //   const list = pushLB(lbKey, { name: safeName, ms });
+  //   setEntries(list);
+  //   setSaved({ name: safeName, ms });
+  //   setName("");
+  // }
   return (
     <div className="fixed inset-0 z-[2147483600] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
       <div className="w-[min(92vw,520px)] rounded-2xl bg-white text-slate-900 shadow-xl p-5 anim-pop">
@@ -505,7 +508,7 @@ function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose:
           <div className="text-2xl font-semibold">Hoàn thành Level 2!</div>
           <div className="mt-1 text-sm text-slate-600">Thời gian: <b>{(ms / 1000).toFixed(1)}s</b></div>
         </div>
-        <div className="mt-4">
+        {/* <div className="mt-4">
           <div className="mb-2 text-sm font-semibold text-slate-700">Bảng xếp hạng Top 5</div>
           <div className="overflow-hidden rounded-lg border border-slate-200">
             <table className="w-full text-sm">
@@ -565,7 +568,7 @@ function WinDialog({ lbKey, ms, onClose }: { lbKey: string; ms: number; onClose:
               Lưu
             </button>
           </div>
-        </div>
+        </div> */}
         <div className="mt-5 flex items-center justify-end">
           <button
             className="rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"

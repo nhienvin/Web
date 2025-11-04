@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import type { Bundle, Province } from "../types";
 import { dist, within } from "../core/math";
 import { useTimer } from "../core/useTimer";
-import { pushLB } from "../core/leaderboard";
+// import { pushLB } from "../core/leaderboard";
 import { useSfx } from "../core/useSfx";
 import { useAtlasPaths } from "../core/useAtlas";
 import { extractViewBoxFromString, useBoardViewBox } from "../core/useBoardViewBox";
@@ -70,8 +70,8 @@ function isBoardAligned(vb: SvgMeta["vb"], vw:number, vh:number){
 }
 
 /* ========= leaderboard read ========= */
-type LBItem = { name: string; ms: number; ts?: number };
-function readLB(lbKey: string): LBItem[] { try { return JSON.parse(localStorage.getItem(lbKey) || "[]"); } catch { return []; } }
+// type LBItem = { name: string; ms: number; ts?: number };
+// function readLB(lbKey: string): LBItem[] { try { return JSON.parse(localStorage.getItem(lbKey) || "[]"); } catch { return []; } }
 
 /* ========= main ========= */
 const LB_KEY = 'lb:pack1:level1';
@@ -478,21 +478,22 @@ function BoardPreviewSVG({ vw, vh }:{ vw:number; vh:number }){
     </svg>
   );
 }
-function WinDialog({ lbKey, ms, onClose }:{
+// function WinDialog({ lbKey, ms, onClose }:{
+  function WinDialog({ms, onClose }:{
   lbKey: string; ms:number; onClose:()=>void;
 }){
-  const [name, setName] = useState("");
-  const [savedName, setSavedName] = useState<string | null>(null);
-  const [lb, setLb] = useState<LBItem[]>(() => readLB(lbKey));
-  const top5 = useMemo(() => lb.slice(0,5), [lb]);
+  // const [name, setName] = useState("");
+  // const [savedName, setSavedName] = useState<string | null>(null);
+  // const [lb, setLb] = useState<LBItem[]>(() => readLB(lbKey));
+  // const top5 = useMemo(() => lb.slice(0,5), [lb]);
 
-  function handleSave(){
-    const cleaned = (name ?? "").trim();
-    const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
-    const list = pushLB(lbKey, { name: safeName, ms });
-    setLb(list);
-    setSavedName(safeName);
-  }
+  // function handleSave(){
+  //   const cleaned = (name ?? "").trim();
+  //   const safeName = cleaned.length ? cleaned.slice(0, 32) : "Ẩn danh";
+  //   const list = pushLB(lbKey, { name: safeName, ms });
+  //   setLb(list);
+  //   setSavedName(safeName);
+  // }
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -504,7 +505,7 @@ function WinDialog({ lbKey, ms, onClose }:{
           <div className="mt-2 text-sm text-slate-500">Thời gian: <b>{(ms/1000).toFixed(1)}s</b></div>
         </div>
 
-        <div className="mt-4">
+        {/* <div className="mt-4">
           <div className="mb-2 text-sm font-semibold text-slate-700">🏆 Top 5</div>
           <div className="rounded border border-slate-200 overflow-hidden">
             <table className="w-full text-sm">
@@ -552,7 +553,7 @@ function WinDialog({ lbKey, ms, onClose }:{
               </div>
             )}
           </div>
-        </div>
+        </div> */}
 
         <div className="mt-4 flex items-center justify-end">
           <button className="px-3 py-1.5 text-sm rounded border" onClick={onClose}>Đóng</button>

@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { useAccount } from "./context";
 import { AVATAR_PRESETS, getAvatarPreset } from "./avatars";
-import type { AvatarId, ClassRoom, GuestProfile } from "./types";
+import type { AvatarId, ClassRoom, GuestProfile, StudentProfile } from "./types";
 import { formatRelativeTime } from "./utils";
 
 type TabId = "guest" | "class";
@@ -15,6 +15,7 @@ export default function LoginScreen() {
     createGuestProfile,
     joinClassAsStudent,
     createClassRoom,
+    updateClassRoom,
   } = useAccount();
 
   const [tab, setTab] = useState<TabId>("guest");
@@ -37,6 +38,14 @@ export default function LoginScreen() {
 
   const guestProfiles = useMemo(() => sortGuests(store.guests), [store.guests]);
   const classRooms = useMemo(() => sortClasses(store.classes), [store.classes]);
+  const selectedClassRoom = useMemo(
+    () => classRooms.find((room) => room.id === studentCode) ?? null,
+    [classRooms, studentCode],
+  );
+  const studentProfilesForClass = useMemo(
+    () => (selectedClassRoom ? sortStudents(selectedClassRoom.students) : []),
+    [selectedClassRoom],
+  );
 
   async function handleCreateGuest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -81,6 +90,32 @@ export default function LoginScreen() {
       setStudentCode("");
     } catch (error) {
       setStudentError(normalizeError(error, "Cannot join class"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+
+  async function handleExistingStudentLogin(classId: string, studentId: string) {
+    if (busy) return;
+    setBusy(true);
+    setStudentError(null);
+    try {
+      const nowIso = new Date().toISOString();
+      await updateClassRoom(classId, (room) => {
+        const student = room.students[studentId];
+        if (!student) {
+          throw new Error("Không tìm thấy học sinh");
+        }
+        room.students[studentId] = {
+          ...student,
+          lastSyncAt: nowIso,
+        };
+        room.updatedAt = nowIso;
+      });
+      setSession({ mode: "student", classId, studentId });
+    } catch (error) {
+      setStudentError(normalizeError(error, "Không thể đăng nhập bằng tài khoản học sinh này"));
     } finally {
       setBusy(false);
     }
@@ -198,11 +233,14 @@ export default function LoginScreen() {
                     <AvatarPicker value={guestAvatar} onChange={setGuestAvatar} />
                     {guestError && <p className="text-sm text-rose-300">{guestError}</p>}
                   </div>
-                  <div className="mt-8 space-y-3 flex justify-center">
-                    <button
-                      type="submit"
-                      disabled={busy || !guestNicknameReady}
-                      className="w-3xs rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50">Bắt đầu</button>
+                  <div className="mt-4 space-y-4 flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={busy || !guestNicknameReady}
+                    className="w-3xs rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Bắt đầu
+                  </button>
                   </div>
                 </form>
               </section>
@@ -213,20 +251,29 @@ export default function LoginScreen() {
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
                   <h2 className="text-lg font-semibold text-white">Học sinh</h2>
                   <p className="mt-1 text-sm text-white/60">
-                    Nhập mã lớp, Chọn Nikname và avartar để đồng bộ lên không gian lớp.
+                    Chọn mã lớp trong danh sách, nhập nickname và chọn avatar để vào lớp.
                   </p>
                   <form className="mt-4 space-y-4" onSubmit={handleStudentJoin}>
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">
-                          Mã lớp
+                          Chọn mã lớp
                         </label>
-                        <input
+                        <select
                           className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white focus:border-emerald-400 focus:outline-none"
                           value={studentCode}
-                          onChange={(event) => setStudentCode(event.target.value.toUpperCase())}
-                          placeholder="VD: AB12CD"
-                        />
+                          onChange={(event) => {
+                            setStudentCode(event.target.value.toUpperCase());
+                            setStudentError(null);
+                          }}
+                        >
+                          <option value="" disabled>Chọn mã lớp</option>
+                          {classRooms.map((room) => (
+                            <option key={room.id} value={room.id}>
+                              {room.id} — {room.title ?? "Lớp không tên"}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">
@@ -240,15 +287,61 @@ export default function LoginScreen() {
                         />
                       </div>
                     </div>
+
+                    {selectedClassRoom && (
+                      <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">
+                            Học sinh đã có tài khoản
+                          </h4>
+                          <span className="text-xs text-white/60">
+                            {studentProfilesForClass.length} tài khoản
+                          </span>
+                        </div>
+                        {studentProfilesForClass.length === 0 ? (
+                          <p className="mt-3 text-sm text-white/60">
+                            Chưa có tài khoản nào trong lớp này. Sử dụng biểu mẫu bên dưới để tạo mới.
+                          </p>
+                        ) : (
+                          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {studentProfilesForClass.map((student) => (
+                              <button
+                                key={student.id}
+                                type="button"
+                                disabled={busy}
+                                onClick={() => handleExistingStudentLogin(selectedClassRoom.id, student.id)}
+                                className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left transition hover:border-emerald-400/60 hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <AvatarBadge avatarId={student.avatarId} label={student.nickname} />
+                                  <div>
+                                    <p className="text-sm font-semibold text-white">{student.nickname}</p>
+                                    <p className="text-xs text-white/60">
+                                      Hoạt động {formatRelativeTime(student.lastSyncAt)}
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
+                                  Chơi ngay
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <AvatarPicker value={studentAvatar} onChange={setStudentAvatar} />
                     {studentError && <p className="text-sm text-rose-300">{studentError}</p>}
+                    <div className="mt-4 space-y-4 flex justify-center">
                     <button
                       type="submit"
                       disabled={busy}
-                      className="w-full rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="w-3xs rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Vào
                     </button>
+                    </div>
                   </form>
                 </div>
 
@@ -328,13 +421,15 @@ export default function LoginScreen() {
                             Lớp mới đã được tạo. Mã lớp: <span className="font-semibold">{newClassCode}</span>
                           </div>
                         )}
+                        <div className="mt-4 space-y-4 flex justify-center">
                         <button
                           type="submit"
                           disabled={busy}
-                          className="w-full rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="w-3xs rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Tạo lớp
                         </button>
+                        </div>
                       </div>
                     </form>
                   </div>
@@ -387,6 +482,10 @@ function AvatarBadge({ avatarId, label }: { avatarId: AvatarId; label?: string }
       {label ? label.slice(0, 2).toUpperCase() : preset.label.slice(0, 2)}
     </div>
   );
+}
+
+function sortStudents(map: Record<string, StudentProfile>): StudentProfile[] {
+  return Object.values(map).sort((a, b) => dateValue(b.lastSyncAt) - dateValue(a.lastSyncAt));
 }
 
 function sortGuests(map: Record<string, GuestProfile>): GuestProfile[] {

@@ -1,7 +1,13 @@
 ﻿import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 import { useAccount } from "./context";
-import { AVATAR_PRESETS, getAvatarPreset } from "./avatars";
+import {
+  DEFAULT_AVATAR_ID,
+  getClassAvatarOptions,
+  getPeopleAvatarOptions,
+  resolveAvatar,
+  type AvatarOption,
+} from "./avatars";
 import type { AvatarId, ClassRoom, GuestProfile, StudentProfile } from "./types";
 import { formatRelativeTime } from "./utils";
 
@@ -20,17 +26,19 @@ export default function LoginScreen() {
 
   const [tab, setTab] = useState<TabId>("guest");
   const [guestNickname, setGuestNickname] = useState("");
-  const [guestAvatar, setGuestAvatar] = useState<AvatarId>("jade");
+  const peopleAvatarOptions = useMemo(() => getPeopleAvatarOptions(), []);
+  const classAvatarOptions = useMemo(() => getClassAvatarOptions(), []);
+  const [guestAvatar, setGuestAvatar] = useState<AvatarId>(peopleAvatarOptions[0]?.id ?? DEFAULT_AVATAR_ID);
   const [guestError, setGuestError] = useState<string | null>(null);
   const guestNicknameReady = guestNickname.trim().length > 0;
   const [studentCode, setStudentCode] = useState("");
   const [studentNickname, setStudentNickname] = useState("");
-  const [studentAvatar, setStudentAvatar] = useState<AvatarId>("sunrise");
+  const [studentAvatar, setStudentAvatar] = useState<AvatarId>(peopleAvatarOptions[0]?.id ?? DEFAULT_AVATAR_ID);
   const [studentError, setStudentError] = useState<string | null>(null);
 
   const [teacherName, setTeacherName] = useState("");
   const [classTitle, setClassTitle] = useState("");
-  const [teacherAvatar, setTeacherAvatar] = useState<AvatarId>("indigo");
+  const [teacherAvatar, setTeacherAvatar] = useState<AvatarId>(classAvatarOptions[0]?.id ?? DEFAULT_AVATAR_ID);
   const [teacherError, setTeacherError] = useState<string | null>(null);
   const [newClassCode, setNewClassCode] = useState<string | null>(null);
 
@@ -230,7 +238,7 @@ export default function LoginScreen() {
                         placeholder="Nhập nickname"
                       />
                     </div>
-                    <AvatarPicker value={guestAvatar} onChange={setGuestAvatar} />
+                    <AvatarPicker value={guestAvatar} onChange={setGuestAvatar} options={peopleAvatarOptions} />
                     {guestError && <p className="text-sm text-rose-300">{guestError}</p>}
                   </div>
                   <div className="mt-4 space-y-4 flex justify-center">
@@ -331,7 +339,7 @@ export default function LoginScreen() {
                       </div>
                     )}
 
-                    <AvatarPicker value={studentAvatar} onChange={setStudentAvatar} />
+<AvatarPicker value={studentAvatar} onChange={setStudentAvatar} options={peopleAvatarOptions} />
                     {studentError && <p className="text-sm text-rose-300">{studentError}</p>}
                     <div className="mt-4 space-y-4 flex justify-center">
                     <button
@@ -414,7 +422,7 @@ export default function LoginScreen() {
                             />
                           </div>
                         </div>
-                        <AvatarPicker value={teacherAvatar} onChange={setTeacherAvatar} />
+                        <AvatarPicker value={teacherAvatar} onChange={setTeacherAvatar} options={classAvatarOptions} />
                         {teacherError && <p className="text-sm text-rose-300">{teacherError}</p>}
                         {newClassCode && (
                           <div className="rounded-xl border border-emerald-400/50 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
@@ -443,28 +451,46 @@ export default function LoginScreen() {
   );
 }
 
-function AvatarPicker({ value, onChange }: { value: AvatarId; onChange: (id: AvatarId) => void }) {
+function AvatarPicker({
+  value,
+  onChange,
+  options,
+}: {
+  value: AvatarId;
+  onChange: (id: AvatarId) => void;
+  options: AvatarOption[];
+}) {
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">Avatar</p>
       <div className="mt-2 grid grid-cols-4 gap-2">
-        {AVATAR_PRESETS.map((preset) => {
-          const active = preset.id === value;
+      {options.map((option) => {
+          const active = option.id === value;
           return (
             <button
-              key={preset.id}
+            key={option.id}
               type="button"
-              onClick={() => onChange(preset.id)}
+              onClick={() => onChange(option.id)}
               className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-2 text-xs transition ${
                 active
                   ? "border-emerald-400 bg-emerald-500/10 text-white"
                   : "border-white/10 bg-black/20 text-white/70 hover:border-emerald-400/50 hover:text-white"
               }`}
             >
-              <div className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold ${preset.background} ${preset.foreground}`}>
-                {preset.label.slice(0, 2)}
-              </div>
-              <span>{preset.label}</span>
+              {option.kind === "image" ? (
+                <img
+                  src={option.url}
+                  alt={option.label}
+                  className="h-12 w-12 rounded-full object-cover"
+                />
+              ) : (
+                <div
+                  className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold ${option.background} ${option.foreground}`}
+                >
+                  {option.label.slice(0, 2).toUpperCase()}
+                </div>
+              )}
+              {/* <span>{option.label}</span> */}
             </button>
           );
         })}
@@ -474,12 +500,22 @@ function AvatarPicker({ value, onChange }: { value: AvatarId; onChange: (id: Ava
 }
 
 function AvatarBadge({ avatarId, label }: { avatarId: AvatarId; label?: string }) {
-  const preset = getAvatarPreset(avatarId);
+  const avatar = resolveAvatar(avatarId);
+  if (avatar.kind === "image") {
+    return (
+      <img
+        src={avatar.url}
+        alt={label ?? avatar.label}
+        className="h-10 w-10 rounded-full object-cover"
+      />
+    );
+  }
+  const text = (label ?? avatar.label).slice(0, 2).toUpperCase();
   return (
     <div
-      className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${preset.background} ${preset.foreground}`}
+    className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${avatar.background} ${avatar.foreground}`}
     >
-      {label ? label.slice(0, 2).toUpperCase() : preset.label.slice(0, 2)}
+      {text}
     </div>
   );
 }

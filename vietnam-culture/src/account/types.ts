@@ -1,14 +1,6 @@
 ﻿import type { GameScreen } from "../core/gameScreens";
 
-export type AvatarId =
-  | "jade"
-  | "sunrise"
-  | "indigo"
-  | "amber"
-  | "teal"
-  | "crimson"
-  | "slate"
-  | "violet";
+export type AvatarId = string;
 
 export interface LevelProgress {
   completed: boolean;

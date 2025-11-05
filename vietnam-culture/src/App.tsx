@@ -11,6 +11,11 @@ import LoginScreen from "./account/LoginScreen";
 import { useAccount } from "./account/context";
 import ClassDashboard from "./account/ClassDashboard";
 import { getAvatarPreset } from "./account/avatars";
+import {
+    computeAchievements,
+    type Achievement,
+    type AchievementSummary,
+  } from "./account/achievements";
 import type { LevelCompletionPayload, ProfileStore, ProgressByLevel } from "./account/types";
 import type { Session } from "./account/context";
 import type { GameScreen } from "./core/gameScreens";
@@ -74,11 +79,15 @@ export default function App() {
   const { session, setSession, store, recordLevelCompletion } = useAccount();
   const [bundle, setBundle] = useState<Bundle | null>(null);
   const [screen, setScreen] = useState<Screen>("auth");
-
+  const [showAchievements, setShowAchievements] = useState(false);
   useEffect(() => {
     loadBundle().then(setBundle).catch(console.error);
   }, []);
-
+  useEffect(() => {
+    if (!session) {
+      setShowAchievements(false);
+    }
+  }, [session]);
   useEffect(() => {
     if (!session) {
       setScreen("auth");
@@ -108,7 +117,11 @@ export default function App() {
     () => getSessionProgress(session, store),
     [session, store],
   );
-
+  const achievementModel = useMemo(
+    () => computeAchievements(sessionProgress),
+    [sessionProgress],
+  );
+  const { achievements, summary: achievementSummary } = achievementModel;
   if (screen === "auth") {
     return <LoginScreen />;
   }
@@ -171,33 +184,48 @@ export default function App() {
             }`}
           >
             {sessionInfo && (
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold ${sessionInfo.avatarBg} ${sessionInfo.avatarFg}`}
-                >
-                  {sessionInfo.avatarText}
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold ${sessionInfo.avatarBg} ${sessionInfo.avatarFg}`}
+                  >
+                    {sessionInfo.avatarText}
+                  </div>
+                  <div className="text-right">
+                    <p
+                      className={`text-xs uppercase tracking-[0.3em] ${
+                        isMenu ? "text-white/60" : "text-slate-500"
+                      }`}
+                    >
+                      {sessionInfo.roleLabel}
+                    </p>
+                    <p className="text-sm font-semibold">{sessionInfo.displayName}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p
-                    className={`text-xs uppercase tracking-[0.3em] ${
-                      isMenu ? "text-white/60" : "text-slate-500"
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAchievements(true)}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                      isMenu
+                        ? "bg-emerald-500 text-white hover:bg-emerald-400"
+                        : "bg-emerald-500 text-white hover:bg-emerald-600"
                     }`}
                   >
-                    {sessionInfo.roleLabel}
-                  </p>
-                  <p className="text-sm font-semibold">{sessionInfo.displayName}</p>
+                    Xem thành tích
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                      isMenu
+                        ? "bg-white/10 text-white hover:bg-white/20"
+                        : "bg-slate-900 text-white hover:bg-slate-800"
+                    }`}
+                  >
+                    Đăng xuất
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                    isMenu
-                      ? "bg-white/10 text-white hover:bg-white/20"
-                      : "bg-slate-900 text-white hover:bg-slate-800"
-                  }`}
-                >
-                  Đăng xuất
-                </button>
               </div>
             )}
           </header>
@@ -244,6 +272,104 @@ export default function App() {
               </div>
             </div>
           </footer>
+        </div>
+      </div>
+      {showAchievements && (
+        <AchievementsDialog
+          achievements={achievements}
+          summary={achievementSummary}
+          sessionInfo={sessionInfo}
+          onClose={() => setShowAchievements(false)}
+        />
+      )}
+    </div>
+  );
+}
+type AchievementsDialogProps = {
+  achievements: Achievement[];
+  summary: AchievementSummary;
+  sessionInfo: SessionInfo | null;
+  onClose: () => void;
+};
+
+function AchievementsDialog({
+  achievements,
+  summary,
+  sessionInfo,
+  onClose,
+}: AchievementsDialogProps) {
+  const completionText =
+    summary.totalPlayable > 0
+      ? `Hoàn thành ${summary.completedCount}/${summary.totalPlayable} cấp độ`
+      : "Chưa có cấp độ khả dụng";
+  const attemptText =
+    summary.totalAttempts > 0
+      ? `${summary.totalAttempts} lần thứ`
+      : "Chưa có lượt chơi";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6" onClick={onClose}>
+      <div
+        className="w-full max-w-3xl overflow-hidden rounded-3xl bg-white text-slate-900 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4 px-6 py-5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600">
+              Thành tích
+            </p>
+            <h2 className="mt-1 text-xl font-semibold">
+              {sessionInfo ? `Huy hiệu của ${sessionInfo.displayName}` : "Huy hiệu của bạn"}
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              {completionText} · {attemptText}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-700"
+          >
+            Đóng
+          </button>
+        </div>
+        <div className="grid gap-4 border-t border-slate-200 bg-slate-50 px-6 py-6 sm:grid-cols-2">
+          {achievements.map((achievement) => (
+            <article
+              key={achievement.id}
+              className={`flex h-full flex-col justify-between rounded-2xl border px-4 py-4 shadow-sm ${
+                achievement.achieved
+                  ? "border-emerald-200 bg-white"
+                  : "border-transparent bg-white/70"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-12 w-12 items-center justify-center rounded-full text-xs font-semibold uppercase tracking-[0.3em] ${
+                    achievement.achieved
+                      ? "bg-emerald-500 text-white"
+                      : "bg-slate-200 text-slate-500"
+                  }`}
+                >
+                  {achievement.badgeLabel}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{achievement.title}</p>
+                  <p className="text-xs text-slate-500">{achievement.description}</p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs">
+                <span
+                  className={`font-semibold uppercase tracking-[0.3em] ${
+                    achievement.achieved ? "text-emerald-600" : "text-slate-400"
+                  }`}
+                >
+                  {achievement.achieved ? "Đã mở khóa" : "Chưa đạt"}
+                </span>
+                <span className="font-medium text-slate-500">{achievement.progressLabel}</span>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </div>

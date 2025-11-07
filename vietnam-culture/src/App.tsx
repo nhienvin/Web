@@ -5,8 +5,9 @@ import type { Bundle } from "./types";
 import Level1 from "./levels/Level1";
 import Level2 from "./levels/Level2";
 import Level3 from "./levels/Level3";
-import Level4 from "./levels/Level4";
-import Level5 from "./levels/Level5";
+// import Level4 from "./levels/Level4";
+// import Level5 from "./levels/Level5";
+import Level6 from "./levels/Level6";
 import LoginScreen from "./account/LoginScreen";
 import { useAccount } from "./account/context";
 import ClassDashboard from "./account/ClassDashboard";
@@ -58,8 +59,9 @@ const SCREEN_COMPONENTS: Record<GameScreen, ScreenRenderer> = {
   level1: (props) => <Level1 {...props} />,
   level2: (props) => <Level2 {...props} />,
   level3: (props) => <Level3 {...props} />,
-  level4: (props) => <Level4 {...props} />,
-  level5: (props) => <Level5 {...props} />,
+  // level4: (props) => <Level4 {...props} />,
+  // level5: (props) => <Level5 {...props} />,
+  level6: (props) => <Level6 {...props} />,
   "pack2-level1": createComingSoonScreen(
     "Cấp 1: Văn hoá vùng miền",
     "Màn chơi đang được hoàn thiện để mang tới cho bạn trải nghiệm tốt nhất."

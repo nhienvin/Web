@@ -1,0 +1,493 @@
+{
+    "id": "level6_geo_triples",
+    "slug": "geo-triples-river-basins",
+    "version": 1,
+    "title": "Sông – Núi – Biển Việt Nam",
+    "locale": "vi-VN",
+    "category": ["địa lý", "sông", "lưu vực"],
+    "overview": {
+      "introText": "Kéo tên sông vào đúng vùng lưu vực rồi dựng dòng chảy từ thượng nguồn tới cửa biển.",
+      "phases": [
+        "Pha A — Kéo tên sông vào lưu vực đúng",
+        "Pha B — Dựng dòng chảy từ thượng nguồn tới cửa"
+      ]
+    },
+    "phases": {
+      "phaseA": {
+        "id": "phase_a_match_basins",
+        "label": "Kéo tên sông vào lưu vực",
+        "type": "drag-drop",
+        "maxScore": 100,
+        "timeLimitSeconds": 90,
+        "scoring": {
+          "attemptScores": [10, 6, 3],
+          "maxAttemptsPerDrop": 3,
+          "mistakePenalty": 1,
+          "speedBonus": {
+            "thresholdSeconds": 60,
+            "bonus": 10
+          },
+          "completionThreshold": {
+            "minCorrect": 8,
+            "autoAdvance": true
+          }
+        },
+        "ui": {
+          "showBasinsOverlay": true,
+          "progressBar": true,
+          "hintToggle": true
+        },
+        "feedback": {
+          "correct": {
+            "animation": "glow",
+            "showRiverTracePreview": true
+          },
+          "incorrect": {
+            "animation": "shake",
+            "maxShakes": 2,
+            "hintPool": [
+              "Vùng mưa nhiều ven Trường Sơn!",
+              "Tìm đồng bằng phù sa rộng lớn nhé!",
+              "Nhìn về phía núi đá vôi miền Đông Bắc!"
+            ]
+          }
+        },
+        "basins": [
+          {
+            "id": "hong_thai_binh",
+            "riverName": "Sông Hồng – Thái Bình",
+            "aliases": ["Hồng", "Thái Bình"],
+            "macroRegion": "Bắc Bộ",
+            "provinces": ["Lào Cai", "Yên Bái", "Phú Thọ", "Hà Nội", "Hải Dương", "Hải Phòng", "Thái Bình"],
+            "centroid": {"lat": 21.6, "lng": 105.6},
+            "icon": "icons/karst.svg",
+            "hint": "Sông lớn nhất miền Bắc, bồi đắp đồng bằng châu thổ."
+          },
+          {
+            "id": "ma",
+            "riverName": "Sông Mã",
+            "aliases": ["Mã"],
+            "macroRegion": "Bắc Trung Bộ",
+            "provinces": ["Thanh Hóa", "Sơn La", "Hòa Bình"],
+            "centroid": {"lat": 10.2, "lng": 104.8},
+            "icon": "icons/truong-son-pass.svg",
+            "hint": "Khởi từ vùng núi Tây Bắc, đổ ra biển Thanh Hóa."
+          },
+          {
+            "id": "ca_lam",
+            "riverName": "Sông Cả (Lam)",
+            "aliases": ["Cả", "Lam"],
+            "macroRegion": "Bắc Trung Bộ",
+            "provinces": ["Nghệ An", "Hà Tĩnh"],
+            "centroid": {"lat": 18.8, "lng": 105.2},
+            "icon": "icons/truong-son-pass.svg",
+            "hint": "Đi ngang Vinh, chịu tác động địa hình Trường Sơn."
+          },
+          {
+            "id": "huong",
+            "riverName": "Sông Hương",
+            "aliases": ["Hương"],
+            "macroRegion": "Trung Bộ",
+            "provinces": ["Thừa Thiên Huế"],
+            "centroid": {"lat": 16.4, "lng": 107.6},
+            "icon": "icons/tam-giang.svg",
+            "hint": "Đổ vào đầm phá Tam Giang – Cầu Hai."
+          },
+          {
+            "id": "vu_gia_thu_bon",
+            "riverName": "Vu Gia – Thu Bồn",
+            "aliases": ["Vu Gia", "Thu Bồn"],
+            "macroRegion": "Trung Trung Bộ",
+            "provinces": ["Quảng Nam", "Đà Nẵng"],
+            "centroid": {"lat": 15.7, "lng": 107.9},
+            "icon": "icons/truong-son-pass.svg",
+            "hint": "Lưu vực đôi, một nhánh ra Cửa Đại."
+          },
+          {
+            "id": "ba_da_rang",
+            "riverName": "Sông Ba (Đà Rằng)",
+            "aliases": ["Ba", "Đà Rằng"],
+            "macroRegion": "Nam Trung Bộ",
+            "provinces": ["Gia Lai", "Phú Yên"],
+            "centroid": {"lat": 13.4, "lng": 108.9},
+            "icon": "icons/truong-son-pass.svg",
+            "hint": "Băng Tây Nguyên xuống đồng bằng Tuy Hòa."
+          },
+          {
+            "id": "tra_khuc",
+            "riverName": "Sông Trà Khúc",
+            "aliases": ["Trà Khúc"],
+            "macroRegion": "Nam Trung Bộ",
+            "provinces": ["Quảng Ngãi"],
+            "centroid": {"lat": 15.0, "lng": 108.7},
+            "icon": "icons/truong-son-pass.svg",
+            "hint": "Có thuỷ điện Thạch Nham và đô thị Quảng Ngãi."
+          },
+          {
+            "id": "dong_nai",
+            "riverName": "Sông Đồng Nai",
+            "aliases": ["Đồng Nai"],
+            "macroRegion": "Đông Nam Bộ",
+            "provinces": ["Lâm Đồng", "Đắk Nông", "Bình Phước", "Đồng Nai", "Bình Dương", "TP.HCM"],
+            "centroid": {"lat": 11.2, "lng": 107.1},
+            "icon": "icons/tri-an.svg",
+            "hint": "Có hồ Trị An, nhánh Sài Gòn – Vàm Cỏ lân cận."
+          },
+          {
+            "id": "mekong_cuu_long",
+            "riverName": "Sông Mê Kông (Cửu Long)",
+            "aliases": ["Mê Kông", "Cửu Long"],
+            "macroRegion": "Đồng bằng SCL",
+            "provinces": ["An Giang", "Đồng Tháp", "Vĩnh Long", "Cần Thơ", "Trà Vinh", "Sóc Trăng", "Bến Tre", "Tiền Giang"],
+            "centroid": {"lat": 10.3, "lng": 105.8},
+            "icon": "icons/rice-delta.svg",
+            "hint": "Chia thành sông Tiền – sông Hậu, nhiều cửa biển."
+          },
+          {
+            "id": "ky_cung_bang_giang",
+            "riverName": "Sông Kỳ Cùng – Bằng Giang",
+            "aliases": ["Kỳ Cùng", "Bằng Giang"],
+            "macroRegion": "Đông Bắc",
+            "provinces": ["Lạng Sơn", "Cao Bằng"],
+            "centroid": {"lat": 22.1, "lng": 106.6},
+            "icon": "icons/karst.svg",
+            "hint": "Chảy sang Quảng Tây, Trung Quốc."
+          }
+        ]
+      },
+      "phaseB": {
+        "id": "phase_b_trace_flow",
+        "label": "Dựng dòng chảy",
+        "type": "path-draw",
+        "maxScore": 100,
+        "defaultSampleSize": 5,
+        "timeLimitSecondsPerRiver": 20,
+        "scoring": {
+          "thresholds": [
+            {"timeSeconds": 12, "score": 20},
+            {"timeSeconds": 20, "score": 15},
+            {"timeSeconds": 999, "score": 10}
+          ],
+          "hintPenalty": 5,
+          "mistakePenalty": 2,
+          "autoAssistAfterMistakes": 3,
+          "floorScore": 5
+        },
+        "bufferMeters": {
+          "easy": 30000,
+          "normal": 25000,
+          "hard": 18000
+        },
+        "assist": {
+          "contourLines": {
+            "enabledAfterMistakes": 2,
+            "alpha": 0.35
+          },
+          "ghostTrace": {
+            "enabledAfterMistakes": 3,
+            "opacity": 0.45
+          }
+        },
+        "routing": {
+          "requireSourceTap": true,
+          "allowMultipleMouths": ["mekong_cuu_long"],
+          "snapToleranceKm": 20
+        },
+        "flowPaths": [
+          {
+            "basinId": "hong_thai_binh",
+            "sourceLabel": "Thượng nguồn sông Hồng",
+            "source": {"lat": 28.1, "lng": 85.1},
+            "mouthOptions": [
+              {"label": "Cửa Ba Lạt", "lat": 20.2, "lng": 106.6},
+              {"label": "Cửa Thái Bình", "lat": 20.6, "lng": 106.7}
+            ],
+            "polyline": {"encoding": "polyline6", "value": ""},
+            "durationTargetsSeconds": [12, 20]
+          },
+          {
+            "basinId": "ma",
+            "sourceLabel": "Thượng nguồn sông Mã",
+            "source": {"lat": 21.2, "lng": 104.2},
+            "mouthOptions": [
+              {"label": "Cửa Hới", "lat": 19.8, "lng": 105.8}
+            ],
+            "polyline": {"encoding": "polyline6", "value": ""},
+            "durationTargetsSeconds": [12, 20]
+          },
+          {
+            "basinId": "ca_lam",
+            "sourceLabel": "Đỉnh Trường Sơn (sông Cả)",
+            "source": {"lat": 19.1, "lng": 104.2},
+            "mouthOptions": [
+              {"label": "Cửa Hội", "lat": 18.8, "lng": 105.7}
+            ],
+            "polyline": {"encoding": "polyline6", "value": ""},
+            "durationTargetsSeconds": [12, 20]
+          },
+          {
+            "basinId": "huong",
+            "sourceLabel": "A Lưới",
+            "source": {"lat": 16.2, "lng": 107.2},
+            "mouthOptions": [
+              {"label": "Đầm phá Tam Giang – Cầu Hai", "lat": 16.5, "lng": 107.7}
+            ],
+            "polyline": {"encoding": "polyline6", "value": ""},
+            "durationTargetsSeconds": [12, 20]
+          },
+          {
+            "basinId": "vu_gia_thu_bon",
+            "sourceLabel": "Ngọc Linh",
+            "source": {"lat": 15.1, "lng": 107.5},
+            "mouthOptions": [
+              {"label": "Cửa Đại", "lat": 15.9, "lng": 108.6},
+              {"label": "Cửa Hàn", "lat": 16.1, "lng": 108.2}
+            ],
+            "polyline": {"encoding": "polyline6", "value": ""},
+            "durationTargetsSeconds": [12, 20]
+          },
+          {
+            "basinId": "ba_da_rang",
+            "sourceLabel": "Pleiku",
+            "source": {"lat": 13.9, "lng": 107.9},
+            "mouthOptions": [
+              {"label": "Cửa Đà Diễn", "lat": 13.0, "lng": 109.3}
+            ],
+            "polyline": {"encoding": "polyline6", "value": ""},
+            "durationTargetsSeconds": [12, 20]
+          },
+          {
+            "basinId": "tra_khuc",
+            "sourceLabel": "Kon Plông",
+            "source": {"lat": 14.8, "lng": 108.4},
+            "mouthOptions": [
+              {"label": "Cửa Đại Quảng Ngãi", "lat": 15.1, "lng": 108.8}
+            ],
+            "polyline": {"encoding": "polyline6", "value": ""},
+            "durationTargetsSeconds": [12, 20]
+          },
+          {
+            "basinId": "dong_nai",
+            "sourceLabel": "Cao nguyên Lâm Viên",
+            "source": {"lat": 11.8, "lng": 108.5},
+            "mouthOptions": [
+              {"label": "Cửa Soài Rạp", "lat": 10.3, "lng": 106.9}
+            ],
+            "polyline": {"encoding": "polyline6", "value": ""},
+            "durationTargetsSeconds": [12, 20]
+          },
+          {
+            "basinId": "mekong_cuu_long",
+            "sourceLabel": "Biên giới Việt Nam – Campuchia",
+            "source": {"lat": 10.8, "lng": 105.0},
+            "mouthOptions": [
+              {"label": "Cửa Định An", "lat": 9.5, "lng": 106.5},
+              {"label": "Cửa Cổ Chiên", "lat": 9.8, "lng": 106.3},
+              {"label": "Vùng biển ĐBSCL", "lat": 9.3, "lng": 105.8}
+            ],
+            "polyline": {"encoding": "polyline6", "value": ""},
+            "durationTargetsSeconds": [12, 20]
+          },
+          {
+            "basinId": "ky_cung_bang_giang",
+            "sourceLabel": "Trùng Khánh",
+            "source": {"lat": 22.6, "lng": 106.5},
+            "mouthOptions": [
+              {"label": "Cửa khẩu Hữu Nghị (sang Quảng Tây)", "lat": 22.0, "lng": 106.7}
+            ],
+            "polyline": {"encoding": "polyline6", "value": ""},
+            "durationTargetsSeconds": [12, 20]
+          }
+        ]
+      }
+    },
+    "difficultyPresets": {
+      "easy": {
+        "description": "Tô màu lưu vực rõ, hỏi 3 sông ở Pha B.",
+        "phaseA": {
+          "showBasinsOverlay": true,
+          "maxMistakesPerCard": 3
+        },
+        "phaseB": {
+          "sampleSize": 3,
+          "bufferMeters": 30000,
+          "hintAutoRevealSeconds": 15
+        }
+      },
+      "normal": {
+        "description": "Màu lưu vực nhạt, thêm distractor, hỏi 5 sông.",
+        "phaseA": {
+          "includeDistractors": ["vam_co_reference"],
+          "showBasinsOverlay": true
+        },
+        "phaseB": {
+          "sampleSize": 5,
+          "bufferMeters": 25000,
+          "hintAutoRevealSeconds": 18
+        }
+      },
+      "hard": {
+        "description": "Không tô lưu vực, yêu cầu vẽ sát dòng.",
+        "phaseA": {
+          "showBasinsOverlay": false,
+          "showProvinceLabels": true
+        },
+        "phaseB": {
+          "sampleSize": 5,
+          "bufferMeters": 18000,
+          "hintAutoRevealSeconds": 12,
+          "requireFullTrace": true
+        }
+      }
+    },
+    "badges": [
+      {
+        "id": "thu_linh_luu_vuc",
+        "title": "Thủ lĩnh lưu vực",
+        "description": "Hoàn thành Pha A đúng ≥9/10 ngay lần đầu.",
+        "criteria": {
+          "phase": "phaseA",
+          "correctFirstTry": 9
+        }
+      },
+      {
+        "id": "dong_chay_chuan",
+        "title": "Dòng chảy chuẩn",
+        "description": "Pha B vẽ đúng 5/5 trong dưới 60 giây.",
+        "criteria": {
+          "phase": "phaseB",
+          "correctCount": 5,
+          "timeTotalSeconds": 60
+        }
+      },
+      {
+        "id": "mat_dia_hinh",
+        "title": "Mắt địa hình",
+        "description": "Không bật đường đồng mức hỗ trợ.",
+        "criteria": {
+          "phase": "phaseB",
+          "assistUsed": "contourLines",
+          "maxUsage": 0
+        }
+      },
+      {
+        "id": "fan_dam_pha",
+        "title": "Fan đầm phá",
+        "description": "Chọn đúng hướng chảy vào Tam Giang – Cầu Hai (sông Hương).",
+        "criteria": {
+          "phase": "phaseB",
+          "basinId": "huong",
+          "mouthId": "Đầm phá Tam Giang – Cầu Hai"
+        }
+      }
+    ],
+    "assets": {
+      "maps": {
+        "baseRelief": "maps/vn_relief.webp",
+        "provinceBorders": "maps/vn_provinces.svg"
+      },
+      "layers": {
+        "basinsGeoJson": "maps/lake_river_basins.geojson",
+        "riverPolylines": "maps/river_mainstems.json"
+      },
+      "icons": {
+        "karst": "icons/karst.svg",
+        "truongSonPass": "icons/truong-son-pass.svg",
+        "riceDelta": "icons/rice-delta.svg",
+        "triAnLake": "icons/tri-an.svg",
+        "tamGiang": "icons/tam-giang.svg"
+      },
+      "audio": {
+        "streams": {
+          "highlandCreek": {"file": "audio/highland_creek.ogg", "loopSeconds": 10},
+          "coastalWaves": {"file": "audio/coastal_waves.ogg", "loopSeconds": 12},
+          "deltaBoat": {"file": "audio/delta_boat.ogg", "loopSeconds": 8}
+        }
+      }
+    },
+    "quickMatch": {
+      "label": "Thi đấu ngắn",
+      "bankId": "geo_triples",
+      "questionMix": {
+        "phaseA": 3,
+        "phaseB": 2
+      },
+      "timeLimitSeconds": 120,
+      "difficulty": "normal"
+    },
+    "classroomSettings": {
+      "regions": [
+        {
+          "id": "north",
+          "label": "Miền Bắc",
+          "includeBasins": ["hong_thai_binh", "ma", "ky_cung_bang_giang"]
+        },
+        {
+          "id": "central",
+          "label": "Miền Trung",
+          "includeBasins": ["ca_lam", "huong", "vu_gia_thu_bon", "ba_da_rang", "tra_khuc"]
+        },
+        {
+          "id": "south",
+          "label": "Miền Nam",
+          "includeBasins": ["dong_nai", "mekong_cuu_long"]
+        }
+      ],
+      "timeLimits": {
+        "phaseA": [60, 90, 120],
+        "phaseB": [15, 20, 25]
+      },
+      "toleranceAdjustmentsKm": [15, 20, 30],
+      "provinceHints": true
+    },
+    "export": {
+      "format": "csv",
+      "fields": ["nickname", "A_correct", "B_score", "total"],
+      "filePrefix": "geo_triples_results"
+    },
+    "postGame": {
+      "factSlides": [
+        {
+          "id": "huong_fact",
+          "title": "Sông Hương và đầm phá Tam Giang",
+          "body": "Đầm phá Tam Giang – Cầu Hai là hệ đầm phá lớn nhất Đông Nam Á, nhận nước trực tiếp từ sông Hương."
+        },
+        {
+          "id": "mekong_fact",
+          "title": "Mê Kông và 9 cửa",
+          "body": "Sông Mê Kông vào Việt Nam tách thành Tiền – Hậu, đổ ra biển bằng nhiều cửa như Định An, Trần Đề, Cửa Đại."
+        },
+        {
+          "id": "dong_nai_fact",
+          "title": "Hồ Trị An",
+          "body": "Hồ Trị An trên sông Đồng Nai là hồ nhân tạo lớn, điều tiết nước cho Đồng Nai – TP.HCM."
+        }
+      ]
+    },
+    "qaTargets": {
+      "phaseA": {
+        "goalAccuracy": 0.8,
+        "goalTimeSeconds": 90,
+        "adjustments": {
+          "accuracyFallback": 0.7,
+          "timeBufferSeconds": 15
+        }
+      },
+      "phaseB": {
+        "goalAccuracy": 0.7,
+        "goalTimeSeconds": 90,
+        "adjustments": {
+          "bufferKmDelta": 5,
+          "assistTriggerMistakes": 1
+        }
+      }
+    },
+    "telemetry": {
+      "events": [
+        "phaseA_card_drop",
+        "phaseB_path_complete",
+        "assist_contour_toggle",
+        "badge_unlocked"
+      ]
+    }
+  }

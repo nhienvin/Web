@@ -35,15 +35,20 @@ export const PACKS: LevelPack[] = [
         label: "Cấp 3: Đoán tên tỉnh dựa vào hình ảnh",
         accentClass: "text-rose-500",
       },
+      // {
+      //   id: "level4",
+      //   label: "Cấp 4: Xuyên Việt lộ trình",
+      //   accentClass: "text-sky-500",
+      // },
+      // {
+      //   id: "level5",
+      //   label: "Cấp 5: Âm thanh địa phương",
+      //   accentClass: "text-indigo-500",
+      // },
       {
-        id: "level4",
-        label: "Cấp 4: Xuyên Việt lộ trình",
-        accentClass: "text-sky-500",
-      },
-      {
-        id: "level5",
-        label: "Cấp 5: Âm thanh địa phương",
-        accentClass: "text-indigo-500",
+        id: "level6",
+        label: "Cấp 6: Sông lớn",
+        accentClass: "text-amber-100",
       },
     ],
   },

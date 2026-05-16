@@ -405,14 +405,14 @@ function FloatingChip({
 
   return (
     <div className="fixed z-50 select-none pointer-events-none" style={{ left:x, top:y }}>
-      <div className="px-3 py-2 rounded border text-xs/2 font-medium shadow text-slate-900"
+      <div className="px-1 py-1 rounded border text-xs/[8px] font-medium shadow text-slate-900"
            style={{ background: color.chipBg, borderColor: color.chipBd }}>
         {name}
       </div>
     </div>
   );
 }
-// ---- Dev: chá»‰nh anchor nhanh ----
+// ---- Dev: Chỉnh anchor nhanh ----
 function AnchorTuner({ bundle, vw, vh }: { bundle: Bundle; vw: number; vh: number }) {
   const [pid, setPid] = useState(bundle.provinces[0]?.id || "");
   const [anchors, setAnchors] = useState<Record<string, [number, number]>>(

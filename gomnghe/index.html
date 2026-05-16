@@ -1,165 +1,341 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="./src/css/styles.css">
-        <script type="text/javascript" src="./src/js/script.js"></script>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Corinthia:wght@400;700&family=VT323&display=swap" rel="stylesheet">
-        <title>Gốm Nghê</title>
-    </head>
-    <body>
-        <!-- header -->
-         <div class="header">
-            <!-- <img src="" alt="Gốm Nghê"> -->
-             <h1>Gốm Nghê</h1>
-         </div>
-         <!-- End header -->
-        <!-- Tab -->
-        <button class="tablink" onclick="openPage('Home', this)" id="defaultOpen">Nhà Nghê</button>
-        <button class="tablink" onclick="openPage('News', this)" >Nghê nói</button>
-        <button class="tablink" onclick="openPage('Childs', this)" >Nghê sinh nở</button>
-        <button class="tablink" onclick="openPage('Service', this)" >Nghê vui chơi</button>
-        <button class="tablink" onclick="openPage('Contact', this)">Nghê đi trốn</button>
-        <button class="tablink" onclick="openPage('About', this)">Nghê tự bạch</button>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gốm Nghê – Hoằng pháp Mỵ Châu</title>
+    <meta name="description" content="Xưởng gốm mộc tại Hà Nội, sử dụng đất và men tự nhiên, sản xuất trực tiếp, nung 1200–1300°C, an toàn và bền cho sử dụng hàng ngày. Nhận giao hàng toàn quốc.">
+    <meta name="keywords" content="gốm mộc, gốm bản địa, men tự nhiên, không hóa chất, không chất độc, 
+     ấm trà, chén trà, gốm thủ công, gốm nung khử, gốm nhiệt cao">
+    <meta name="author" content="Hoằng">
 
-        <div id="Home" class="tabcontent typewriter" style="text-align: center;">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Gốm Bản Địa Dùng Hàng Ngày">
+    <meta property="og:description" content="Gốm bền, an toàn, giá hợp lý. Làm trực tiếp tại xưởng.">
+    <meta property="og:image" content="images/og-image.jpg">
+    <meta property="og:type" content="website">
+
+    <link rel="stylesheet" href="./src/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": ["LocalBusiness", "Manufacturer"],
+        "@id": "https://yourdomain.com/#xuonggom",
+        "name": "Gốm Nghê [Hoằng]",
+        "image": "https://yourdomain.com/images/og-image.jpg",
+        "url": "https://yourdomain.com",
+        "telephone": "+84948469899",
+        "priceRange": "₫₫",
+        "description": "Xưởng sản xuất gốm bản địa dùng hàng ngày tại Phương Trạch - Vĩnh Thanh - Hà Nội. Sản xuất trực tiếp, không qua trung gian.",
+        "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Thôn Phương Trạch",
+        "addressLocality": "Xã Vĩnh Thanh",
+        "addressRegion": "Thành Phố Hà Nội",
+        "postalCode": "100000",
+        "addressCountry": "VN"
+        },
+        "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "xx.xxxxxx",
+        "longitude": "xx.xxxxxx"
+        },
+        "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": "Vietnam"
+        },
+        "founder": {
+        "@type": "Person",
+        "name": "[Hoằng]"
+        },
+        "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+            "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"
+        ],
+        "opens": "08:00",
+        "closes": "17:00"
+        },
+        "sameAs": [
+        "https://www.facebook.com/profile.php?id=61574638252220",
+        "https://zalo.me/yourlink"
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Danh mục sản phẩm gốm Nghê",
+        "itemListElement": [
+        {
+            "@type": "Product",
+            "name": "Ấm pha trà",
+            "image": "https://yourdomain.com/images/am1.jpg",
+            "description": "Ấm pha trà gốm mộc sản xuất tại xưởng ở Hà Nội, nung nhiệt cao, phù hợp dùng hàng ngày.",
+            "brand": {
+            "@type": "Brand",
+            "name": "Gốm Nghê [Hoằng]"
+            },
+            "offers": {
+            "@type": "Offer",
+            "priceCurrency": "VND",
+            "availability": "https://schema.org/InStock",
+            "url": "https://yourdomain.com/#san-pham"
+            }
+        },
+        {
+            "@type": "Product",
+            "name": "Chén uống trà gốm mộc",
+            "image": "https://yourdomain.com/images/chen1.jpg",
+            "description": "Chén trà gốm mộc, xương chắc, dùng hàng ngày.",
+            "brand": {
+            "@type": "Brand",
+            "name": "Gốm Nghê [Hoằng]"
+            },
+            "offers": {
+            "@type": "Offer",
+            "priceCurrency": "VND",
+            "availability": "https://schema.org/InStock",
+            "url": "https://yourdomain.com/#san-pham"
+            }
+        }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "Gốm mộc có an toàn cho thực phẩm không?",
+            "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Gốm được nung nhiệt cao 1200–1300°C, không sử dụng hóa chất độc hại, an toàn cho sử dụng hàng ngày."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Có thể đến xem trực tiếp tại xưởng không?",
+            "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Khách có thể đến xem trực tiếp tại xưởng ở Phương Trạch - Vĩnh Thanh - Hà Nội. Vui lòng liên hệ trước để sắp xếp thời gian."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Xưởng có giao hàng toàn quốc không?",
+            "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Chúng tôi nhận giao hàng toàn quốc thông qua đơn vị vận chuyển."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Sản phẩm có giống nhau 100% không?",
+            "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Vì được làm thủ công và dùng men tự nhiên cùng chế độ nung cũng như cách sắp xếp các vị trí trong lò nên mỗi sản phẩm có sự khác biệt tự nhiên nhỏ, không giống nhau hoàn toàn."
+            }
+        }
+        ]
+    }
+    </script>
+                
+</head>
+
+    
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="container">
+        <h1 class="logo">Gốm Nghê</h1>
+        <nav>
+            <ul>
+                <li><a href="#san-pham">Sản phẩm</a></li>
+                <li><a href="#dat-hang">Đặt hàng</a></li>
+                <li><a href="#lien-he">Liên hệ</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<main>
+
+<!-- HERO -->
+<section id="hero">
+    <div class="container">
         <h2>Gốm Nghê</h2>
-        <p>Vẻ đẹp của Gốm nằm trong sự ngô nghê của nó.</p>
-        <button class="button" onclick="window.location.href='https://www.freecodecamp.org/';"><span>Tham gia </span></button>
-        </div>
+        <p>Vẻ đẹp của Gốm nằm trong sự khiếm khuyết và ngô nghê của nó.</p>
+        <a href="#san-pham" class="btn-primary">Xem sản phẩm</a>
+    </div>
+</section>
+<!-- Cùng Nghệ sĩ -->
+<section id="du-an">
 
-        <div id="News" class="tabcontent">
-            <div class="row">
-                <div class="col-6 col-s-6">
-                    <div class="card">
-                        <h2>Nguồn gốc của Gốm</h2>
-                        <img style="height:200px;"alt="Gốm Nghê">
-                        <h5>Gốm có nguồn gốc từ bao giờ, 25/02/2025</h5>
-                        <p>Gốm có nguồn gốc từ bao giờ thì đến nay có 3 giả thuyết...</p>
-                        <a href="https://youtube.com" target="_blank">Đọc tiếp</a>
-                    </div>
-                </div>
-                <div class="col-6 col-s-6">
-                    <div class="card">
-                        <h2>Nguồn gốc của Gốm</h2>
-                        <img style="height:200px;"alt="Gốm Nghê">
-                        <h5>Gốm có nguồn gốc từ bao giờ, 25/02/2025</h5>
-                        <p>Gốm có nguồn gốc từ bao giờ thì đến nay có 3 giả thuyết...</p>
-                        <a href="https://youtube.com" target="_blank">Đọc tiếp</a>
-                    </div>
-                </div>
+  <div class="container">
+
+    <h2>Dự án cộng tác</h2>
+
+    <p class="section-intro">
+      Những cuộc gặp gỡ giữa gốm và các nghệ sĩ,
+      nơi đất và lửa trở thành chất liệu kể chuyện.
+    </p>
+
+    <div class="project-grid">
+
+      <article class="project-card">
+
+        <img src="/images/project-01.jpg"
+             alt="Dự án cộng tác với nghệ sĩ A">
+
+        <h3>
+          <a href="/du-an/nghe-si-a.html">
+            Gốm & ký ức dòng sông
+          </a>
+        </h3>
+
+        <p>
+          Một dự án thử nghiệm giữa gốm nung khử và hội họa mực nước.
+        </p>
+
+      </article>
+
+      <article class="project-card">
+
+        <img src="/images/project-02.jpg"
+             alt="Dự án cộng tác với nghệ sĩ B">
+
+        <h3>
+          <a href="/du-an/nghe-si-b.html">
+            Những chiếc bát biết kể chuyện
+          </a>
+        </h3>
+
+        <p>
+          Chuỗi chén trà mang dấu vết của nhạc và lửa.
+        </p>
+
+      </article>
+
+    </div>
+
+    <a href="/du-an/" class="btn">
+      Xem tất cả dự án →
+    </a>
+
+  </div>
+
+</section>
+
+<!-- SẢN PHẨM -->
+<section id="san-pham">
+    <div class="container">
+        <h2>Sản phẩm</h2>
+
+        <!-- Nhóm 1 -->
+        <article class="product-group">
+            <p>Gốm Nghê không chỉ mang cho các bạn ấm trà, cái chén, cái bát, cái đĩa mà còn mang tới các bạn vẻ mộc mạc, ngô nghê, văn hóa Việt trong đó.</p>
+
+            <div class="product-grid">
+                <img src="./src/imgs/sanpham/Tracu/DSC_0528.JPG" alt="Ấm trà gốm mộc">
+                <img src="./src/imgs/sanpham/Tracu/DSC_9282.JPG" alt="Ấm trà men">
+                <img src="./src/imgs/sanpham/Tracu/DSC_9300.JPG" alt="Khải">
             </div>
+        </article>
 
-            <div class="row">
-                <div class="col-6 col-s-6">
-                    <div class="card">
-                        <h2>Nguồn gốc của Gốm</h2>
-                        <img style="height:200px;"alt="Gốm Nghê">
-                        <h5>Gốm có nguồn gốc từ bao giờ, 25/02/2025</h5>
-                        <p>Gốm có nguồn gốc từ bao giờ thì đến nay có 3 giả thuyết...</p>
-                        <a href="https://youtube.com" target="_blank">Đọc tiếp</a>
-                    </div>
-                </div>
-                <div class="col-6 col-s-6">
-                    <div class="card">
-                        <h2>Nguồn gốc của Gốm</h2>
-                        <img style="height:200px;"alt="Gốm Nghê">
-                        <h5>Gốm có nguồn gốc từ bao giờ, 25/02/2025</h5>
-                        <p>Gốm có nguồn gốc từ bao giờ thì đến nay có 3 giả thuyết...</p>
-                        <a href="https://youtube.com" target="_blank">Đọc tiếp</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+		<p class="view-all">
+          <a href="/sanpham/">Xem tất cả →</a>
+        </p>
+    </div>
+    
+</section>
+  <section class="home-knowledge">
+    <div class="container">
+      <h2>Kiến thức gốm</h2>
+  
+      <div class="knowledge-grid">
+    
+        <article>
+          <h3>
+            <a href="/kien-thuc/gom-moc-la-gi.html">
+              Gốm mộc là gì?
+            </a>
+          </h3>
+        </article>
+    
+        <article>
+          <h3>
+            <a href="/kien-thuc/tai-sao-gom-moc-khong-hoan-hao.html">
+              Vì sao gốm mộc không hoàn hảo?
+            </a>
+          </h3>
+        </article>
+    
+        <article>
+          <h3>
+            <a href="/kien-thuc/gom-moc-va-gom-men-khac-nhau.html">
+              Gốm mộc và gốm men khác nhau thế nào?
+            </a>
+          </h3>
+        </article>
+    
+      </div>
+    
+      <p class="view-all">
+        <a href="/kien-thuc/">Xem tất cả bài viết →</a>
+      </p>
+    
+    </div>
+    
+  </section>
+  
 
-        <div id="Childs" class="tabcontent">
-            <h3>Những đứa con của Nghê</h3>
-            <img src="https://static.pexels.com/photos/52500/horse-herd-fog-nature-52500.jpeg" alt="Herd of horses">
-        <img src="https://static.pexels.com/photos/66898/elephant-cub-tsavo-kenya-66898.jpeg" alt="Baby Elephant">
-        <img src="https://static.pexels.com/photos/213399/pexels-photo-213399.jpeg" alt="Koi Fish">
-        <img src="https://static.pexels.com/photos/158471/ibis-bird-red-animals-158471.jpeg" alt="Ibis Bird">
-        <img src="https://static.pexels.com/photos/133459/pexels-photo-133459.jpeg" alt="Lemur">
-        <img src="https://static.pexels.com/photos/50988/ape-berber-monkeys-mammal-affchen-50988.jpeg" alt="Berber Monkeys">
-        </div>
+</main>
 
-        <div id="Service" class="tabcontent">
-            <div class="row">
-                <div class="col-6 col-s-6">
-                    <div class="card">
-                        <h2>Trải nghiệm làm Gốm</h2>
-                        <img src="" style="height:200px;" alt="Gốm Nghê">
-                        <p>- Hướng dẫn làm gốm cơ bản.</p>
-                        <p>- Cho thuê không gian và dụng cụ làm gốm.</p>
+<!-- FOOTER -->
+<footer class="site-footer">
 
-                    </div>
-                </div>
-                <div class="col-6 col-s-6">
-                    <div class="card">
-                        <h2>Sản xuất gốm theo yêu cầu</h2>
-                        <img src="" style="height:200px;" alt="Gốm Nghê">
-                        <p>- Thiết kế và sản xuất các sản phẩm gốm theo yêu cầu.</p>
-                        <p>- Cung cấp các sản phẩm gốm chất lượng cao cho gia đình, tiệm...</p>
-
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-6 col-s-6">
-                    <div class="card">
-                        <h2>Thiết lập xưởng Gốm</h2>
-                        <img src="" style="height:200px;" alt="Gốm Nghê">
-                        <p>- ...</p>
-                        
-                    </div>
-                </div>
-                <div class="col-6 col-s-6">
-                    <div class="card">
-                        <h2>Tạm thời như vậy</h2>
-                        <img src="" style="height:200px;"alt="Gốm Nghê">
-                        <p>...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="Contact" class="tabcontent">
-        <h3>Cảm ơn các bạn đã liên hệ với chúng tôi</h3>
-        <p>Địa chỉ: Phương Trạch - Vĩnh Ngọc - Đông Anh - Hà Nội</p>
-        <p>Số điện thoại: 0948469899</p>
+    <div class="footer-container">
+  
+      <!-- Cột 1: Giới thiệu -->
+      <div class="footer-col">
+        <h3>Gốm Nghê</h3>
+        <p>
+          Hoằng pháp Mỵ Châu.
+        </p>
+      </div>
+  
+      <!-- Cột 2: Điều hướng -->
+      <div class="footer-col">
+        <h3>Điều hướng</h3>
+        <ul>
+          <li><a href="/">Trang chủ</a></li>
+          <li><a href="/san-pham/">Sản phẩm</a></li>
+          <li><a href="/kien-thuc/">Kiến thức</a></li>
+        </ul>
+      </div>
+  
+      <!-- Cột 4: Thông tin liên hệ (Local SEO) -->
+      <div class="footer-col">
+        <h3>Liên hệ</h3>
+        <p><strong>Gốm Nghê</strong></p>
+        <p>Phương Trạch - Vĩnh Thanh - Hà Nội</p>
+        <p>Điện thoại: 0948469899</p>
         <p>Email: hoang.joker@gmail.com</p>
-        <a href="#" target="_blank">Facebook</a>
-        <a href="#" target="_blank">Instagram</a>
-        <a href="#" target="_blank">Youtube</a>
+      </div>
+  
+    </div>
+  
+    <div class="footer-bottom">
+      <p>© 2026 Gốm Nghê. All rights reserved.</p>
+    </div>
+  
+  </footer>
+  
 
-        </div>
-
-        <div id="About" class="tabcontent">
-        <h2 style="text-align: center;">Chúng tôi là Gốm Nghê</h2>
-        <p>Gốm là sản phẩm của văn hóa. Chúng tôi là những người làm văn hóa, luôn đau đáu trong lòng câu hỏi:
-            "Gốm Việt đi về đâu?". Chúng tôi mang hồn cốt, văn hóa Việt trong từng đứa con của chúng tôi.
-            Chúng tôi mong muốn từng người dân Việt Nam khi cầm những đứa con của chúng tôi đều tự hào về chúng.
-            Chúng tôi hy vọng Gốm Việt sẽ vươn tầm ra thế giới.
-        </p>
-        <p>
-            Chúng tôi chọn <a href="https://vi.wikipedia.org/wiki/Con_ngh%C3%AA" target="_blank">Nghê</a> là tên gọi cho Gốm của mình. Trong văn hóa của người Việt thì con Nghê là con vật linh thiêng rất gần gũi. Gốm Việt có nét độc đáo so với Gốm các nước khác đôi khi đó là sự ngô nghê có ý đồ trong việc tạo hình. Chúng tôi thấy rằng đó chính là điểm độc đáo để Gốm Việt tạo ra sự khác biệt của mình. Chúng ta sinh ra với sự ngô nghê nhìn nhận thế giới này, rồi chúng ta lớn lên với những điều học hỏi từ thế giới này. Chúng ta sống và làm việc với những kinh nghiệm mình đã học hỏi được. Các anh chị tôi quen nói rằng chúng ta chỉ thực sự sáng tạo ra những tác phẩm tuyệt vời khi chúng ta trở về đúng với sự "ngô nghê" của chính mình. Chính vì chúng tôi lựa chọn sự "ngô nghê" cho những đứa con của chúng tôi.
-
-        </p>
-        <p>
-            Chúng tôi vô cùng biết ơn Tiến sĩ Silicat - Nhà gốm học <a href="#" target="_blank">Vũ Năng Thi</a> đã cố vấn cho chúng tôi.
-            <picture>
-                <img src="./src/imgs/Thay.jpg" alt="Nhà gốm học Vũ Năng Thi">
-            </picture>
-            
-        </p>
-        </div>
-        
-        <!-- End Tab -->
-         <div class="footer" style="text-align: center;">
-            <h4>Được thiết kế bởi Hoằng</h4>
-         </div>
-    </body>
+</body>
 </html>

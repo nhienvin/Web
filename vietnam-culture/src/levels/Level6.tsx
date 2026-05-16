@@ -12,14 +12,12 @@ const VN_LAT_MIN = 8.0;
 const VN_LAT_MAX = 23.8;
 const VN_LNG_MIN = 102.0;
 const VN_LNG_MAX = 109.6;
-const SOURCE_HIT_RADIUS = 24;
-const MOUTH_HIT_RADIUS = 32;
-const DEFAULT_BUFFER_METERS = 26000;
-const TRACE_SAMPLE_POINTS = 140;
 const BOARD_OUTLINE_SRC = "/assets/board_blank_outline.svg";
 
 const BASIN_MARKER_RADIUS = 22;
 const BASIN_DROP_RADIUS = 38;
+const PROVINCE_NODE_RADIUS = 18;
+const PROVINCE_NODE_HIT_RADIUS = 52;
 
 const BASIN_MARKER_OFFSETS: Record<string, { x: number; y: number }> = {
   ky_cung_bang_giang: { x: -102, y: 78 },
@@ -44,16 +42,42 @@ const PROVINCE_NAME_ALIASES: Record<string, string> = {
   tphcminh: "79",
 };
 
+const PHASE_A_DIFFICULTY_STYLE: Record<
+  Difficulty,
+  {
+    idleCircleClass: string;
+    showBasinsOverlay: boolean;
+    includeDistractors?: string[];
+    showProvinceLabels?: boolean;
+  }
+> = {
+  easy: {
+    idleCircleClass: "fill-emerald-300/40 stroke-emerald-100/90",
+    showBasinsOverlay: true,
+  },
+  normal: {
+    idleCircleClass: "fill-emerald-200/20 stroke-emerald-200/40",
+    showBasinsOverlay: true,
+    includeDistractors: ["vam_co_reference", "song_gianh_reference"],
+  },
+  hard: {
+    idleCircleClass: "fill-transparent stroke-emerald-200/30",
+    showBasinsOverlay: false,
+    showProvinceLabels: true,
+    includeDistractors: [
+      "vam_co_reference",
+      "song_da_reference",
+      "song_lo_reference",
+      "song_gianh_reference",
+      "song_sebanghieng_reference",
+    ],
+  },
+};
+
 const FLOW_PRIORITY: Record<Difficulty, string[]> = {
   easy: ["hong_thai_binh", "huong", "mekong_cuu_long"],
   normal: [],
   hard: [],
-};
-
-const FLOW_MOUTH_RADIUS: Record<Difficulty, number> = {
-  easy: MOUTH_HIT_RADIUS + 10,
-  normal: MOUTH_HIT_RADIUS,
-  hard: Math.max(18, MOUTH_HIT_RADIUS - 8),
 };
 
 type BasinDefinition = {
@@ -267,20 +291,16 @@ type PhaseAResult = {
   bonusAwarded: boolean;
 };
 
-type PreparedMouth = {
+type ProvinceNode = {
+  id: string;
   label: string;
   point: BoardPoint;
-  radius: number;
 };
 
-type PreparedFlow = {
+type PreparedProvinceChain = {
   id: string;
   basin: BasinDefinition;
-  sourceLabel: string;
-  source: BoardPoint;
-  mouthOptions: PreparedMouth[];
-  referencePath: BoardPoint[];
-  allowMultipleMouths: boolean;
+  nodes: ProvinceNode[];
   meta: FlowPathDefinition;
 };
 
@@ -316,6 +336,7 @@ type PhaseBViewProps = {
   preset: DifficultyPreset;
   difficulty: Difficulty;
   basins: BasinDefinition[];
+  bundle: Bundle;
   boardSize: { width: number; height: number };
   onComplete: (result: PhaseBResult) => void;
   seed: number;
@@ -329,6 +350,34 @@ const DISTRACTOR_LIBRARY: Record<string, RiverCard> = {
     type: "distractor",
     hint: "Vàm Cỏ là phụ lưu gần Đồng Nai – đừng nhầm thành lưu vực riêng!",
     macroRegion: "Đông Nam Bộ",
+  },
+  song_da_reference: {
+    id: "song_da_reference",
+    label: "Sông Đà",
+    type: "distractor",
+    hint: "Sông Đà thuộc hệ thống sông Hồng nhưng thường được hỏi riêng về thủy điện.",
+    macroRegion: "Tây Bắc",
+  },
+  song_lo_reference: {
+    id: "song_lo_reference",
+    label: "Sông Lô",
+    type: "distractor",
+    hint: "Sông Lô là phụ lưu lớn của hệ Hồng – Thái Bình, không tạo lưu vực độc lập.",
+    macroRegion: "Đông Bắc",
+  },
+  song_gianh_reference: {
+    id: "song_gianh_reference",
+    label: "Sông Gianh",
+    type: "distractor",
+    hint: "Sông Gianh chỉ chảy trong tỉnh Quảng Bình, quy mô nhỏ hơn 10 lưu vực chính.",
+    macroRegion: "Bắc Trung Bộ",
+  },
+  song_sebanghieng_reference: {
+    id: "song_sebanghieng_reference",
+    label: "Sông Sê Băng Hiêng",
+    type: "distractor",
+    hint: "Sông này bắt nguồn ở Lào rồi vào Quảng Trị, không nằm trong danh sách GeoTriples.",
+    macroRegion: "Trung Bộ",
   },
 };
 
@@ -397,88 +446,17 @@ function distanceBetween(a: BoardPoint, b: BoardPoint) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-function distancePointToSegment(p: BoardPoint, a: BoardPoint, b: BoardPoint) {
-  const l2 = (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
-  if (l2 === 0) return distanceBetween(p, a);
-  let t = ((p.x - a.x) * (b.x - a.x) + (p.y - a.y) * (b.y - a.y)) / l2;
-  t = Math.max(0, Math.min(1, t));
-  const projection = { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y) };
-  return distanceBetween(p, projection);
-}
-
-function decodePolyline(value: string, precision = 6) {
-  if (!value) return [];
-  const points: { lat: number; lng: number }[] = [];
-  let index = 0;
-  let lat = 0;
-  let lng = 0;
-  const factor = Math.pow(10, precision);
-  while (index < value.length) {
-    let result = 0;
-    let shift = 0;
-    let byte: number;
-    do {
-      byte = value.charCodeAt(index++) - 63;
-      result |= (byte & 0x1f) << shift;
-      shift += 5;
-    } while (byte >= 0x20);
-    const deltaLat = result & 1 ? ~(result >> 1) : result >> 1;
-    lat += deltaLat;
-
-    result = 0;
-    shift = 0;
-    do {
-      byte = value.charCodeAt(index++) - 63;
-      result |= (byte & 0x1f) << shift;
-      shift += 5;
-    } while (byte >= 0x20);
-    const deltaLng = result & 1 ? ~(result >> 1) : result >> 1;
-    lng += deltaLng;
-
-    points.push({ lat: lat / factor, lng: lng / factor });
-  }
-  return points;
-}
-
-function sampleTrace(points: BoardPoint[], maxPoints: number): BoardPoint[] {
-  if (points.length <= maxPoints) return points;
-  const result: BoardPoint[] = [];
-  const step = (points.length - 1) / (maxPoints - 1);
-  for (let i = 0; i < maxPoints; i += 1) {
-    const idx = Math.min(points.length - 1, Math.round(i * step));
-    result.push(points[idx]);
-  }
-  return result;
-}
-
-function computeMaxDeviation(trace: BoardPoint[], reference: BoardPoint[]) {
-  if (reference.length < 2) return Infinity;
-  const segments: [BoardPoint, BoardPoint][] = [];
-  for (let i = 0; i < reference.length - 1; i += 1) {
-    segments.push([reference[i], reference[i + 1]]);
-  }
-  let maxDist = 0;
-  for (const point of trace) {
-    let minDist = Infinity;
-    for (const [a, b] of segments) {
-      const dist = distancePointToSegment(point, a, b);
-      if (dist < minDist) minDist = dist;
-    }
-    if (minDist > maxDist) maxDist = minDist;
-  }
-  return maxDist;
-}
-
-function kmPerPixelY(height: number) {
-  const latSpan = VN_LAT_MAX - VN_LAT_MIN;
-  const kmNorthSouth = latSpan * 111.32;
-  return kmNorthSouth / height;
+function getProvincePoint(name: string, anchors: Map<string, BoardPoint>) {
+  const normalized = normalizeLabel(name);
+  if (normalized && anchors.has(normalized)) return anchors.get(normalized)!;
+  if (anchors.has(name)) return anchors.get(name)!;
+  return null;
 }
 
 function normalizeLabel(value?: string) {
   if (!value) return '';
   return value
-    .replace(/[d�]/g, (ch) => (ch === 'd' ? 'd' : 'D'))
+    .replace(/[đĐ]/g, (ch) => (ch === 'đ' ? 'd' : 'D'))
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]/gi, '')
@@ -551,72 +529,90 @@ function createCards(
   return shuffleArray([...baseCards, ...distractors], seed);
 }
 
-function prepareFlows(
+function buildProvinceNodes(
+  basin: BasinDefinition,
+  anchors: Map<string, BoardPoint>,
+  board: { width: number; height: number },
+): ProvinceNode[] {
+  const provinceNames = basin.provinces ?? [];
+  if (provinceNames.length < 2) return [];
+  const fallback = basin.centroid
+    ? projectLatLng(basin.centroid.lat, basin.centroid.lng, board.width, board.height)
+    : { x: board.width / 2, y: board.height / 2 };
+  const anchored = provinceNames
+    .map((name, index) => {
+      const anchor = getProvincePoint(name, anchors);
+      if (!anchor) return null;
+      return {
+        id: `${basin.id}-${index}`,
+        label: name,
+        point: anchor,
+      } satisfies ProvinceNode;
+    })
+    .filter(Boolean) as ProvinceNode[];
+  if (anchored.length >= 2) return anchored;
+  // Fallback: spread synthetic nodes around centroid so gameplay is still possible even if anchors are missing.
+  return provinceNames.map((name, index) => {
+    const angle = (index / provinceNames.length) * Math.PI * 2;
+    const radius = 28 + index * 6;
+    return {
+      id: `${basin.id}-fallback-${index}`,
+      label: name,
+      point: {
+        x: fallback.x + Math.cos(angle) * radius,
+        y: fallback.y + Math.sin(angle) * radius,
+      },
+    };
+  });
+}
+
+function prepareProvinceChains(
   flowPaths: FlowPathDefinition[],
   basins: BasinDefinition[],
   board: { width: number; height: number },
+  anchors: Map<string, BoardPoint>,
   difficulty: Difficulty,
   preset: DifficultyPreset,
   seed?: number,
-): PreparedFlow[] {
+): PreparedProvinceChain[] {
   const dictionary = new Map(basins.map((item) => [item.id, item]));
-  const mouthRadius = FLOW_MOUTH_RADIUS[difficulty] ?? MOUTH_HIT_RADIUS;
   const baseSeed = seed ?? 0;
   const base = flowPaths
     .map((flow) => {
       const basin = dictionary.get(flow.basinId);
       if (!basin) return null;
-      const reference = flow.polyline?.value
-        ? decodePolyline(flow.polyline.value, flow.polyline.encoding === "polyline5" ? 5 : 6).map((pt) =>
-            projectLatLng(pt.lat, pt.lng, board.width, board.height),
-          )
-        : [projectLatLng(flow.source.lat, flow.source.lng, board.width, board.height)];
-
-      if (!flow.polyline || reference.length < 2) {
-        const firstMouth = flow.mouthOptions[0];
-        if (firstMouth) {
-          reference.push(projectLatLng(firstMouth.lat, firstMouth.lng, board.width, board.height));
-        }
-      }
-
+      const nodes = buildProvinceNodes(basin, anchors, board);
+      if (nodes.length < 2) return null;
       return {
         id: `${flow.basinId}`,
         basin,
-        sourceLabel: flow.sourceLabel,
-        source: projectLatLng(flow.source.lat, flow.source.lng, board.width, board.height),
-        mouthOptions: flow.mouthOptions.map((mouth) => ({
-          label: mouth.label,
-          point: projectLatLng(mouth.lat, mouth.lng, board.width, board.height),
-          radius: mouthRadius,
-        })),
-        referencePath: reference,
-        allowMultipleMouths: Boolean(flow.mouthOptions.length > 1),
+        nodes,
         meta: flow,
-      } satisfies PreparedFlow;
+      } satisfies PreparedProvinceChain;
     })
-    .filter(Boolean) as PreparedFlow[];
+    .filter(Boolean) as PreparedProvinceChain[];
 
   const priorityIds = FLOW_PRIORITY[difficulty] ?? [];
-  let ordered: PreparedFlow[];
+  let ordered: PreparedProvinceChain[];
 
   if (priorityIds.length) {
     const prioritySet = new Set(priorityIds);
     const prioritized = shuffleArray(
-        priorityIds
-          .map((id) => base.find((flow) => flow.basin.id === id))
-          .filter(Boolean) as PreparedFlow[],
-        baseSeed ^ 0x5a5a,
-      );
-      const remainder = shuffleArray(
-        base.filter((flow) => !prioritySet.has(flow.basin.id)),
-        baseSeed,
-      );
+      priorityIds
+        .map((id) => base.find((flow) => flow.basin.id === id))
+        .filter(Boolean) as PreparedProvinceChain[],
+      baseSeed ^ 0x5a5a,
+    );
+    const remainder = shuffleArray(
+      base.filter((flow) => !prioritySet.has(flow.basin.id)),
+      baseSeed,
+    );
     ordered = [...prioritized, ...remainder];
   } else {
     ordered = shuffleArray(base, seed);
   }
 
-  const allowCount = preset.phaseB?.sampleSize ?? undefined;
+  const allowCount = preset.phaseB?.sampleSize;
   if (allowCount && ordered.length > allowCount) {
     return ordered.slice(0, allowCount);
   }
@@ -672,10 +668,22 @@ function PhaseAView({
   sfx,
 }: PhaseAViewProps) {
   const { playCorrect, playWrong } = sfx;
-  const cards = useMemo(
-    () => createCards(config.basins, preset, assets?.icons, seed),
-    [config.basins, preset, assets?.icons, seed],
-  );
+  const difficultyProfile = PHASE_A_DIFFICULTY_STYLE[difficulty];
+  const includeDistractors = difficultyProfile.includeDistractors ?? preset.phaseA?.includeDistractors;
+  const idleCircleClass = difficultyProfile.idleCircleClass;
+  const showProvinceLabels = difficultyProfile.showProvinceLabels ?? preset.phaseA?.showProvinceLabels ?? false;
+  const showBasinsOverlay = difficultyProfile.showBasinsOverlay;
+  const overlayOpacity = difficulty === "easy" ? 0.28 : 0.14;
+  const cards = useMemo(() => {
+    const adjustedPreset = {
+      ...preset,
+      phaseA: {
+        ...preset.phaseA,
+        includeDistractors,
+      },
+    };
+    return createCards(config.basins, adjustedPreset, assets?.icons, seed);
+  }, [config.basins, preset, includeDistractors, assets?.icons, seed]);
   const provinceAnchors = useMemo(() => buildProvinceAnchorMap(bundle), [bundle]);
   const basinBoardPositions = useMemo(() => {
     const map = new Map<string, BoardPoint>();
@@ -739,7 +747,6 @@ function PhaseAView({
   }, []);
 
   const targetTotal = config.basins.length;
-  const overlayEnabled = preset.phaseA?.showBasinsOverlay ?? config.ui?.showBasinsOverlay ?? true;
 
   const handleCardSelect = useCallback(
     (cardId: string) => {
@@ -863,7 +870,7 @@ function PhaseAView({
   ]);
 
   return (
-    <div className="flex h-full flex-col gap-4 p-4 md:p-6">
+    <div className="flex-1 min-h-0 overflow-y-scroll flex-col gap-4 p-4 md:p-6">
       <div className="flex flex-col justify-between gap-3 rounded-2xl bg-emerald-950/90 p-4 text-white shadow-lg md:flex-row md:items-center">
         <div>
           <div className="text-xs uppercase tracking-wide text-emerald-200/90">
@@ -894,124 +901,149 @@ function PhaseAView({
       </div>
 
       <div className="flex flex-1 flex-col gap-4 lg:flex-row">
-  <div className="flex-1 rounded-2xl border border-slate-800/60 bg-slate-900/85 shadow-xl">
-    <div
-      className="relative h-full w-full overflow-hidden rounded-2xl"
-      style={{ aspectRatio: `${boardSize.width}/${boardSize.height}` }}
-    >
-      <svg
-        viewBox={`0 0 ${boardSize.width} ${boardSize.height}`}
-        className="absolute inset-0 h-full w-full"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <image href={BOARD_OUTLINE_SRC} width={boardSize.width} height={boardSize.height} opacity={0.45} />
-        {config.basins.map((basin) => {
-          const fallback = basin.centroid
-            ? projectLatLng(basin.centroid.lat, basin.centroid.lng, boardSize.width, boardSize.height)
-            : { x: boardSize.width / 2, y: boardSize.height / 2 };
-          // const position = basinBoardPositions.get(basin.id) ?? fallback;
-          const offset = BASIN_MARKER_OFFSETS[basin.id] ?? { x: 0, y: 0 };
-          const position = {
-            x: (basinBoardPositions.get(basin.id) ?? fallback).x + offset.x,
-            y: (basinBoardPositions.get(basin.id) ?? fallback).y + offset.y,
-          };
-          const placement = placements[basin.id];
-          const isCorrect = placement?.isCorrect ?? false;
-          const highlight = shakeTarget === basin.id;
-
-          return (
-            <g key={basin.id} transform={`translate(${position.x}, ${position.y})`}>
-              <circle
-                r={BASIN_MARKER_RADIUS}
-                className={`transition-all duration-300 ${
-                  highlight
-                    ? "animate-[wiggle_0.4s_ease-in-out] fill-red-400/40 stroke-red-200"
-                    : isCorrect
-                      ? "fill-emerald-300/35 stroke-emerald-200"
-                      : "fill-emerald-200/20 stroke-emerald-200/45"
-                }`}
-                strokeWidth={isCorrect ? 3 : 2}
-              />
-              <circle
-                r={BASIN_DROP_RADIUS}
-                className="cursor-pointer fill-transparent"
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  const riverId = event.dataTransfer.getData("application/river-id");
-                  handleDrop(basin.id, riverId);
-                }}
-                onClick={() => handleDrop(basin.id)}
-              />
-            </g>
-          );
-        })}
-
-        <style>
-          {`@keyframes wiggle { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }`}
-        </style>
-      </svg>
-    </div>
-  </div>
-
-  <aside className="w-full shrink-0 rounded-2xl border border-slate-800/60 bg-slate-900/85 p-4 shadow-xl lg:max-w-sm">
-    <div className="rounded-xl bg-slate-800/70 px-4 py-3 text-sm text-slate-200">
-      <div className="font-semibold text-emerald-200">Kéo thẻ sông sang vùng lưu vực phù hợp</div>
-      <div className="mt-1 text-xs text-slate-300">
-        Giữ chuột hoặc chạm giữ thẻ bên phải, kéo ngang sang vùng phát sáng trên bản đồ.
-      </div>
-    </div>
-    <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
-      {cards.map((card) => {
-        const state = cardStates[card.id];
-        if (!state) return null;
-        const isSelected = selectedCard === card.id;
-        const isLocked = state.locked;
-
-        return (
-          <button
-            key={card.id}
-            className={`group flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition
-              ${isLocked ? "border-emerald-300/70 bg-emerald-400/20 text-emerald-100" : ""}
-              ${isSelected ? "border-emerald-300/80 bg-emerald-500/20 text-white shadow-lg" : ""}
-              ${
-                !isLocked && !isSelected
-                  ? "border-slate-600 bg-slate-700/40 text-slate-100 hover:border-emerald-400/60 hover:bg-emerald-500/15"
-                  : ""
-              }`}
-            draggable={!isLocked}
-            onDragStart={(event) => {
-              if (isLocked) {
-                event.preventDefault();
-                return;
-              }
-              event.dataTransfer.setData("application/river-id", card.id);
-              event.dataTransfer.effectAllowed = "move";
-            }}
-            onClick={() => handleCardSelect(card.id)}
+      <div className="flex-1 rounded-2xl border border-slate-800/60 bg-slate-900/85 shadow-xl">
+        <div
+          className="relative h-full w-full overflow-hidden rounded-2xl"
+          style={{ aspectRatio: `${boardSize.width}/${boardSize.height}` }}
+        >
+          <svg
+            viewBox={`0 0 ${boardSize.width} ${boardSize.height}`}
+            className="absolute inset-0 h-full w-full"
+            preserveAspectRatio="xMidYMid meet"
           >
-            <div>
-              <div className="font-semibold">{state.label}</div>
-              <div className="text-[11px] uppercase tracking-wide text-emerald-200/80">
-                {state.type === "distractor" ? "Thử thách" : state.macroRegion ?? "Lưu vực"}
-              </div>
+            <defs>
+              <linearGradient id="phaseA-basinTint" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#34d399" />
+                <stop offset="100%" stopColor="#0ea5e9" />
+              </linearGradient>
+            </defs>
+            {showBasinsOverlay && (
+              <rect
+                x={0}
+                y={0}
+                width={boardSize.width}
+                height={boardSize.height}
+                fill="url(#phaseA-basinTint)"
+                opacity={overlayOpacity}
+              />
+            )}
+            <image href={BOARD_OUTLINE_SRC} width={boardSize.width} height={boardSize.height} opacity={0.45} />
+            {config.basins.map((basin) => {
+              const fallback = basin.centroid
+                ? projectLatLng(basin.centroid.lat, basin.centroid.lng, boardSize.width, boardSize.height)
+                : { x: boardSize.width / 2, y: boardSize.height / 2 };
+              // const position = basinBoardPositions.get(basin.id) ?? fallback;
+              const offset = BASIN_MARKER_OFFSETS[basin.id] ?? { x: 0, y: 0 };
+              const position = {
+                x: (basinBoardPositions.get(basin.id) ?? fallback).x + offset.x,
+                y: (basinBoardPositions.get(basin.id) ?? fallback).y + offset.y,
+              };
+              const placement = placements[basin.id];
+              const isCorrect = placement?.isCorrect ?? false;
+              const highlight = shakeTarget === basin.id;
+              return (
+                <g key={basin.id} transform={`translate(${position.x}, ${position.y})`}>
+                  <circle
+                    r={BASIN_MARKER_RADIUS}
+                    className={`transition-all duration-300 ${
+                      highlight
+                        ? "animate-[wiggle_0.4s_ease-in-out] fill-red-400/40 stroke-red-200"
+                        : isCorrect
+                          ? "fill-emerald-300/35 stroke-emerald-200"
+                          : "fill-emerald-200/20 stroke-emerald-200/45"
+                    }`}
+                    strokeWidth={isCorrect ? 3 : 2}
+                  />
+                  <circle
+                    r={BASIN_DROP_RADIUS}
+                    className="cursor-pointer fill-transparent"
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const riverId = event.dataTransfer.getData("application/river-id");
+                      handleDrop(basin.id, riverId);
+                    }}
+                    onClick={() => handleDrop(basin.id)}
+                  />
+                  {showProvinceLabels && basin.provinces?.length ? (
+                    <text
+                      className="pointer-events-none text-[10px] font-semibold uppercase tracking-wide"
+                      textAnchor="middle"
+                      fill="#dcfce7"
+                      dy={-BASIN_MARKER_RADIUS - 6}
+                    >
+                      {basin.provinces.slice(0, 2).join(" – ")}
+                    </text>
+                  ) : null}
+                </g>
+              );
+            })}
+
+    <style>
+              {`@keyframes wiggle { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }`}
+            </style>
+          </svg>
+        </div>
+      </div>
+
+        <aside className="flex w-full shrink-0 flex-col rounded-2xl border border-slate-800/60 bg-slate-900/85 p-4 shadow-xl lg:max-w-sm">
+          <div className="rounded-xl bg-slate-800/70 px-4 py-3 text-sm text-slate-200">
+            <div className="font-semibold text-emerald-200">Kéo thẻ sông sang vùng lưu vực phù hợp</div>
+            <div className="mt-1 text-xs text-slate-300">
+              Giữ chuột hoặc chạm giữ thẻ bên phải, kéo ngang sang vùng phát sáng trên bản đồ.
             </div>
-            <div className="flex items-center gap-2 text-xs text-emerald-100">
-              {!isLocked && state.attempts > 0 && (
-                <span className="rounded-full bg-slate-900/70 px-2 py-1">Thử: {state.attempts}</span>
-              )}
-              {isLocked && (
-                <span className="rounded-full bg-emerald-500/80 px-2 py-1 text-emerald-950">
-                  ✓
-                </span>
-              )}
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  </aside>
-</div>
+          </div>
+          <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
+            {cards.map((card) => {
+              const state = cardStates[card.id];
+              if (!state) return null;
+              const isSelected = selectedCard === card.id;
+              const isLocked = state.locked;
+
+              return (
+                <button
+                  key={card.id}
+                  className={`group flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition
+                    ${isLocked ? "border-emerald-300/70 bg-emerald-400/20 text-emerald-100" : ""}
+                    ${isSelected ? "border-emerald-300/80 bg-emerald-500/20 text-white shadow-lg" : ""}
+                    ${
+                      !isLocked && !isSelected
+                        ? "border-slate-600 bg-slate-700/40 text-slate-100 hover:border-emerald-400/60 hover:bg-emerald-500/15"
+                        : ""
+                    }`}
+                  draggable={!isLocked}
+                  onDragStart={(event) => {
+                    if (isLocked) {
+                      event.preventDefault();
+                      return;
+                    }
+                    event.dataTransfer.setData("application/river-id", card.id);
+                    event.dataTransfer.effectAllowed = "move";
+                  }}
+                  onClick={() => handleCardSelect(card.id)}
+                >
+                  <div>
+                    <div className="font-semibold">{state.label}</div>
+                    <div className="text-[11px] uppercase tracking-wide text-emerald-200/80">
+                      {state.type === "distractor" ? "Thử thách" : state.macroRegion ?? "Lưu vực"}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-emerald-100">
+                    {!isLocked && state.attempts > 0 && (
+                      <span className="rounded-full bg-slate-900/70 px-2 py-1">Thử: {state.attempts}</span>
+                    )}
+                    {isLocked && (
+                      <span className="rounded-full bg-emerald-500/80 px-2 py-1 text-emerald-950">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
@@ -1021,58 +1053,97 @@ function PhaseBView({
   preset,
   difficulty,
   basins,
+  bundle,
   boardSize,
   onComplete,
   seed,
   sfx,
 }: PhaseBViewProps) {
   const { playCorrect, playWrong } = sfx;
-  const flows = useMemo(
-    () => prepareFlows(config.flowPaths, basins, boardSize, difficulty, preset, seed),
-    [config.flowPaths, basins, boardSize, difficulty, preset, seed],
+  const anchors = useMemo(() => buildProvinceAnchorMap(bundle), [bundle]);
+  const chains = useMemo(
+    () => prepareProvinceChains(config.flowPaths, basins, boardSize, anchors, difficulty, preset, seed),
+    [config.flowPaths, basins, boardSize, anchors, difficulty, preset, seed],
   );
+  const total = chains.length;
+
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [solved, setSolved] = useState(0);
+  const [phaseComplete, setPhaseComplete] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [attempts, setAttempts] = useState(0);
+  const [trace, setTrace] = useState<BoardPoint[]>([]);
+  const [segments, setSegments] = useState<Array<{ from: BoardPoint; to: BoardPoint }>>([]);
+  const [visitedNodes, setVisitedNodesState] = useState<Set<number>>(new Set());
+  const [activeNode, setActiveNodeState] = useState<number | null>(null);
+  const [isTracing, setIsTracingState] = useState(false);
+  const [contourActive, setContourActive] = useState(false);
+  const [ghostActive, setGhostActive] = useState(false);
   const [anyContour, setAnyContour] = useState(false);
   const [anyGhost, setAnyGhost] = useState(false);
   const [fanDamPha, setFanDamPha] = useState(false);
   const [fastestTrace, setFastestTrace] = useState<number | null>(null);
-  const [phaseComplete, setPhaseComplete] = useState(false);
-  const boardRef = useRef<HTMLDivElement>(null);
-  const [trace, setTrace] = useState<BoardPoint[]>([]);
-  const [isTracing, setIsTracing] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [attempts, setAttempts] = useState(0);
-  const [contourActive, setContourActive] = useState(false);
-  const [ghostActive, setGhostActive] = useState(false);
+
+  const boardRef = useRef<SVGSVGElement | null>(null);
+  const activePointerId = useRef<number | null>(null);
+  const visitedNodesRef = useRef<Set<number>>(visitedNodes);
+  const activeNodeRef = useRef<number | null>(activeNode);
+  const tracingRef = useRef(isTracing);
   const totalTimer = useTimer(!phaseComplete);
   const questionTimer = useTimer(!phaseComplete);
+  const requireFullTrace = preset.phaseB?.requireFullTrace ?? false;
+
+  const updateVisitedNodes = useCallback(
+    (updater: Set<number> | ((prev: Set<number>) => Set<number>)) => {
+      setVisitedNodesState((prev) => {
+        const next = typeof updater === "function" ? (updater as (prev: Set<number>) => Set<number>)(prev) : updater;
+        visitedNodesRef.current = next;
+        return next;
+      });
+    },
+    [],
+  );
+
+  const updateActiveNode = useCallback(
+    (value: number | null) => {
+      activeNodeRef.current = value;
+      setActiveNodeState(value);
+    },
+    [],
+  );
+
+  const updateTracing = useCallback(
+    (value: boolean) => {
+      tracingRef.current = value;
+      setIsTracingState(value);
+    },
+    [],
+  );
 
   useEffect(() => {
     totalTimer.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   useEffect(() => {
     questionTimer.reset();
     setTrace([]);
+    setSegments([]);
+    updateTracing(false);
+    updateActiveNode(null);
+    updateVisitedNodes(new Set());
     setAttempts(0);
+    setFeedback(null);
     setContourActive(false);
     setGhostActive(false);
-    setFeedback(null);
-  }, [index, questionTimer]);
+  }, [index, questionTimer, updateTracing, updateActiveNode, updateVisitedNodes]);
 
-  const bufferMeters =
-    preset.phaseB?.bufferMeters ?? config.bufferMeters?.[difficulty] ?? DEFAULT_BUFFER_METERS;
-  const kmPerPixel = kmPerPixelY(boardSize.height);
-  const bufferPx = (bufferMeters / 1000) / kmPerPixel;
-
-  const current = flows[index];
-  const total = flows.length;
+  const current = chains[index];
 
   useEffect(() => {
-    if (!phaseComplete && index >= flows.length) {
+    if (!phaseComplete && (index >= total || total === 0)) {
       const result: PhaseBResult = {
         score,
         ms: totalTimer.ms,
@@ -1081,7 +1152,7 @@ function PhaseBView({
         mistakes,
         hintsUsed: { contour: anyContour, ghost: anyGhost },
         totalMistakes: mistakes,
-        perfectStreak: solved === total && mistakes === 0,
+        perfectStreak: total > 0 ? solved === total && mistakes === 0 : true,
         fastestTraceSeconds: fastestTrace ?? 0,
         fanDamPha,
       };
@@ -1091,10 +1162,9 @@ function PhaseBView({
   }, [
     phaseComplete,
     index,
-    flows.length,
+    total,
     score,
     totalTimer.ms,
-    total,
     solved,
     mistakes,
     anyContour,
@@ -1104,163 +1174,282 @@ function PhaseBView({
     onComplete,
   ]);
 
-  const projectPointer = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>): BoardPoint | null => {
+  const projectClientPoint = useCallback(
+    (clientX: number, clientY: number): BoardPoint | null => {
       const board = boardRef.current;
       if (!board) return null;
       const bounds = board.getBoundingClientRect();
-      const x = ((event.clientX - bounds.left) / bounds.width) * boardSize.width;
-      const y = ((event.clientY - bounds.top) / bounds.height) * boardSize.height;
+      const x = ((clientX - bounds.left) / bounds.width) * boardSize.width;
+      const y = ((clientY - bounds.top) / bounds.height) * boardSize.height;
       return { x, y };
     },
     [boardSize.width, boardSize.height],
   );
 
-  const handlePointerDown = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!current || isTracing) return;
-      const point = projectPointer(event);
-      if (!point) return;
-      const dist = distanceBetween(point, current.source);
-      if (dist > SOURCE_HIT_RADIUS) {
-        setFeedback("Chạm đúng biểu tượng thượng nguồn (giọt nước) để bắt đầu nhé!");
-        return;
-      }
-      setIsTracing(true);
-      setTrace([current.source]);
-      (event.currentTarget as HTMLDivElement).setPointerCapture(event.pointerId);
-      setFeedback(null);
-    },
-    [current, isTracing, projectPointer],
+  const projectPointer = useCallback(
+    (event: React.PointerEvent<Element>): BoardPoint | null => projectClientPoint(event.clientX, event.clientY),
+    [projectClientPoint],
   );
 
-  const handlePointerMove = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!isTracing) return;
+  const computeScoreForCurrent = useCallback(() => {
+    const thresholds = config.scoring.thresholds;
+    const elapsedSeconds = questionTimer.ms / 1000;
+    let baseScore = thresholds[thresholds.length - 1]?.score ?? 10;
+    for (const threshold of thresholds) {
+      if (elapsedSeconds <= threshold.timeSeconds) {
+        baseScore = threshold.score;
+        break;
+      }
+    }
+    if (contourActive || ghostActive) {
+      baseScore -= config.scoring.hintPenalty ?? 5;
+    }
+    const penalty = (config.scoring.mistakePenalty ?? 2) * attempts;
+    return Math.max(config.scoring.floorScore ?? 5, baseScore - penalty);
+  }, [
+    attempts,
+    config.scoring.floorScore,
+    config.scoring.hintPenalty,
+    config.scoring.mistakePenalty,
+    config.scoring.thresholds,
+    contourActive,
+    ghostActive,
+    questionTimer.ms,
+  ]);
+
+  const handleSuccess = useCallback(
+    (awardedScore: number, autoAssist?: boolean) => {
+      activePointerId.current = null;
+      setAttempts(0);
+      setTrace([]);
+      setSegments([]);
+      updateTracing(false);
+      updateActiveNode(null);
+      updateVisitedNodes(new Set());
+      setSolved((prev) => prev + 1);
+      setScore((prev) => prev + awardedScore);
+      playCorrect();
+      setFeedback(
+        autoAssist
+          ? "Đã nối sẵn tuyến tham chiếu – quan sát kỹ thứ tự tỉnh nhé!"
+          : "Tuyệt! Bạn đã hoàn thành tuyến nối các tỉnh của lưu vực này.",
+      );
+      const elapsed = questionTimer.ms / 1000;
+      setFastestTrace((prev) => (prev === null ? elapsed : Math.min(prev, elapsed)));
+      if (current?.basin.id === "huong" && attempts === 0 && !autoAssist) {
+        setFanDamPha(true);
+      }
+      setIndex((prev) => prev + 1);
+      questionTimer.reset();
+    },
+    [attempts, current?.basin.id, playCorrect, questionTimer, updateActiveNode, updateTracing, updateVisitedNodes],
+  );
+
+  const handleAttemptFailure = useCallback(() => {
+    if (!current) return;
+    activePointerId.current = null;
+    updateTracing(false);
+    setTrace([]);
+    setSegments([]);
+    updateActiveNode(null);
+    updateVisitedNodes(new Set());
+    const nextAttempts = attempts + 1;
+    setAttempts(nextAttempts);
+    setMistakes((prev) => prev + 1);
+    const contourThreshold = config.assist?.contourLines?.enabledAfterMistakes ?? 2;
+    if (nextAttempts >= contourThreshold) {
+      setContourActive(true);
+      setAnyContour(true);
+    }
+    const ghostThreshold = config.assist?.ghostTrace?.enabledAfterMistakes ?? 3;
+    if (nextAttempts >= ghostThreshold) {
+      setGhostActive(true);
+      setAnyGhost(true);
+    }
+    const autoAssistCutoff = config.scoring.autoAssistAfterMistakes ?? 3;
+    if (nextAttempts >= autoAssistCutoff) {
+      const awarded = config.scoring.floorScore ?? 5;
+      handleSuccess(awarded, true);
+      return;
+    }
+    playWrong();
+    setFeedback("Chuỗi nối chưa đúng – quay lại tỉnh số 1 và nối theo thứ tự nhé!");
+  }, [
+    attempts,
+    config.assist?.contourLines?.enabledAfterMistakes,
+    config.assist?.ghostTrace?.enabledAfterMistakes,
+    config.scoring.autoAssistAfterMistakes,
+    config.scoring.floorScore,
+    current,
+    handleSuccess,
+    playWrong,
+    updateActiveNode,
+    updateTracing,
+    updateVisitedNodes,
+  ]);
+
+  const pauseTrace = useCallback(() => {
+    activePointerId.current = null;
+    updateTracing(false);
+    setTrace([]);
+  }, [updateTracing]);
+
+  const beginTrace = useCallback(
+    (startIndex: number, pointerId?: number, resetProgress = false) => {
+      if (!current || tracingRef.current || phaseComplete) return false;
+      const startNode = current.nodes[startIndex];
+      if (!startNode) return false;
+      updateTracing(true);
+      updateActiveNode(startIndex);
+      if (resetProgress) {
+        setSegments([]);
+        updateVisitedNodes(new Set([startIndex]));
+      }
+      setTrace([startNode.point]);
+      setFeedback(null);
+      activePointerId.current = pointerId ?? null;
+      return true;
+    },
+    [current, phaseComplete, updateActiveNode, updateTracing, updateVisitedNodes],
+  );
+
+  const tryBeginTraceAtPoint = useCallback(
+    (point: BoardPoint, pointerId?: number) => {
+      if (!current || tracingRef.current || phaseComplete) return false;
+      const startNode = current.nodes[0];
+      if (!startNode) return false;
+      const nearStart = distanceBetween(point, startNode.point) <= PROVINCE_NODE_HIT_RADIUS;
+      const canResume =
+        !requireFullTrace && activeNodeRef.current !== null && visitedNodesRef.current.size > 0;
+      const resumeIndex = canResume ? activeNodeRef.current : null;
+      const resumeNode = resumeIndex !== null ? current.nodes[resumeIndex] : null;
+      const nearResume =
+        resumeNode && distanceBetween(point, resumeNode.point) <= PROVINCE_NODE_HIT_RADIUS;
+
+      if (nearStart) {
+        return beginTrace(0, pointerId, true);
+      }
+
+      if (resumeIndex !== null && resumeNode && nearResume) {
+        return beginTrace(resumeIndex, pointerId, false);
+      }
+
+      const targetNode = resumeNode ?? startNode;
+      const targetIndex = resumeIndex ?? 0;
+      setFeedback(
+        targetIndex === 0
+          ? `Chạm vào tỉnh số 1 (${startNode.label}) để bắt đầu.`
+          : `Chạm vào tỉnh số ${targetIndex + 1} (${targetNode.label}) để tiếp tục nối.`
+      );
+      return false;
+    },
+    [current, phaseComplete, requireFullTrace, beginTrace],
+  );
+
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<SVGSVGElement>) => {
+      if (!current || tracingRef.current || phaseComplete) return;
       const point = projectPointer(event);
       if (!point) return;
+      if (!tryBeginTraceAtPoint(point, event.pointerId)) return;
+      event.preventDefault();
+    },
+    [current, phaseComplete, projectPointer, tryBeginTraceAtPoint],
+  );
+
+  const handleStartNodePointerDown = useCallback(
+    (event: React.PointerEvent<SVGGElement>) => {
+      const point = projectPointer(event);
+      if (!point) return;
+      if (!tryBeginTraceAtPoint(point, event.pointerId)) return;
+      event.preventDefault();
+    },
+    [projectPointer, tryBeginTraceAtPoint],
+  );
+
+  const processPointerPosition = useCallback(
+    (point: BoardPoint) => {
+      const activeIndex = activeNodeRef.current;
+      if (!tracingRef.current || activeIndex === null || !current) return;
       setTrace((prev) => {
         if (!prev.length) return [point];
         const last = prev[prev.length - 1];
-        if (distanceBetween(last, point) < 4) return prev;
+        if (distanceBetween(last, point) < 3) return prev;
         return [...prev, point];
       });
-    },
-    [isTracing, projectPointer],
-  );
-
-  const finalizeAttempt = useCallback(
-    (success: boolean, awardedScore: number, selectedMouth?: PreparedMouth) => {
-      setAttempts(0);
-      setTrace([]);
-      setIsTracing(false);
-      setIndex((prev) => prev + 1);
-      setFeedback(success ? "Tuyệt! Dòng chảy chính đã hiện ra." : "Có gợi ý mới, thử quan sát rồi kéo lại nhé.");
-      if (success) {
-        setSolved((prev) => prev + 1);
-        setScore((prev) => prev + awardedScore);
-        playCorrect();
-        const elapsed = questionTimer.ms / 1000;
-        setFastestTrace((prev) => (prev === null ? elapsed : Math.min(prev, elapsed)));
-        if (
-          current?.basin.id === "huong" &&
-          selectedMouth &&
-          selectedMouth.label.toLowerCase().includes("tam giang")
-        ) {
-          setFanDamPha(true);
+      const nextIndex = activeIndex + 1;
+      const nextNode = current.nodes[nextIndex];
+      if (!nextNode) return;
+      if (distanceBetween(point, nextNode.point) <= PROVINCE_NODE_HIT_RADIUS) {
+        setSegments((prev) => [...prev, { from: current.nodes[activeIndex].point, to: nextNode.point }]);
+        updateActiveNode(nextIndex);
+        updateVisitedNodes((prev) => {
+          const clone = new Set(prev);
+          clone.add(nextIndex);
+          return clone;
+        });
+        setTrace((prev) => [...prev, nextNode.point]);
+        if (nextIndex === current.nodes.length - 1) {
+          const awarded = computeScoreForCurrent();
+          handleSuccess(awarded);
         }
-      } else {
-        playWrong();
       }
-      questionTimer.reset();
     },
-    [current?.basin.id, playCorrect, playWrong, questionTimer],
+    [current, computeScoreForCurrent, handleSuccess, updateActiveNode, updateVisitedNodes],
   );
 
-  const handlePointerUp = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!isTracing || !current) return;
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<SVGSVGElement>) => {
       const point = projectPointer(event);
-      const path = trace.length ? [...trace, ...(point ? [point] : [])] : [current.source];
-      const simplified = sampleTrace(path, TRACE_SAMPLE_POINTS);
-      const lastPoint = simplified[simplified.length - 1];
-      const mouth =
-        lastPoint &&
-        current.mouthOptions.find((candidate) => distanceBetween(candidate.point, lastPoint) <= candidate.radius);
-
-      if (mouth) {
-        const maxDeviation = computeMaxDeviation(simplified, current.referencePath);
-        const withinBuffer = maxDeviation <= bufferPx;
-        if (withinBuffer) {
-          const elapsedSeconds = questionTimer.ms / 1000;
-          const thresholds = config.scoring.thresholds;
-          let baseScore = thresholds[thresholds.length - 1]?.score ?? 10;
-          for (const threshold of thresholds) {
-            if (elapsedSeconds <= threshold.timeSeconds) {
-              baseScore = threshold.score;
-              break;
-            }
-          }
-          if (contourActive || ghostActive) {
-            baseScore -= config.scoring.hintPenalty ?? 5;
-          }
-          const penalty = (config.scoring.mistakePenalty ?? 2) * attempts;
-          const awarded = Math.max(config.scoring.floorScore ?? 5, baseScore - penalty);
-          finalizeAttempt(true, awarded, mouth);
-          return;
-        }
-      }
-
-      // failure
-      const nextAttempts = attempts + 1;
-      setAttempts(nextAttempts);
-      const totalMistakeCount = mistakes + 1;
-      setMistakes(totalMistakeCount);
-
-      const contourThreshold = config.assist?.contourLines?.enabledAfterMistakes ?? 2;
-      const ghostThreshold = config.assist?.ghostTrace?.enabledAfterMistakes ?? 3;
-      if (nextAttempts >= contourThreshold) {
-        setContourActive(true);
-        setAnyContour(true);
-      }
-      if (nextAttempts >= ghostThreshold) {
-        setGhostActive(true);
-        setAnyGhost(true);
-      }
-      const autoAssistCutoff = config.scoring.autoAssistAfterMistakes ?? 3;
-      if (nextAttempts >= autoAssistCutoff) {
-        const awarded = config.scoring.floorScore ?? 5;
-        finalizeAttempt(true, awarded, mouth);
-        setFeedback("Đã mở đường gợi ý. Quan sát kỹ và bám theo dòng chính nhé!");
-        return;
-      }
-
-      setFeedback("Chưa đúng hướng rồi. Để ý hướng đổ ra biển và địa hình cao thấp nhé!");
-      setTrace([]);
-      setIsTracing(false);
-      playWrong();
+      if (!point) return;
+      processPointerPosition(point);
     },
-    [
-      attempts,
-      finalizeAttempt,
-      trace,
-      current,
-      bufferPx,
-      contourActive,
-      ghostActive,
-      config.scoring.thresholds,
-      config.scoring.hintPenalty,
-      config.scoring.mistakePenalty,
-      config.scoring.floorScore,
-      config.scoring.autoAssistAfterMistakes,
-      config.assist?.contourLines?.enabledAfterMistakes,
-      config.assist?.ghostTrace?.enabledAfterMistakes,
-      mistakes,
-      projectPointer,
-      questionTimer.ms,
-      playWrong,
-    ],
+    [projectPointer, processPointerPosition],
   );
+
+  const handlePointerUp = useCallback(() => {
+    if (!tracingRef.current) return;
+    const activeIndex = activeNodeRef.current;
+    if (activeIndex !== null && current && activeIndex === current.nodes.length - 1) return;
+    if (requireFullTrace) {
+      handleAttemptFailure();
+    } else {
+      pauseTrace();
+    }
+  }, [current, requireFullTrace, handleAttemptFailure, pauseTrace]);
+
+  const handlePointerLeave = useCallback(() => {
+    if (!tracingRef.current) return;
+    handleAttemptFailure();
+  }, [handleAttemptFailure]);
+
+  useEffect(() => {
+    if (!isTracing) return;
+    const handleMove = (event: PointerEvent) => {
+      if (activePointerId.current !== null && event.pointerId !== activePointerId.current) return;
+      const point = projectClientPoint(event.clientX, event.clientY);
+      if (!point) return;
+      processPointerPosition(point);
+    };
+    const handleEnd = (event: PointerEvent) => {
+      if (activePointerId.current !== null && event.pointerId !== activePointerId.current) return;
+      const activeIndex = activeNodeRef.current;
+      if (activeIndex !== null && current && activeIndex === current.nodes.length - 1) return;
+      if (requireFullTrace) {
+        handleAttemptFailure();
+      } else {
+        pauseTrace();
+      }
+    };
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleEnd);
+    window.addEventListener("pointercancel", handleEnd);
+    return () => {
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", handleEnd);
+      window.removeEventListener("pointercancel", handleEnd);
+    };
+  }, [isTracing, processPointerPosition, handleAttemptFailure, projectClientPoint, current, requireFullTrace, pauseTrace]);
 
   if (!current) {
     return (
@@ -1270,15 +1459,17 @@ function PhaseBView({
     );
   }
 
+  const defaultFeedback = "Chạm vào tỉnh số 1 rồi kéo lần lượt qua các tỉnh của lưu vực.";
+
   return (
     <div className="flex h-full flex-col gap-4 p-4 md:p-6">
       <div className="flex flex-col justify-between gap-3 rounded-2xl bg-sky-950/90 p-4 text-white shadow-lg md:flex-row md:items-center">
         <div>
           <div className="text-xs uppercase tracking-wide text-sky-200/90">
-            Pha B — Dựng dòng chảy từ thượng nguồn tới cửa biển
+            Pha B — Nối các tỉnh trong lưu vực sông
           </div>
           <div className="text-lg font-semibold">
-            {index + 1}/{total} sông
+            {Math.min(index + 1, total)}/{total || 1} lưu vực
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-sm md:text-base">
@@ -1303,126 +1494,132 @@ function PhaseBView({
 
       <div className="relative flex-1 rounded-2xl bg-slate-900/90 p-4 shadow-xl">
         <div
-          ref={boardRef}
           className="relative mx-auto h-full max-w-5xl overflow-hidden rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900"
           style={{ aspectRatio: `${boardSize.width}/${boardSize.height}` }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
         >
           <svg
+            ref={boardRef}
             viewBox={`0 0 ${boardSize.width} ${boardSize.height}`}
             className="absolute inset-0 h-full w-full"
             preserveAspectRatio="xMidYMid meet"
+            style={{ touchAction: "none" }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerLeave}
+            onPointerCancel={handlePointerLeave}
           >
-            <rect
-              x={0}
-              y={0}
-              width={boardSize.width}
-              height={boardSize.height}
-              fill="url(#relief)"
-              opacity={0.25}
-            />
-            <defs>
-              <radialGradient id="sourceGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.85" />
-                <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.05" />
-              </radialGradient>
-              <radialGradient id="mouthGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.05" />
-              </radialGradient>
-              <linearGradient id="relief" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#0f172a" />
-                <stop offset="100%" stopColor="#020617" />
-              </linearGradient>
-            </defs>
-
-            {contourActive && (
-              <rect
-                x={0}
-                y={0}
-                width={boardSize.width}
-                height={boardSize.height}
-                fill="url(#contours)"
-                opacity={config.assist?.contourLines?.alpha ?? 0.35}
-              />
-            )}
-
-            <defs>
-              <pattern id="contours" patternUnits="userSpaceOnUse" width="40" height="40">
-                <path
-                  d="M0 10 Q10 0 20 10 T40 10 M0 30 Q10 20 20 30 T40 30"
-                  fill="none"
-                  stroke="#38bdf8"
-                  strokeWidth="1"
-                  strokeOpacity="0.7"
-                />
-              </pattern>
-            </defs>
-
-            {current.referencePath.length > 1 && (
+            <image href={BOARD_OUTLINE_SRC} width={boardSize.width} height={boardSize.height} opacity={0.42} />
+            {ghostActive && (
               <polyline
-                points={current.referencePath.map((pt) => `${pt.x},${pt.y}`).join(" ")}
-                stroke="#3b82f6"
-                strokeWidth={ghostActive ? 4 : 2}
-                strokeDasharray={ghostActive ? "0" : "10 12"}
-                strokeOpacity={ghostActive ? 0.65 : 0.35}
+                points={current.nodes.map((node) => `${node.point.x},${node.point.y}`).join(" ")}
+                stroke="#34d399"
+                strokeWidth={2}
+                strokeDasharray="8 8"
+                strokeOpacity={0.6}
                 fill="none"
               />
             )}
-
+            {segments.map((segment, idx) => (
+              <line
+                key={`segment-${idx}`}
+                x1={segment.from.x}
+                y1={segment.from.y}
+                x2={segment.to.x}
+                y2={segment.to.y}
+                stroke="#22d3ee"
+                strokeWidth={6}
+                strokeLinecap="round"
+                strokeOpacity={0.85}
+              />
+            ))}
             {trace.length > 1 && (
               <polyline
                 points={trace.map((pt) => `${pt.x},${pt.y}`).join(" ")}
                 stroke="#fb7185"
-                strokeWidth={6}
-                strokeOpacity={0.9}
+                strokeWidth={5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                strokeOpacity={0.95}
                 fill="none"
               />
             )}
-
-            <g transform={`translate(${current.source.x}, ${current.source.y})`}>
-              <circle r={68} fill="url(#sourceGlow)" opacity={0.45} />
-              <circle r={14} fill="#38bdf8" className="animate-ping" opacity={0.65} />
-              <circle r={10} fill="#0ea5e9" stroke="#38bdf8" strokeWidth={2} />
-            </g>
-
-            {current.mouthOptions.map((mouth) => (
-              <g key={mouth.label} transform={`translate(${mouth.point.x}, ${mouth.point.y})`}>
-                <circle r={74} fill="url(#mouthGlow)" opacity={0.22} />
-                <circle r={mouth.radius} fill="transparent" stroke="#fbbf24" strokeWidth={1.4} />
-              </g>
-            ))}
+            {current.nodes.map((node, idx) => {
+              const visited = visitedNodes.has(idx);
+              const isStartNode = idx === 0;
+              return (
+                <g
+                  key={node.id}
+                  transform={`translate(${node.point.x}, ${node.point.y})`}
+                  onPointerDown={isStartNode ? handleStartNodePointerDown : undefined}
+                  className={isStartNode ? "cursor-pointer" : undefined}
+                >
+                  <circle
+                    r={PROVINCE_NODE_RADIUS + 6}
+                    fill={visited ? "rgba(16,185,129,0.25)" : "rgba(59,130,246,0.18)"}
+                    stroke={visited ? "#34d399" : "#38bdf8"}
+                    strokeWidth={visited ? 3 : 2}
+                  />
+                  <circle r={PROVINCE_NODE_RADIUS} fill="#0f172a" stroke="rgba(15,23,42,0.6)" strokeWidth={1} />
+                  <text
+                    className="pointer-events-none text-[11px] font-semibold tracking-wide"
+                    fill={visited ? "#dcfce7" : "#bae6fd"}
+                    textAnchor="middle"
+                    dy={4}
+                  >
+                    {idx + 1}
+                  </text>
+                  {contourActive && (
+                    <text
+                      className="pointer-events-none text-[10px] font-semibold uppercase tracking-wide"
+                      fill="#e2e8f0"
+                      textAnchor="middle"
+                      dy={-PROVINCE_NODE_RADIUS - 8}
+                    >
+                      {node.label}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
           </svg>
 
           <div className="pointer-events-none absolute inset-0 flex items-start justify-between p-4 text-xs text-white/90 md:p-6 md:text-sm">
             <div className="rounded-xl bg-slate-900/75 px-3 py-2">
-              <div className="text-[10px] uppercase tracking-wide text-sky-200/80">Thượng nguồn</div>
-              <div className="font-semibold text-sky-100">{current.sourceLabel}</div>
+              <div className="text-[10px] uppercase tracking-wide text-sky-200/80">Lưu vực</div>
+              <div className="font-semibold text-sky-100">{current.basin.riverName}</div>
+              <div className="text-[10px] text-slate-300">{current.meta.sourceLabel}</div>
             </div>
-            <div className="flex flex-col gap-1 rounded-xl bg-slate-900/75 px-3 py-2 text-right">
-              <div className="text-[10px] uppercase tracking-wide text-amber-200/80">Cửa sông</div>
-              {current.mouthOptions.map((mouth) => (
-                <div key={mouth.label} className="font-semibold text-amber-100">
-                  {mouth.label}
-                </div>
-              ))}
+            <div className="max-w-xs rounded-xl bg-slate-900/75 px-3 py-2 text-right">
+              <div className="text-[10px] uppercase tracking-wide text-amber-200/80">Thực tế tỉnh</div>
+              <ol className="mt-1 space-y-1 text-xs">
+                {current.nodes.map((node, idx) => (
+                  <li key={node.id} className={visitedNodes.has(idx) ? "text-emerald-200" : "text-amber-100"}>
+                    {idx + 1}. {node.label}
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
         </div>
 
         <div className="mt-4 flex flex-col gap-3 rounded-xl bg-slate-800/80 p-3 text-slate-100 md:flex-row md:items-center md:justify-between">
-          <div className="text-sm text-sky-100">{feedback ?? "Chạm vào giọt nước, kéo theo hướng chảy tới cửa biển."}</div>
+          <div className="text-sm text-sky-100">{feedback ?? defaultFeedback}</div>
           <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-sky-200/80">
             <span>Gợi ý:</span>
-            <span className={`rounded-full border px-3 py-1 ${contourActive ? "border-sky-400 bg-sky-500/20 text-white" : "border-slate-500/70 bg-slate-700/40"}`}>
-              Đồng mức {contourActive ? "đang bật" : "đang tắt"}
+            <span
+              className={`rounded-full border px-3 py-1 ${
+                contourActive ? "border-sky-400 bg-sky-500/20 text-white" : "border-slate-500/70 bg-slate-700/40"
+              }`}
+            >
+              Tên tỉnh {contourActive ? "hiện" : "tắt"}
             </span>
-            <span className={`rounded-full border px-3 py-1 ${ghostActive ? "border-emerald-300 bg-emerald-400/20 text-white" : "border-slate-500/70 bg-slate-700/40"}`}>
-              Đường gợi ý {ghostActive ? "hiện" : "ẩn"}
+            <span
+              className={`rounded-full border px-3 py-1 ${
+                ghostActive ? "border-emerald-300 bg-emerald-400/20 text-white" : "border-slate-500/70 bg-slate-700/40"
+              }`}
+            >
+              Đường gợi ý {ghostActive ? "hiện" : "tắt"}
             </span>
           </div>
         </div>
@@ -1454,11 +1651,11 @@ export default function Level6({
     return { width, height };
   }, [bundle.viewBox]);
 
-  const handleStart = useCallback(() => {
+  const handleStart = useCallback((target: PhaseStep = "phaseA") => {
     setPhaseAResult(null);
     setPhaseBResult(null);
     setBadges([]);
-    setStep("phaseA");
+    setStep(target);
   }, []);
 
   const handlePhaseAComplete = useCallback((result: PhaseAResult) => {
@@ -1558,12 +1755,20 @@ export default function Level6({
               ))}
             </div>
           </div>
-          <button
-            className="rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-emerald-950 shadow-lg hover:bg-emerald-400"
-            onClick={handleStart}
-          >
-            Bắt đầu Pha A
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+            <button
+              className="rounded-full bg-emerald-500 px-6 py-3 font-semibold text-emerald-950 shadow-lg hover:bg-emerald-400"
+              onClick={() => handleStart("phaseA")}
+            >
+              Chơi Pha A
+            </button>
+            <button
+              className="rounded-full border border-sky-400 px-6 py-3 font-semibold text-sky-100 hover:bg-sky-500/10"
+              onClick={() => handleStart("phaseB")}
+            >
+              Chơi nhanh Pha B
+            </button>
+          </div>
         </div>
       )}
 
@@ -1582,13 +1787,14 @@ export default function Level6({
         />
       )}
 
-      {step === "phaseB" && phaseAResult && (
+      {step === "phaseB" && (
         <PhaseBView
           key={`phaseB-${difficulty}`}
           config={data.phases.phaseB}
           preset={preset}
           difficulty={difficulty}
           basins={data.phases.phaseA.basins}
+          bundle={bundle}
           boardSize={boardSize}
           onComplete={handlePhaseBComplete}
           seed={seed ^ 0x321cba}
@@ -1596,17 +1802,22 @@ export default function Level6({
         />
       )}
 
-      {step === "summary" && phaseAResult && phaseBResult && (
+      {step === "summary" && phaseBResult && (
         <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-10">
           <div className="w-full max-w-3xl rounded-3xl bg-slate-900/85 p-6 text-white shadow-2xl ring-1 ring-emerald-500/30">
             <div className="text-center">
               <div className="text-2xl font-semibold text-emerald-200">Hoàn thành GeoTriples!</div>
               <div className="mt-2 text-sm text-slate-200">
-                Tổng thời gian: <b>{((phaseAResult.ms + phaseBResult.ms) / 1000).toFixed(1)}s</b>
+                Tổng thời gian:{" "}
+                <b>{(((phaseAResult?.ms ?? 0) + phaseBResult.ms) / 1000).toFixed(1)}s</b>
               </div>
-              <div className="mt-1 text-sm text-slate-200">
-                Pha A: <b>{phaseAResult.score}</b> điểm — đúng {phaseAResult.correctCount} lưu vực
-              </div>
+              {phaseAResult ? (
+                <div className="mt-1 text-sm text-slate-200">
+                  Pha A: <b>{phaseAResult.score}</b> điểm — đúng {phaseAResult.correctCount} lưu vực
+                </div>
+              ) : (
+                <div className="mt-1 text-sm text-slate-400">Bạn bỏ qua Pha A trong lượt này.</div>
+              )}
               <div className="mt-1 text-sm text-slate-200">
                 Pha B: <b>{phaseBResult.score}</b> điểm — dựng đúng {phaseBResult.solved}/{phaseBResult.asked} dòng
               </div>
@@ -1652,7 +1863,7 @@ export default function Level6({
               </button>
               <button
                 className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-emerald-950 shadow-lg hover:bg-emerald-400"
-                onClick={handleStart}
+                onClick={() => handleStart("phaseA")}
               >
                 Chơi lại
               </button>

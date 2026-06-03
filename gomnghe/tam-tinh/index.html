@@ -15,7 +15,7 @@
     <meta property="og:image" content="images/og-image.jpg">
     <meta property="og:type" content="website">
 
-    <link rel="stylesheet" href="./src/css/style.css">
+    <link rel="stylesheet" href="../src/css/style.css">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -154,150 +154,85 @@
     <div class="container">
         <!-- <h1 class="logo">Gốm Nghê</h1> -->
         <div class="logo">
-          <a href="./index.html"><img src="./src/imgs/Logo_GomNghe.png" alt="Gốm Nghê" class="logo-img"></a>
+          <a href="../index.html"><img src="../src/imgs/Logo_GomNghe.png" alt="Gốm Nghê" class="logo-img"></a>
         </div>
         <nav>
             <ul>
-				<li><a href="./tam-tinh/index.html">Nghê tâm tình</a></li>
-                <li><a href="./nhung-dua-con/index.html">Những đứa con</a></li>
-                <li><a href="./tim-Nghe.html">Tìm Nghê</a></li>
+                <li><a href="../kien-thuc/index.html">Kiến thức</a></li>
+                <li><a href="../san-pham/index.html">Sản phẩm</a></li>
+                <li><a href="../lien-he.html">Liên hệ</a></li>
             </ul>
         </nav>
     </div>
 </header>
 
-<main>
+<main class="container">
 
 <!-- HERO -->
 <section class="hero">
-    <div class="container">
-        <h2>Gốm Nghê</h2>
-        <p>Vẻ đẹp của Gốm nằm trong sự khiếm khuyết và ngô nghê của nó.</p>
-        <!-- <a href="#san-pham" class="btn-primary">Xem sản phẩm</a> -->
-    </div>
+	<h2>Những chặng đường gốm</h2>
+	<p>Những mẩu chuyện nhỏ, những điều Nghê học hỏi được trên con đường tìm về với nguồn cội.</p>
+	<!-- <a href="#san-pham" class="btn-primary">Xem sản phẩm</a> -->
 </section>
-<!-- Kiến thức -->
-  <section class="home-knowledge">
-    <div class="container">
-      <h2>Nghê tâm tình</h2>
-		<p>Bạn hãy cùng Nghê phiêu lưu trên con đường Gốm nhé.</p>
-      <div class="knowledge-grid">
-    
-        <article>
-          <h3>
-            <a href="/kien-thuc/gom-moc-la-gi.html">
-              Gốm mộc là gì?
-            </a>
-          </h3>
-        </article>
-    
-        <article>
-          <h3>
-            <a href="/kien-thuc/tai-sao-gom-moc-khong-hoan-hao.html">
-              Vì sao gốm mộc không hoàn hảo?
-            </a>
-          </h3>
-        </article>
-    
-        <article>
-          <h3>
-            <a href="/kien-thuc/gom-moc-va-gom-men-khac-nhau.html">
-              Gốm mộc và gốm men khác nhau thế nào?
-            </a>
-          </h3>
-        </article>
-    
-      </div>
-    
-      <p class="view-all">
-        <a href="/kien-thuc/">Xem tất cả bài viết →</a>
-      </p>
-    
-    </div>
-    
-  </section>
-<!-- SẢN PHẨM -->
-<section id="san-pham">
-    <div class="container">
-        <h2>Những đứa con</h2>
 
-        <!-- Nhóm 1 -->
-        <article class="product-group">
-            <p>Gốm Nghê không chỉ mang cho các bạn ấm trà, cái chén, cái bát, cái đĩa mà còn mang tới các bạn vẻ mộc mạc, ngô nghê, văn hóa Việt trong đó.</p>
+<!-- ===== DANH SÁCH BÀI ===== -->
 
-            <div class="product-grid">
-                <img src="./src/imgs/sanpham/tra-cu/DSC_0528.JPG" alt="Ấm trà gốm mộc">
-                <img src="./src/imgs/sanpham/tra-cu/DSC_9282.JPG" alt="Ấm trà men">
-                <img src="./src/imgs/sanpham/tra-cu/DSC_9300.JPG" alt="Khải">
-            </div>
-        </article>
+  <section class="article-list">
 
-		<p class="view-all">
-          <a href="./san-pham/index.html">Xem tất cả →</a>
+    <h2>Tất cả bài viết</h2>
+
+    <div class="article-grid">
+
+      <!-- ITEM -->
+
+      <article class="article-card">
+
+        <img src="/images/article-02.jpg"
+             alt="Đất làm gốm đến từ đâu">
+
+        <p class="article-category">
+          Đất và lửa
         </p>
+
+        <h3>
+          <a href="/kien-thuc/dat-lam-gom-den-tu-dau.html">
+            Đất làm gốm đến từ đâu?
+          </a>
+        </h3>
+
+        <p>
+          Có phải đất nào cũng có thể trở thành gốm?
+        </p>
+
+      </article>
+
+      <!-- ITEM -->
+
+      <article class="article-card">
+
+        <img src="/images/article-03.jpg"
+             alt="Lửa trong nghề gốm">
+
+        <p class="article-category">
+          Trong xưởng
+        </p>
+
+        <h3>
+          <a href="/kien-thuc/lua-trong-nghe-gom.html">
+            Lửa trong nghề gốm có tính cách không?
+          </a>
+        </h3>
+
+        <p>
+          Có những ngày lửa rất hiền.
+          Và cũng có những ngày không ai đoán được.
+        </p>
+
+      </article>
+
     </div>
-    
-</section>
-<!-- Cùng Nghệ sĩ -->
-<!-- <section id="du-an"> -->
 
-  <!-- <div class="container"> -->
-
-    <!-- <h2>Đi cùng nghệ sĩ</h2> -->
-
-    <!-- <p class="section-intro"> -->
-      <!-- Những cuộc gặp gỡ giữa gốm và các nghệ sĩ, -->
-      <!-- nơi đất và lửa trở thành chất liệu kể chuyện. -->
-    <!-- </p> -->
-
-    <!-- <div class="project-grid"> -->
-
-      <!-- <article class="project-card"> -->
-
-        <!-- <img src="/images/project-01.jpg" -->
-             <!-- alt="Dự án cộng tác với nghệ sĩ A"> -->
-
-        <!-- <h3> -->
-          <!-- <a href="/du-an/nghe-si-a.html"> -->
-            <!-- Gốm & ký ức dòng sông -->
-          <!-- </a> -->
-        <!-- </h3> -->
-
-        <!-- <p> -->
-          <!-- Một dự án thử nghiệm giữa gốm nung khử và hội họa mực nước. -->
-        <!-- </p> -->
-
-      <!-- </article> -->
-
-      <!-- <article class="project-card"> -->
-
-        <!-- <img src="/images/project-02.jpg" -->
-             <!-- alt="Dự án cộng tác với nghệ sĩ B"> -->
-
-        <!-- <h3> -->
-          <!-- <a href="/du-an/nghe-si-b.html"> -->
-            <!-- Những chiếc bát biết kể chuyện -->
-          <!-- </a> -->
-        <!-- </h3> -->
-
-        <!-- <p> -->
-          <!-- Chuỗi chén trà mang dấu vết của nhạc và lửa. -->
-        <!-- </p> -->
-
-      <!-- </article> -->
-
-    <!-- </div> -->
-
-    <!-- <a href="/du-an/" class="btn"> -->
-      <!-- Xem tất cả dự án → -->
-    <!-- </a> -->
-
-  <!-- </div> -->
-
-<!-- </section> -->
-
-
-  
+  </section>
 
 </main>
 
@@ -318,9 +253,9 @@
       <div class="footer-col">
         <h3>Điều hướng</h3>
         <ul>
-			<li><a href="./tam-tinh/index.html">Nghê tâm tình</a></li>
-			<li><a href="./nhung-dua-con/index.html">Những đứa con</a></li>
-			<li><a href="./tim-Nghe.html">Tìm Nghê</a></li>
+          <li><a href="/">Trang chủ</a></li>
+          <li><a href="/san-pham/">Sản phẩm</a></li>
+          <li><a href="/kien-thuc/">Kiến thức</a></li>
         </ul>
       </div>
   

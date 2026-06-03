@@ -1,0 +1,116 @@
+[
+  {
+    "id": "tienSuSoSu",
+    "label": "Tiền Sử - Sơ Sử",
+    "years": "Hàng triệu năm – 179 TCN",
+    "color": "#a08060",
+    "bg": "#1e170e",
+    "intro": "Từ những con người đầu tiên trên đất Việt qua các thời đại đồ đá, đồ kim khí đến buổi bình minh dựng nước.",
+    "videoId": "jNQXAC9IVRw",
+    "startYear": -1000000,
+    "endYear": -179,
+    "bgImg": "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=600&q=80",
+    "phases": [
+      { "id": "ph-dacuu",    "label": "Thời đại Đá cũ",  "startYear": -1000000, "endYear": -10000 },
+      { "id": "ph-damoi",    "label": "Thời đại Đá mới",  "startYear": -10000,  "endYear": -4000  },
+      { "id": "ph-kimkhi",   "label": "Thời đại Kim khí", "startYear": -4000,   "endYear": -2879  },
+      { "id": "ph-dungnuoc", "label": "Thời kỳ dựng nước","startYear": -2879,   "endYear": -179   }
+    ]
+  },
+  {
+    "id": "bacThuoc",
+    "label": "Bắc Thuộc",
+    "years": "179 TCN – 938",
+    "color": "#6a9060",
+    "bg": "#0e1a0a",
+    "intro": "Hơn 1.000 năm đô hộ của phong kiến phương Bắc nhưng tinh thần dân tộc không bao giờ tắt.",
+    "videoId": "jNQXAC9IVRw",
+    "startYear": -179,
+    "endYear": 938,
+    "bgImg": "https://images.unsplash.com/photo-1508193638397-1c4234db14d8?w=600&q=80",
+    "phases": [
+      { "id": "ph-bt1",       "label": "Bắc thuộc lần 1",        "startYear": -179, "endYear": 40  },
+      { "id": "ph-knhbt",     "label": "Khởi nghĩa Hai Bà Trưng","startYear": 40,   "endYear": 43  },
+      { "id": "ph-bt2",       "label": "Bắc thuộc lần 2",        "startYear": 43,   "endYear": 544 },
+      { "id": "ph-knlbi",     "label": "Khởi nghĩa Lý Bí",       "startYear": 544,  "endYear": 602 },
+      { "id": "ph-bt3",       "label": "Bắc thuộc lần 3",        "startYear": 602,  "endYear": 938 }
+    ]
+  },
+  {
+    "id": "phongKien",
+    "label": "Phong Kiến Độc Lập",
+    "years": "938 – 1858",
+    "color": "#5080b0",
+    "bg": "#0a1020",
+    "intro": "Chín thế kỷ độc lập tự chủ với các triều đại nối tiếp — đỉnh cao văn minh Đại Việt.",
+    "videoId": "jNQXAC9IVRw",
+    "startYear": 938,
+    "endYear": 1858,
+    "bgImg": "https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=600&q=80",
+    "phases": [
+      { "id": "ph-tuchu",     "label": "Giai đoạn tự chủ",       "startYear": 905,  "endYear": 938  },
+      { "id": "ph-ngo",       "label": "Nhà Ngô",                 "startYear": 938,  "endYear": 967  },
+      { "id": "ph-dinh",      "label": "Nhà Đinh",                "startYear": 968,  "endYear": 980  },
+      { "id": "ph-tienle",    "label": "Nhà Tiền Lê",             "startYear": 980,  "endYear": 1009 },
+      { "id": "ph-ly",        "label": "Nhà Lý",                  "startYear": 1009, "endYear": 1225 },
+      { "id": "ph-tran",      "label": "Nhà Trần",                "startYear": 1225, "endYear": 1400 },
+      { "id": "ph-ho",        "label": "Nhà Hồ",                  "startYear": 1400, "endYear": 1407 },
+      { "id": "ph-thuocminh", "label": "Thuộc Minh",              "startYear": 1407, "endYear": 1427 },
+      { "id": "ph-leso",      "label": "Nhà Lê Sơ",               "startYear": 1428, "endYear": 1527 },
+      { "id": "ph-tk1618",    "label": "Giai đoạn TK XVI–XVIII",  "startYear": 1527, "endYear": 1778 },
+      { "id": "ph-tayson",    "label": "Nhà Tây Sơn",             "startYear": 1778, "endYear": 1802 },
+      { "id": "ph-nguyen",    "label": "Nhà Nguyễn (độc lập)",    "startYear": 1802, "endYear": 1858 }
+    ]
+  },
+  {
+    "id": "phapThuoc",
+    "label": "Pháp Thuộc",
+    "years": "1858 – 1945",
+    "color": "#b05050",
+    "bg": "#1c0808",
+    "intro": "Từ tiếng súng Đà Nẵng 1858 đến Cách mạng Tháng Tám 1945 — 87 năm đấu tranh đòi lại độc lập dân tộc.",
+    "videoId": "jNQXAC9IVRw",
+    "startYear": 1858,
+    "endYear": 1945,
+    "bgImg": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80",
+    "phases": [
+      { "id": "ph-xamluoc",   "label": "Quá trình xâm lược",      "startYear": 1858, "endYear": 1885 },
+      { "id": "ph-pt1885",    "label": "Giai đoạn 1885 – 1919",   "startYear": 1885, "endYear": 1919 },
+      { "id": "ph-pt1919",    "label": "Giai đoạn 1919 – 1930",   "startYear": 1919, "endYear": 1930 },
+      { "id": "ph-pt1930",    "label": "Giai đoạn 1930 – 1945",   "startYear": 1930, "endYear": 1945 }
+    ]
+  },
+  {
+    "id": "khangChien",
+    "label": "Kháng Chiến",
+    "years": "1945 – 1975",
+    "color": "#c07030",
+    "bg": "#1c1008",
+    "intro": "Ba mươi năm trường kỳ kháng chiến — từ độc lập 1945 đến thống nhất hoàn toàn 30/4/1975.",
+    "videoId": "jNQXAC9IVRw",
+    "startYear": 1945,
+    "endYear": 1975,
+    "bgImg": "https://images.unsplash.com/photo-1526778548025-fa2f459cd5ce?w=600&q=80",
+    "phases": [
+      { "id": "ph-kcphap",    "label": "Kháng chiến chống Pháp",  "startYear": 1945, "endYear": 1954 },
+      { "id": "ph-kcmy",      "label": "Kháng chiến chống Mỹ",    "startYear": 1954, "endYear": 1975 }
+    ]
+  },
+  {
+    "id": "hienDai",
+    "label": "Hiện Đại",
+    "years": "1975 – nay",
+    "color": "#408060",
+    "bg": "#081810",
+    "intro": "Từ thống nhất 1975, qua Đổi Mới 1986 đến hội nhập và phát triển — Việt Nam vươn mình trong thế kỷ XXI.",
+    "videoId": "jNQXAC9IVRw",
+    "startYear": 1975,
+    "endYear": 2025,
+    "bgImg": "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=600&q=80",
+    "phases": [
+      { "id": "ph-truocdm",   "label": "Trước Đổi Mới",           "startYear": 1975, "endYear": 1986 },
+      { "id": "ph-doimoi",    "label": "Đổi Mới",                  "startYear": 1986, "endYear": 2000 },
+      { "id": "ph-hoinhap",   "label": "Hội nhập và phát triển",   "startYear": 2000, "endYear": 2025 }
+    ]
+  }
+]

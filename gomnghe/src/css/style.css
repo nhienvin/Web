@@ -48,14 +48,16 @@ body {
     font-family: "SAIGON1985", serif; /* thay bằng font anh */
     color: var(--text-color);
     line-height: 1.6;
-    background: url("../imgs/VINTAGE_GRUNGE_BACKGROUND.avif") center/cover fixed no-repeat;
+    /* background: url("../imgs/VINTAGE_GRUNGE_BACKGROUND.avif") center/cover fixed no-repeat; */
+    background: url("../imgs/GomNghe_BG.JPG") center/cover fixed no-repeat;
 }
 
 h1, h2, h3, h4, h5, h6{
     color: goldenrod;
 }
 em{
-	color: #690B22;
+	/* color: #690B22; */
+	color: goldenrod;
 }
 .font-SAIGON1985{
     font-family: 'SAIGON1985';
@@ -115,10 +117,15 @@ header .container {
 }
 
 .logo {
-    font-size: 1.5rem;
-    font-weight: bold;
+    /* font-size: 1.5rem;
+    font-weight: bold; */
+    display: flex;
+    align-items: center;
 }
-
+.logo-img{
+    height: 80px;
+    margin-right: 10px;
+}
 nav ul {
     display: flex;
     gap: 25px;
@@ -138,17 +145,17 @@ nav a:hover {
 /* =========================
    HERO
 ========================= */
-#hero {
+.hero {
     text-align: center;
     padding: 100px 0;
 }
 
-#hero h2 {
+.hero h2 {
     font-size: 2.2rem;
     margin-bottom: 10px;
 }
 
-#hero p {
+.hero p {
     color: var(--text-color);
     margin-bottom: 25px;
 }
@@ -193,7 +200,7 @@ section h2 {
     margin-bottom: 10px;
 }
 /* Không dành cho ai */
-#khong-danh-cho-ai {
+#nhung-dieu-gui-gam {
     text-align: center;
 }
 
@@ -211,7 +218,9 @@ section h2 {
 .note {
     margin-top: 15px;
     font-style: italic;
-    color: #690B22;
+    /* color: #690B22; */
+	font-size: 48px;
+	color:goldenrod;
 }
 
 /* =========================
@@ -260,8 +269,8 @@ section h2 {
     margin: 0 auto;
   
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
+    grid-template-columns: repeat(3, 1fr);
+    gap:40px;
   }
   
   .footer-col h3 {
@@ -307,3 +316,234 @@ section h2 {
     }
   }
   
+  
+/* Trang cùng nghệ sĩ */
+.project-hero img {
+  width: 100%;
+  margin-top: 20px;
+  display: block;
+}
+
+.project-meta {
+  color: #777;
+  margin-top: 10px;
+}
+
+.project-intro {
+  font-size: 20px;
+  line-height: 1.8;
+  margin: 50px 0;
+}
+
+.artist-box {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 30px;
+  align-items: center;
+}
+
+.artist-box img {
+  width: 100%;
+  display: block;
+}
+
+.project-page h2 {
+  margin-top: 60px;
+  margin-bottom: 20px;
+}
+
+.project-page p {
+  line-height: 1.8;
+  margin-bottom: 18px;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.gallery-grid img {
+  width: 100%;
+  display: block;
+}
+
+.project-ending {
+  margin-top: 70px;
+  padding-top: 30px;
+  border-top: 1px solid #ddd;
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+
+  .artist-box {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* Trang liên hệ */
+
+.contact-hero {
+  margin-bottom: 50px;
+}
+
+.contact-hero h1 {
+  margin-bottom: 20px;
+}
+
+.intro {
+  font-size: 36px;
+  line-height: 1.8;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.contact-card {
+  padding: 25px;
+  border: 1px solid #ddd;
+}
+
+.contact-card h2 {
+  margin-bottom: 15px;
+}
+
+.contact-info {
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+.order-process ol {
+  padding-left: 20px;
+}
+
+.order-process li {
+  margin-bottom: 12px;
+  line-height: 1.7;
+}
+
+.contact-note ul {
+  padding-left: 20px;
+}
+
+.contact-note li {
+  margin-bottom: 10px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ccc;
+  background: transparent;
+  font-family: inherit;
+}
+
+.contact-form button {
+  width: fit-content;
+  padding: 12px 22px;
+  border: none;
+  background: #222;
+  color: #fff;
+  cursor: pointer;
+}
+
+.contact-form button:hover {
+  background: #444;
+}
+
+.contact-faq details {
+  margin-bottom: 15px;
+}
+
+.contact-ending {
+  margin-top: 60px;
+  padding-top: 25px;
+  border-top: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* Trang kiến thức */
+.article-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 35px;
+  margin-top: 30px;
+}
+
+.article-card img {
+  width: 100%;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.article-category {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+
+.article-card h3 {
+  margin-bottom: 12px;
+}
+
+.article-card a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.article-card a:hover {
+  text-decoration: underline;
+}
+
+.article-card p {
+  line-height: 1.7;
+}
+
+.random-reading ul {
+  padding-left: 20px;
+}
+
+.random-reading li {
+  margin-bottom: 10px;
+}
+
+.knowledge-ending {
+  margin-top: 70px;
+  padding-top: 25px;
+  border-top: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+
+  .featured-post {
+    grid-template-columns: 1fr;
+  }
+
+  .article-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
